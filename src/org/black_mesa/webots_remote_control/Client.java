@@ -1,32 +1,81 @@
 package org.black_mesa.webots_remote_control;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
-public class Client implements Runnable {
-	private InetAddress address;
-	private int port;
-	private Camera camera;
-	
-	public Client(String address) {
-		String[] split = address.split(":");
-		// TODO
-	}
-	
-	@Override
-	public void run() {
+import android.util.Log;
+
+public class Client {
+	private Socket socket;
+
+	private Camera receivedCamera;
+
+	public Client(InetAddress address, int port) {
 		try {
-			Socket socket = new Socket(address, port);
-			socket.close();
+			socket = new Socket(address, port);
 		} catch (IOException e) {
-			e.printStackTrace();
+			socket = null;
+		}
+		if (socket != null) {
+			new Thread(new Runnable() {
+
+				@Override
+				public void run() {
+					recvCamera();
+				}
+
+			}).start();
 		}
 	}
-	
+
 	public void onCameraChange(Camera camera) {
-		synchronized (this) {
-			this.camera = camera.clone();
+		final Camera toSend = camera.clone();
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				sendCamera(toSend);
+			}
+
+		}).start();
+	}
+
+	public Camera getCamera() {
+		Camera ret;
+		synchronized (socket) {
+			ret = receivedCamera.clone();
+		}
+		return ret;
+	}
+
+	public boolean isConnected() {
+		return socket != null && socket.isConnected();
+	}
+
+	private void recvCamera() {
+		synchronized (socket) {
+			try {
+				ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+				receivedCamera = (Camera) in.readObject();
+			} catch (IOException e) {
+				Log.e(this.getClass().getName(), e.toString());
+			} catch (ClassNotFoundException e) {
+				Log.e(this.getClass().getName(), e.toString());
+			}
+		}
+	}
+
+	private void sendCamera(Camera camera) {
+		synchronized (socket) {
+			try {
+				ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+				out.writeObject(camera);
+			} catch (IOException e) {
+				Log.e(this.getClass().getName(), e.toString());
+			}
 		}
 	}
 }

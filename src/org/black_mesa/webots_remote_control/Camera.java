@@ -7,9 +7,8 @@ public class Camera implements Cloneable, Serializable {
 	private double positionX, positionY, positionZ;
 	private double orientationX, orientationY, orientationZ, orientationAngle;
 
-	public Camera(double positionX, double positionY, double positionZ,
-			double orientationX, double orientationY, double orientationZ,
-			double orientationAngle) {
+	public Camera(double positionX, double positionY, double positionZ, double orientationX, double orientationY,
+			double orientationZ, double orientationAngle) {
 		super();
 		this.positionX = positionX;
 		this.positionY = positionY;
@@ -62,7 +61,6 @@ public class Camera implements Cloneable, Serializable {
 
 	@Override
 	public Camera clone() {
-		return new Camera(positionX, positionY, positionZ, orientationX,
-				orientationY, orientationZ, orientationAngle);
+		return new Camera(positionX, positionY, positionZ, orientationX, orientationY, orientationZ, orientationAngle);
 	}
 }
