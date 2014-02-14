@@ -59,4 +59,10 @@ public class Camera implements Cloneable, Serializable {
 	public double getOrientationAngle() {
 		return orientationAngle;
 	}
+
+	@Override
+	public Camera clone() {
+		return new Camera(positionX, positionY, positionZ, orientationX,
+				orientationY, orientationZ, orientationAngle);
+	}
 }
