@@ -46,7 +46,9 @@ public class Client {
 	}
 
 	public boolean isConnected() {
-		return socket != null && socket.isConnected();
+		synchronized (socket) {
+			return socket != null && socket.isConnected();
+		}
 	}
 
 	private void recvCamera() {
