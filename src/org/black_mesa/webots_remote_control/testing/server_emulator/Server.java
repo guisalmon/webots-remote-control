@@ -5,8 +5,11 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+/**
+ * @author Ilja Kroonen
+ */
 public class Server {
-	
+
 	@SuppressWarnings("resource")
 	public static void main(String[] args) {
 		try {
@@ -17,7 +20,7 @@ public class Server {
 			ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
 			Camera camera = new Camera(0, 0, 0, 0, 0, 1, 0);
 			out.writeObject(camera);
-			while(true) {
+			while (true) {
 				camera = (Camera) in.readObject();
 				System.out.println(camera.toString());
 			}

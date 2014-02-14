@@ -5,6 +5,9 @@ import java.net.InetAddress;
 import org.black_mesa.webots_remote_control.Camera;
 import org.black_mesa.webots_remote_control.Client;
 
+/**
+ * @author Ilja Kroonen
+ */
 public class ClientTest {
 
 	public static void launch(String host, int port) {
