@@ -9,26 +9,20 @@ import java.net.Socket;
 import android.util.Log;
 
 public class Client {
-	private Socket socket;
+	private final Socket socket;
 
 	private Camera receivedCamera;
 
-	public Client(InetAddress address, int port) {
-		try {
-			socket = new Socket(address, port);
-		} catch (IOException e) {
-			socket = null;
-		}
-		if (socket != null) {
-			new Thread(new Runnable() {
+	public Client(InetAddress address, int port) throws IOException {
+		socket = new Socket(address, port);
+		new Thread(new Runnable() {
 
-				@Override
-				public void run() {
-					recvCamera();
-				}
+			@Override
+			public void run() {
+				recvCamera();
+			}
 
-			}).start();
-		}
+		}).start();
 	}
 
 	public void onCameraChange(Camera camera) {
