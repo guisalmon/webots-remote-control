@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="drawer_list_array">
+        <item>"Favoris"</item>
+        <item>"Vues"</item>
+        <item>"Sensibilité"</item>
+        <item>"Préférences"</item>
+        <item>"A propos"</item>
+    </string-array>
+</resources>
