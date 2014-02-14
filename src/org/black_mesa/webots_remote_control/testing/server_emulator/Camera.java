@@ -1,4 +1,4 @@
-package org.black_mesa.webots_remote_control;
+package org.black_mesa.webots_remote_control.testing.server_emulator;
 
 import java.io.Serializable;
 
@@ -9,7 +9,6 @@ public class Camera implements Cloneable, Serializable {
 
 	public Camera(double positionX, double positionY, double positionZ, double orientationX, double orientationY,
 			double orientationZ, double orientationAngle) {
-		super();
 		this.positionX = positionX;
 		this.positionY = positionY;
 		this.positionZ = positionZ;
