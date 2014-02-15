@@ -48,7 +48,7 @@ public class Camera implements Cloneable, Serializable {
 	}
 
 	/**
-	 * Changed the orientation of the camera
+	 * Changes the orientation of the camera
 	 * 
 	 * @param horizontal
 	 *            Signed value representing a percentage of the horizontal field
@@ -58,9 +58,44 @@ public class Camera implements Cloneable, Serializable {
 	 *            of view (typically between -50 and 50)
 	 */
 	public void changeOrientation(double horizontal, double vertical) {
-		Log.e("Camera", "Not implemented yet");
-		positionX += horizontal;
-		positionY += vertical;
+		// TODO Field of view
+		// Horizontal rotation
+		{
+			double c = Math.cos(horizontal / 100 * Math.PI);
+			double s = Math.sin(horizontal / 100 * Math.PI);
+			double newX = (0 * 0 * (1 - c) + c) * orientationX + (0 * 1 * (1 - c) - 0 * s) * orientationY
+					+ (0 * 0 * (1 - c) + 1 * s) * orientationZ;
+			double newY = (1 * 0 * (1 - c) + 0 * s) * orientationX + (1 * 1 * (1 - c) + c) * orientationY
+					+ (1 * 0 * (1 - c) - 0 * s) * orientationZ;
+			double newZ = (0 * 0 * (1 - c) - 1 * s) * orientationX + (1 * 0 * (1 - c) + 0 * s) * orientationY
+					+ (0 * 0 * (1 - c) + c) * orientationZ;
+			// The vector must be a unit vector
+			double length = vectorLength(newX, newY, newZ);
+			orientationX = newX / length;
+			orientationY = newY / length;
+			orientationZ = newZ / length;
+		}
+
+		// Vertical rotation
+		{
+			double c = Math.cos(vertical / 100 * Math.PI);
+			double s = Math.sin(vertical / 100 * Math.PI);
+			double newX = (1 * 1 * (1 - c) + c) * orientationX + (1 * 0 * (1 - c) - 0 * s) * orientationY
+					+ (1 * 0 * (1 - c) + 0 * s) * orientationZ;
+			double newY = (0 * 1 * (1 - c) + 0 * s) * orientationX + (0 * 0 * (1 - c) + c) * orientationY
+					+ (0 * 0 * (1 - c) - 1 * s) * orientationZ;
+			double newZ = (1 * 0 * (1 - c) - 0 * s) * orientationX + (0 * 0 * (1 - c) + 1 * s) * orientationY
+					+ (0 * 0 * (1 - c) + c) * orientationZ;
+			// The vector must be a unit vector
+			double length = vectorLength(newX, newY, newZ);
+			orientationX = newX / length;
+			orientationY = newY / length;
+			orientationZ = newZ / length;
+		}
+	}
+
+	private double vectorLength(double x, double y, double z) {
+		return Math.sqrt(x * x + y * y + z * z);
 	}
 
 	/**
