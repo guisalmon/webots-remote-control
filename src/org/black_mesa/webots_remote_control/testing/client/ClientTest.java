@@ -4,6 +4,9 @@ import java.net.InetAddress;
 
 import org.black_mesa.webots_remote_control.Camera;
 import org.black_mesa.webots_remote_control.Client;
+import org.black_mesa.webots_remote_control.InvalidClientException;
+
+import android.util.Log;
 
 /**
  * @author Ilja Kroonen
@@ -14,9 +17,15 @@ public class ClientTest {
 		try {
 			InetAddress address = InetAddress.getByName(host);
 			Client client = new Client(address, port);
+			Thread.sleep(100);
 			Camera camera = client.getCamera();
-			System.out.println(camera.toString());
-			for (int i = 0; i < 1000; ++i) {
+			if (camera != null) {
+				Log.i("ClientTest", camera.toString());
+			} else {
+				Log.i("ClientTest", "Did not receive camera");
+			}
+			camera = new Camera(0, 0, 0, 0, 0, 0, 0);
+			for (int i = 0; i < 10; ++i) {
 				switch (i % 3) {
 				case 0:
 					camera.changeOrientation(1, 1);
@@ -28,10 +37,13 @@ public class ClientTest {
 					camera.moveStraight(1);
 					break;
 				}
+				Log.i("ClientTest", camera.toString());
 				client.onCameraChange(camera);
 			}
+		} catch (InvalidClientException e) {
+			Log.e("ClientTest", "Camera instance was invalid");
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.e("ClientTest", e.toString());
 		}
 	}
 }

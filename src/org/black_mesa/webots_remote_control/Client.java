@@ -9,23 +9,35 @@ import java.net.Socket;
 import android.util.Log;
 
 public class Client {
-	private final Socket socket;
+	private Socket socket;
+	private ObjectOutputStream outputStream = null;
 
-	private Camera receivedCamera;
+	private Camera receivedCamera = null;
 
-	public Client(InetAddress address, int port) throws IOException {
-		socket = new Socket(address, port);
+	private boolean valid = true;
+
+	public Client(InetAddress address, int port) {
+		final InetAddress finalAddress = address;
+		final int finalPort = port;
 		new Thread(new Runnable() {
 
 			@Override
 			public void run() {
-				recvCamera();
+				try {
+					socket = new Socket(finalAddress, finalPort);
+					recvCamera();
+				} catch (IOException e) {
+					valid = false;
+				}
 			}
 
 		}).start();
 	}
 
-	public void onCameraChange(Camera camera) {
+	public void onCameraChange(Camera camera) throws InvalidClientException {
+		if (!valid) {
+			throw new InvalidClientException();
+		}
 		final Camera toSend = camera.clone();
 		new Thread(new Runnable() {
 
@@ -37,18 +49,12 @@ public class Client {
 		}).start();
 	}
 
-	public Camera getCamera() {
-		Camera ret;
-		synchronized (socket) {
-			ret = receivedCamera.clone();
+	public Camera getCamera() throws InvalidClientException {
+		if (!valid) {
+			throw new InvalidClientException();
 		}
+		Camera ret = receivedCamera;
 		return ret;
-	}
-
-	public boolean isConnected() {
-		synchronized (socket) {
-			return socket != null && socket.isConnected();
-		}
 	}
 
 	private void recvCamera() {
@@ -58,8 +64,10 @@ public class Client {
 				receivedCamera = (Camera) in.readObject();
 			} catch (IOException e) {
 				Log.e(this.getClass().getName(), e.toString());
+				valid = false;
 			} catch (ClassNotFoundException e) {
 				Log.e(this.getClass().getName(), e.toString());
+				// TODO This should be notified to the user
 			}
 		}
 	}
@@ -67,10 +75,13 @@ public class Client {
 	private void sendCamera(Camera camera) {
 		synchronized (socket) {
 			try {
-				ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-				out.writeObject(camera);
+				if (outputStream == null) {
+					outputStream = new ObjectOutputStream(socket.getOutputStream());
+				}
+				outputStream.writeObject(camera);
 			} catch (IOException e) {
 				Log.e(this.getClass().getName(), e.toString());
+				valid = false;
 			}
 		}
 	}

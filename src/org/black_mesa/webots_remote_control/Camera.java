@@ -2,6 +2,8 @@ package org.black_mesa.webots_remote_control;
 
 import java.io.Serializable;
 
+//import android.util.Log;
+
 /**
  * @author Ilja Kroonen
  */
@@ -31,8 +33,10 @@ public class Camera implements Cloneable, Serializable {
 	 *            Signed value representing the distance of the movement to the
 	 *            top
 	 */
-	public void moveSideways(int horizontal, int vertical) {
-		throw new UnsupportedOperationException("Not implemented yet");
+	public void moveSideways(double horizontal, double vertical) {
+		//Log.e("Camera", "Not implemented yet");
+		positionX += horizontal;
+		positionY += vertical;
 	}
 
 	/**
@@ -45,8 +49,10 @@ public class Camera implements Cloneable, Serializable {
 	 *            Signed value representing a percentage of the vertical field
 	 *            of view (typically between -50 and 50)
 	 */
-	public void changeOrientation(int horizontal, int vertical) {
-		throw new UnsupportedOperationException("Not implemented yet");
+	public void changeOrientation(double horizontal, double vertical) {
+		//Log.e("Camera", "Not implemented yet");
+		positionX += horizontal;
+		positionY += vertical;
 	}
 
 	/**
@@ -55,8 +61,9 @@ public class Camera implements Cloneable, Serializable {
 	 * @param distance
 	 *            Signed distance of the movement
 	 */
-	public void moveStraight(int distance) {
-		throw new UnsupportedOperationException("Not implemented yet");
+	public void moveStraight(double distance) {
+		//Log.e("Camera", "Not implemented yet");
+		positionX += distance;
 	}
 
 	public double getPositionX() {
