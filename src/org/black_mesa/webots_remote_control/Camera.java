@@ -2,8 +2,6 @@ package org.black_mesa.webots_remote_control;
 
 import java.io.Serializable;
 
-import android.util.Log;
-
 /**
  * @author Ilja Kroonen
  */
@@ -58,9 +56,9 @@ public class Camera implements Cloneable, Serializable {
 	 *            of view (typically between -50 and 50)
 	 */
 	public void changeOrientation(double horizontal, double vertical) {
-		// TODO Field of view
 		// Horizontal rotation
 		{
+			// TODO Field of view
 			double c = Math.cos(horizontal / 100 * Math.PI);
 			double s = Math.sin(horizontal / 100 * Math.PI);
 			double newX = (0 * 0 * (1 - c) + c) * orientationX + (0 * 1 * (1 - c) - 0 * s) * orientationY
@@ -78,6 +76,7 @@ public class Camera implements Cloneable, Serializable {
 
 		// Vertical rotation
 		{
+			// TODO Field of view
 			double c = Math.cos(vertical / 100 * Math.PI);
 			double s = Math.sin(vertical / 100 * Math.PI);
 			double newX = (1 * 1 * (1 - c) + c) * orientationX + (1 * 0 * (1 - c) - 0 * s) * orientationY
@@ -94,7 +93,7 @@ public class Camera implements Cloneable, Serializable {
 		}
 	}
 
-	private double vectorLength(double x, double y, double z) {
+	private static final double vectorLength(double x, double y, double z) {
 		return Math.sqrt(x * x + y * y + z * z);
 	}
 
