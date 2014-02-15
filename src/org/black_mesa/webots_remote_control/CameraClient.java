@@ -11,6 +11,9 @@ import android.util.Log;
 /**
  * @author Ilja Kroonen
  */
+/*
+ * TODO This class should probably have a close method
+ */
 public class CameraClient {
 	private ObjectOutputStream outputStream = null;
 	private Socket socket;
