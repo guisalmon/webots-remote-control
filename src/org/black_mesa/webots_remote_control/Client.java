@@ -8,6 +8,9 @@ import java.net.Socket;
 
 import android.util.Log;
 
+/**
+ * @author Ilja Kroonen
+ */
 public class Client {
 	private Socket socket;
 	private ObjectOutputStream outputStream = null;
@@ -15,6 +18,7 @@ public class Client {
 	private Camera receivedCamera = null;
 
 	private boolean valid = true;
+	private boolean serverCompatible = true;
 
 	public Client(InetAddress address, int port) {
 		final InetAddress finalAddress = address;
@@ -34,7 +38,10 @@ public class Client {
 		}).start();
 	}
 
-	public void onCameraChange(Camera camera) throws InvalidClientException {
+	public void onCameraChange(Camera camera) throws InvalidClientException, IncompatibleServerException {
+		if (!serverCompatible) {
+			throw new IncompatibleServerException();
+		}
 		if (!valid) {
 			throw new InvalidClientException();
 		}
@@ -49,7 +56,10 @@ public class Client {
 		}).start();
 	}
 
-	public Camera getCamera() throws InvalidClientException {
+	public Camera getCamera() throws InvalidClientException, IncompatibleServerException {
+		if (!serverCompatible) {
+			throw new IncompatibleServerException();
+		}
 		if (!valid) {
 			throw new InvalidClientException();
 		}
@@ -67,7 +77,8 @@ public class Client {
 				valid = false;
 			} catch (ClassNotFoundException e) {
 				Log.e(this.getClass().getName(), e.toString());
-				// TODO This should be notified to the user
+				serverCompatible = false;
+				valid = false;
 			}
 		}
 	}

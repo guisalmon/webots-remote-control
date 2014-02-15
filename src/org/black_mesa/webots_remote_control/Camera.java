@@ -2,7 +2,7 @@ package org.black_mesa.webots_remote_control;
 
 import java.io.Serializable;
 
-//import android.util.Log;
+import android.util.Log;
 
 /**
  * @author Ilja Kroonen
@@ -34,7 +34,7 @@ public class Camera implements Cloneable, Serializable {
 	 *            top
 	 */
 	public void moveSideways(double horizontal, double vertical) {
-		//Log.e("Camera", "Not implemented yet");
+		Log.e("Camera", "Not implemented yet");
 		positionX += horizontal;
 		positionY += vertical;
 	}
@@ -50,7 +50,7 @@ public class Camera implements Cloneable, Serializable {
 	 *            of view (typically between -50 and 50)
 	 */
 	public void changeOrientation(double horizontal, double vertical) {
-		//Log.e("Camera", "Not implemented yet");
+		Log.e("Camera", "Not implemented yet");
 		positionX += horizontal;
 		positionY += vertical;
 	}
@@ -62,36 +62,8 @@ public class Camera implements Cloneable, Serializable {
 	 *            Signed distance of the movement
 	 */
 	public void moveStraight(double distance) {
-		//Log.e("Camera", "Not implemented yet");
+		Log.e("Camera", "Not implemented yet");
 		positionX += distance;
-	}
-
-	public double getPositionX() {
-		return positionX;
-	}
-
-	public double getPositionY() {
-		return positionY;
-	}
-
-	public double getPositionZ() {
-		return positionZ;
-	}
-
-	public double getOrientationX() {
-		return orientationX;
-	}
-
-	public double getOrientationY() {
-		return orientationY;
-	}
-
-	public double getOrientationZ() {
-		return orientationZ;
-	}
-
-	public double getOrientationAngle() {
-		return orientationAngle;
 	}
 
 	@Override
