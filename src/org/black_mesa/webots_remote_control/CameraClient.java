@@ -42,13 +42,14 @@ public class CameraClient {
 						}
 
 					});
+					sender.start();
 					recvCamera();
 					ready = true;
 				} catch (IOException e) {
 					valid = false;
 				}
 			}
-		});
+		}).start();
 	}
 
 	public boolean isReady() {
@@ -81,7 +82,9 @@ public class CameraClient {
 		}
 
 		next = camera.clone();
-		sender.notify();
+		synchronized (sender) {
+			sender.notify();
+		}
 	}
 
 	/**
@@ -118,7 +121,9 @@ public class CameraClient {
 				previous = next;
 			}
 			try {
-				wait(500);
+				synchronized (sender) {
+					sender.wait(500);
+				}
 			} catch (InterruptedException e) {
 			}
 		}

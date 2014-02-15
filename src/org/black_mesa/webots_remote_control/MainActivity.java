@@ -1,5 +1,7 @@
 package org.black_mesa.webots_remote_control;
 
+import org.black_mesa.webots_remote_control.testing.client.ClientTest;
+
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;

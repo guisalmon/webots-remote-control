@@ -26,6 +26,7 @@ public class ClientTest {
 			}
 			camera = new Camera(0, 0, 0, 0, 0, 0, 0);
 			for (int i = 0; i < 10; ++i) {
+				Thread.sleep(100);
 				switch (i % 3) {
 				case 0:
 					camera.changeOrientation(1, 1);
