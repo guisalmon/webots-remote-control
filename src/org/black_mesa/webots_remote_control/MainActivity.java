@@ -1,10 +1,7 @@
 package org.black_mesa.webots_remote_control;
 
-import org.black_mesa.webots_remote_control.testing.client.ClientTest;
-
 import android.os.Bundle;
 import android.app.Activity;
-import android.util.Log;
 import android.view.Menu;
 
 public class MainActivity extends Activity {
@@ -13,8 +10,6 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		Log.i("ClientTest", "Launching test");
-		ClientTest.launch("192.168.1.2", 42511);
 	}
 
 	@Override
