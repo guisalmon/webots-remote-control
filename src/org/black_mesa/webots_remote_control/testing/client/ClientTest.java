@@ -24,7 +24,7 @@ public class ClientTest {
 			} else {
 				Log.i("ClientTest", "Did not receive camera");
 			}
-			camera = new Camera(0, 0, 0, 0, 0, 0, 0);
+			camera = new Camera(0, 0, 0, 0, 0, 1, 0);
 			for (int i = 0; i < 10; ++i) {
 				Thread.sleep(100);
 				switch (i % 3) {
