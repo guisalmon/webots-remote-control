@@ -1,4 +1,4 @@
-package org.black_mesa.webots_remote_control.testing.client;
+package org.black_mesa.webots_remote_control.testing.camera_client;
 
 import java.net.InetAddress;
 
@@ -11,7 +11,7 @@ import android.util.Log;
 /**
  * @author Ilja Kroonen
  */
-public class ClientTest {
+public class CameraClientTest {
 
 	public static void launch(String host, int port) {
 		try {
