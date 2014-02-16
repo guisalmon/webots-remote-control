@@ -104,17 +104,9 @@ public class Camera implements Cloneable, Serializable {
 	 *            Signed distance of the movement
 	 */
 	public void moveStraight(double distance) {
-		double c = Math.cos(orientationAngle);
-		double s = Math.sin(orientationAngle);
-		positionX = (orientationX * orientationX * (1 - c) + c) * 0
-				+ (orientationX * orientationY * (1 - c) - orientationZ * s) * 0
-				+ (orientationX * orientationZ * (1 - c) + orientationY * s) * distance + positionX;
-		positionY = (orientationY * orientationX * (1 - c) + orientationZ * s) * 0
-				+ (orientationY * orientationY * (1 - c) + c) * 0
-				+ (orientationY * orientationZ * (1 - c) - orientationX * s) * distance + positionY;
-		positionZ = (orientationX * orientationZ * (1 - c) - orientationY * s) * 0
-				+ (orientationY * orientationZ * (1 - c) + orientationX * s) * 0
-				+ (orientationZ * orientationZ * (1 - c) + c) * distance + positionZ;
+		positionX += orientationX * distance;
+		positionY += orientationY * distance;
+		positionZ += orientationZ * distance;
 	}
 
 	@Override

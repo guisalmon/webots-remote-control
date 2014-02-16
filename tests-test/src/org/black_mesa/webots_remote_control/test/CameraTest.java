@@ -19,33 +19,34 @@ public class CameraTest {
 
 		// We move 1 up, which means we should now be on the y axis
 		camera.moveSideways(0, 1);
+		System.out.println(camera.toString());
 		expected = new Camera(0, 1, 0, 0, 0, 1, 0);
 		assertTrue(camera.compare(expected, epsilon));
 
 		// We now rotate the viewpoint 90 degrees to the right
 		camera.changeOrientation(50, 0);
+		System.out.println(camera.toString());
 		expected = new Camera(0, 1, 0, 1, 0, 0, 0);
 		assertTrue(camera.compare(expected, epsilon));
 		
 		// We reset the camera and we move 1 straight
 		camera = new Camera(0, 0, 0, 0, 0, 1, 0);
 		camera.moveStraight(1);
+		System.out.println(camera.toString());
 		expected = new Camera(0, 0, 1, 0, 0, 1, 0);
 		assertTrue(camera.compare(expected, epsilon));
 		
 		// We rotate 90 degrees to the left and move 1 straight
 		camera.changeOrientation(-50, 0);
 		camera.moveStraight(1);
+		System.out.println(camera.toString());
 		expected = new Camera(-1, 0, 1, -1, 0, 0, 0);
 		assertTrue(camera.compare(expected, epsilon));
 		
-		// We rotate 45 degrees up and move sqrt(2) straight
+		// We now move 1 up
+		camera.moveSideways(0, 3);
 		System.out.println(camera.toString());
-		camera.changeOrientation(0, 25);
-		System.out.println(camera.toString());
-		camera.moveStraight(Math.sqrt(2));
-		System.out.println(camera.toString());
-		expected = new Camera(-2, 1, 1, -1, 0, 0, 0);
+		expected = new Camera(-1, -1, 1, -1, 0, 0, 0);
 		assertTrue(camera.compare(expected, epsilon));
 	}
 
