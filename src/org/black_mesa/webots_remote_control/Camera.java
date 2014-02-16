@@ -93,7 +93,7 @@ public class Camera implements Cloneable, Serializable {
 		}
 	}
 
-	private static final double vectorLength(double x, double y, double z) {
+	private static double vectorLength(double x, double y, double z) {
 		return Math.sqrt(x * x + y * y + z * z);
 	}
 
@@ -126,5 +126,17 @@ public class Camera implements Cloneable, Serializable {
 	public String toString() {
 		return "(" + positionX + "," + positionY + "," + positionZ + ") ; (" + orientationX + "," + orientationY + ","
 				+ orientationZ + "," + orientationAngle + ")";
+	}
+
+	public boolean compare(Camera camera, double epsilon) {
+		return compare(positionX, camera.positionX, epsilon) && compare(positionY, camera.positionY, epsilon)
+				&& compare(positionZ, camera.positionZ, epsilon) && compare(orientationX, camera.orientationX, epsilon)
+				&& compare(orientationY, camera.orientationY, epsilon)
+				&& compare(orientationZ, camera.orientationZ, epsilon)
+				&& compare(orientationAngle, camera.orientationAngle, epsilon);
+	}
+
+	private static boolean compare(double a, double b, double epsilon) {
+		return (a - b) * (a - b) < epsilon;
 	}
 }
