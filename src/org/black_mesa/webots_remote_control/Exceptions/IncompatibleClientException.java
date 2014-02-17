@@ -1,4 +1,4 @@
-package org.black_mesa.webots_remote_control.Exceptions;
+package org.black_mesa.webots_remote_control.exceptions;
 
 /**
  * Throws when the client detects that the server is not compatible (typically

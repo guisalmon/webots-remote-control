@@ -6,9 +6,9 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
-import org.black_mesa.webots_remote_control.Exceptions.NotReadyClientException;
-import org.black_mesa.webots_remote_control.Exceptions.IncompatibleClientException;
-import org.black_mesa.webots_remote_control.Exceptions.InvalidClientException;
+import org.black_mesa.webots_remote_control.exceptions.IncompatibleClientException;
+import org.black_mesa.webots_remote_control.exceptions.InvalidClientException;
+import org.black_mesa.webots_remote_control.exceptions.NotReadyClientException;
 
 import android.util.Log;
 
