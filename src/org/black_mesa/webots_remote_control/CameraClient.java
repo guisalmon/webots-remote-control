@@ -6,6 +6,10 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
+import org.black_mesa.webots_remote_control.Exceptions.NotReadyClientException;
+import org.black_mesa.webots_remote_control.Exceptions.IncompatibleClientException;
+import org.black_mesa.webots_remote_control.Exceptions.InvalidClientException;
+
 import android.util.Log;
 
 /**
@@ -66,19 +70,19 @@ public class CameraClient {
 	 *            Reference to the state we want to send
 	 * @throws InvalidClientException
 	 *             There is no active connection with the server
-	 * @throws IncompatibleServerException
+	 * @throws IncompatibleClientException
 	 *             The server is not in a version compatible with the client
-	 * @throws ClientNotReadyException
+	 * @throws NotReadyClientException
 	 *             The client is not yet ready ; you should check if the client
 	 *             is ready with the isReady() method before using it
 	 */
-	public void onCameraChange(Camera camera) throws InvalidClientException, IncompatibleServerException,
-			ClientNotReadyException {
+	public void onCameraChange(Camera camera) throws InvalidClientException, IncompatibleClientException,
+			NotReadyClientException {
 		if (!ready) {
-			throw new ClientNotReadyException();
+			throw new NotReadyClientException();
 		}
 		if (!serverCompatible) {
-			throw new IncompatibleServerException();
+			throw new IncompatibleClientException();
 		}
 		if (!valid) {
 			throw new InvalidClientException();
@@ -97,13 +101,13 @@ public class CameraClient {
 	 * @return Instance of the Camera class sent by the server
 	 * @throws InvalidClientException
 	 *             No active connection with the server
-	 * @throws IncompatibleServerException
+	 * @throws IncompatibleClientException
 	 *             The server is not in a version compatible with the client
 	 */
 
-	public Camera getCamera() throws InvalidClientException, IncompatibleServerException {
+	public Camera getCamera() throws InvalidClientException, IncompatibleClientException {
 		if (!serverCompatible) {
-			throw new IncompatibleServerException();
+			throw new IncompatibleClientException();
 		}
 		if (!valid) {
 			throw new InvalidClientException();

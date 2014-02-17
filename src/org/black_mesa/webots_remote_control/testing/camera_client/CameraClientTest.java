@@ -4,7 +4,7 @@ import java.net.InetAddress;
 
 import org.black_mesa.webots_remote_control.Camera;
 import org.black_mesa.webots_remote_control.CameraClient;
-import org.black_mesa.webots_remote_control.InvalidClientException;
+import org.black_mesa.webots_remote_control.Exceptions.InvalidClientException;
 
 import android.util.Log;
 

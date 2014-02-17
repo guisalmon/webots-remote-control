@@ -1,4 +1,4 @@
-package org.black_mesa.webots_remote_control;
+package org.black_mesa.webots_remote_control.Exceptions;
 
 /**
  * Throws when the client is not correctly connected to a server
