@@ -12,8 +12,11 @@ public class GesturesHandler {
 	private float curY;
 	private float dX;
 	private float dY;
+	private float secX;
+	private float secY;
 	
 	private boolean pressed;
+	private boolean pinch;
 	
 	public GesturesHandler(float xMin, float xMax, float yMin, float yMax) {
 		minXwindow = xMin;
@@ -23,6 +26,7 @@ public class GesturesHandler {
 		curX = 0;
 		curY = 0;
 		pressed = false;
+		pinch = false;
 	}
 	
 	public void touch(float x, float y){
@@ -31,20 +35,36 @@ public class GesturesHandler {
 		pressed = true;
 	}
 	
+	public void secondaryTouch(float x, float y){
+		secX = x;
+		secY = y;
+		pinch = true;
+	}
+	
 	public void release(float x, float y, long tps){
-		dX = x - curX;
-		dY = y - curY;
-		float percX = dX/(maxXwindow-minXwindow);
-		float percY = dY/(maxYwindow-minYwindow);
-		if(isCenter()){
-			//drag(dX, dY, tps);
-			Log.i(getClass().getName(), "Drag : x "+percX+", y "+percY+", tps "+tps);
-		}else{
-			//move(dX, dY, tps);
-			Log.i(getClass().getName(), "Move : x "+percX+", y "+percY+", tps "+tps);
+		if(pressed){
+			dX = x - curX;
+			dY = y - curY;
+			float percX = dX/(maxXwindow-minXwindow);
+			float percY = dY/(maxYwindow-minYwindow);
+			if(isCenter()){
+				//drag(dX, dY, tps);
+				Log.i(getClass().getName(), "Drag : x "+percX+", y "+percY+", tps "+tps);
+			}else{
+				//move(dX, dY, tps);
+				Log.i(getClass().getName(), "Move : x "+percX+", y "+percY+", tps "+tps);
+			}
+			dX = 0;
+			dY = 0;
 		}
-		dX = 0;
-		dY = 0;
+		pressed = false;
+	}
+	
+	public void pinch(float x, float y){
+		if (pinch){
+			Log.i(getClass().getName(), "Pinched !");
+		}
+		pinch = false;
 		pressed = false;
 	}
 

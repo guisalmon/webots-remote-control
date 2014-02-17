@@ -16,11 +16,11 @@ import android.view.View;
 import android.view.View.OnDragListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 public class CameraFragment extends Fragment implements OnTouchListener, OnDragListener{
 	private GesturesHandler mGestureHandler;
+	private int touchState;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -64,15 +64,28 @@ public class CameraFragment extends Fragment implements OnTouchListener, OnDragL
 		
 		//Initiate gesture handler
 		mGestureHandler = new GesturesHandler(xMin, xMax, yMin, yMax);
+		touchState = 0;
 		super.onActivityCreated(savedInstanceState);
 	}
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
-				mGestureHandler.touch(event.getRawX(), event.getRawY());
+				if (touchState == 0){
+					mGestureHandler.touch(event.getRawX(), event.getRawY());
+				}
+				if (touchState == 1){
+					mGestureHandler.secondaryTouch(event.getRawX(), event.getRawY());
+				}
+				touchState++;
+				
 		    } else if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
-		    	mGestureHandler.release(event.getRawX(), event.getRawY(), event.getEventTime() - event.getDownTime());
+		    	if(touchState == 0){
+		    		mGestureHandler.release(event.getRawX(), event.getRawY(), event.getEventTime() - event.getDownTime());
+		    	}else{
+		    		mGestureHandler.pinch(event.getRawX(), event.getRawY());
+		    	}
+		    	touchState = 0;
 		    }
 		return false;
 	}
