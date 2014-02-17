@@ -24,25 +24,29 @@ public class Camera implements Cloneable, Serializable {
 	/**
 	 * Moves the camera to the side
 	 * 
-	 * @param horizontal
-	 *            Signed value representing the distance of the movement to the
-	 *            right
-	 * @param vertical
-	 *            Signed value representing the distance of the movement to the
-	 *            top
+	 * @param right
+	 *            Signed value representing the distance of the movement along
+	 *            the right vector
+	 * @param up
+	 *            Signed value representing the distance of the movement along
+	 *            the up vector
+	 * @param forward
+	 *            Signed value representing the distance of the movement along
+	 *            the forward vector
 	 */
-	public void moveSideways(double horizontal, double vertical) {
+	public void move(double right, double up, double forward) {
+		// We use the rotation matrix of the axis / angle representation
 		double c = Math.cos(orientationAngle);
 		double s = Math.sin(orientationAngle);
-		positionX = (orientationX * orientationX * (1 - c) + c) * horizontal
-				+ (orientationX * orientationY * (1 - c) - orientationZ * s) * vertical
-				+ (orientationX * orientationZ * (1 - c) + orientationY * s) * 0 + positionX;
-		positionY = (orientationY * orientationX * (1 - c) + orientationZ * s) * horizontal
-				+ (orientationY * orientationY * (1 - c) + c) * vertical
-				+ (orientationY * orientationZ * (1 - c) - orientationX * s) * 0 + positionY;
-		positionZ = (orientationX * orientationZ * (1 - c) - orientationY * s) * horizontal
-				+ (orientationY * orientationZ * (1 - c) + orientationX * s) * vertical
-				+ (orientationZ * orientationZ * (1 - c) + c) * 0 + positionZ;
+		positionX += (orientationX * orientationX * (1 - c) + c) * right
+				+ (orientationX * orientationY * (1 - c) - orientationZ * s) * up
+				+ (orientationX * orientationZ * (1 - c) + orientationY * s) * forward;
+		positionY += (orientationY * orientationX * (1 - c) + orientationZ * s) * right
+				+ (orientationY * orientationY * (1 - c) + c) * up
+				+ (orientationY * orientationZ * (1 - c) - orientationX * s) * forward;
+		positionZ += (orientationX * orientationZ * (1 - c) - orientationY * s) * right
+				+ (orientationY * orientationZ * (1 - c) + orientationX * s) * up
+				+ (orientationZ * orientationZ * (1 - c) + c) * forward;
 	}
 
 	/**
@@ -56,57 +60,85 @@ public class Camera implements Cloneable, Serializable {
 	 *            of view (typically between -50 and 50)
 	 */
 	public void changeOrientation(double horizontal, double vertical) {
-		// Horizontal rotation
 		{
-			// TODO Field of view
-			double c = Math.cos(horizontal / 100 * Math.PI);
-			double s = Math.sin(horizontal / 100 * Math.PI);
-			double newX = (0 * 0 * (1 - c) + c) * orientationX + (0 * 1 * (1 - c) - 0 * s) * orientationY
-					+ (0 * 0 * (1 - c) + 1 * s) * orientationZ;
-			double newY = (1 * 0 * (1 - c) + 0 * s) * orientationX + (1 * 1 * (1 - c) + c) * orientationY
-					+ (1 * 0 * (1 - c) - 0 * s) * orientationZ;
-			double newZ = (0 * 0 * (1 - c) - 1 * s) * orientationX + (1 * 0 * (1 - c) + 0 * s) * orientationY
-					+ (0 * 0 * (1 - c) + c) * orientationZ;
-			// The vector must be a unit vector
+			// We want to rotate around the local y axis
+			// First we rotate the absolute y axis to get the local y axis
+			double c = Math.cos(orientationAngle);
+			double s = Math.sin(orientationAngle);
+			double x = 0;
+			double y = 1;
+			double z = 0;
+			double newX = (orientationX * orientationX * (1 - c) + c) * x
+					+ (orientationX * orientationY * (1 - c) - orientationZ * s) * y
+					+ (orientationX * orientationZ * (1 - c) + orientationY * s) * z;
+			double newY = (orientationY * orientationX * (1 - c) + orientationZ * s) * x
+					+ (orientationY * orientationY * (1 - c) + c) * y
+					+ (orientationY * orientationZ * (1 - c) - orientationX * s) * z;
+			double newZ = (orientationX * orientationZ * (1 - c) - orientationY * s) * x
+					+ (orientationY * orientationZ * (1 - c) + orientationX * s) * y
+					+ (orientationZ * orientationZ * (1 - c) + c) * z;
 			double length = vectorLength(newX, newY, newZ);
-			orientationX = newX / length;
-			orientationY = newY / length;
-			orientationZ = newZ / length;
+			x = newX / length;
+			y = newY / length;
+			z = newZ / length;
+			// We now rotate around the (x, y, z) axis
+			c = Math.cos(horizontal);
+			s = Math.sin(horizontal);
+			newX = (x * x * (1 - c) + c) * orientationX
+					+ (x * y * (1 - c) - z * s) * orientationY
+					+ (x * z * (1 - c) + y * s) * orientationZ;
+			newY = (y * x * (1 - c) + z * s) * orientationX
+					+ (y * y * (1 - c) + c) * orientationY
+					+ (y * z * (1 - c) - x * s) * orientationZ;
+			newZ = (x * z * (1 - c) - y * s) * orientationX
+					+ (y * z * (1 - c) + x * s) * orientationY
+					+ (z * z * (1 - c) + c) * orientationZ;
+			orientationX = newX;
+			orientationY = newY;
+			orientationZ = newZ;
 		}
-
-		// Vertical rotation
+		
 		{
-			// TODO Field of view
-			double c = Math.cos(vertical / 100 * Math.PI);
-			double s = Math.sin(vertical / 100 * Math.PI);
-			double newX = (1 * 1 * (1 - c) + c) * orientationX + (1 * 0 * (1 - c) - 0 * s) * orientationY
-					+ (1 * 0 * (1 - c) + 0 * s) * orientationZ;
-			double newY = (0 * 1 * (1 - c) + 0 * s) * orientationX + (0 * 0 * (1 - c) + c) * orientationY
-					+ (0 * 0 * (1 - c) - 1 * s) * orientationZ;
-			double newZ = (1 * 0 * (1 - c) - 0 * s) * orientationX + (0 * 0 * (1 - c) + 1 * s) * orientationY
-					+ (0 * 0 * (1 - c) + c) * orientationZ;
-			// The vector must be a unit vector
+			// We want to rotate around the local x axis
+			// First we rotate the absolute x axis to get the local x axis
+			double c = Math.cos(orientationAngle);
+			double s = Math.sin(orientationAngle);
+			double x = 1;
+			double y = 0;
+			double z = 0;
+			double newX = (orientationX * orientationX * (1 - c) + c) * x
+					+ (orientationX * orientationY * (1 - c) - orientationZ * s) * y
+					+ (orientationX * orientationZ * (1 - c) + orientationY * s) * z;
+			double newY = (orientationY * orientationX * (1 - c) + orientationZ * s) * x
+					+ (orientationY * orientationY * (1 - c) + c) * y
+					+ (orientationY * orientationZ * (1 - c) - orientationX * s) * z;
+			double newZ = (orientationX * orientationZ * (1 - c) - orientationY * s) * x
+					+ (orientationY * orientationZ * (1 - c) + orientationX * s) * y
+					+ (orientationZ * orientationZ * (1 - c) + c) * z;
 			double length = vectorLength(newX, newY, newZ);
-			orientationX = newX / length;
-			orientationY = newY / length;
-			orientationZ = newZ / length;
+			x = newX / length;
+			y = newY / length;
+			z = newZ / length;
+			// We now rotate around the (x, y, z) axis
+			c = Math.cos(vertical);
+			s = Math.sin(vertical);
+			newX = (x * x * (1 - c) + c) * orientationX
+					+ (x * y * (1 - c) - z * s) * orientationY
+					+ (x * z * (1 - c) + y * s) * orientationZ;
+			newY = (y * x * (1 - c) + z * s) * orientationX
+					+ (y * y * (1 - c) + c) * orientationY
+					+ (y * z * (1 - c) - x * s) * orientationZ;
+			newZ = (x * z * (1 - c) - y * s) * orientationX
+					+ (y * z * (1 - c) + x * s) * orientationY
+					+ (z * z * (1 - c) + c) * orientationZ;
+			orientationX = newX;
+			orientationY = newY;
+			orientationZ = newZ;
 		}
 	}
 
 	private static double vectorLength(double x, double y, double z) {
 		return Math.sqrt(x * x + y * y + z * z);
-	}
-
-	/**
-	 * Moves the camera on the axis of the viewpoint
-	 * 
-	 * @param distance
-	 *            Signed distance of the movement
-	 */
-	public void moveStraight(double distance) {
-		positionX += orientationX * distance;
-		positionY += orientationY * distance;
-		positionZ += orientationZ * distance;
 	}
 
 	@Override

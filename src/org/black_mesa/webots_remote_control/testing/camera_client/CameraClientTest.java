@@ -27,15 +27,12 @@ public class CameraClientTest {
 			camera = new Camera(0, 0, 0, 0, 0, 1, 0);
 			for (int i = 0; i < 10; ++i) {
 				Thread.sleep(100);
-				switch (i % 3) {
+				switch (i % 2) {
 				case 0:
 					camera.changeOrientation(1, 1);
 					break;
 				case 1:
-					camera.moveSideways(1, 1);
-					break;
-				case 2:
-					camera.moveStraight(1);
+					camera.move(1, 1, 1);
 					break;
 				}
 				Log.i("ClientTest", camera.toString());
