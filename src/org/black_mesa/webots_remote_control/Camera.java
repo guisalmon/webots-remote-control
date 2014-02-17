@@ -35,7 +35,9 @@ public class Camera implements Cloneable, Serializable {
 	 *            the forward vector
 	 */
 	public void move(double right, double up, double forward) {
-		// We use the rotation matrix of the axis / angle representation
+		// right = local x axis, up = local y axis, forward = local z axis
+		// We multiply our translation with the rotation matrix in order to get
+		// the translation in the local system
 		double c = Math.cos(orientationAngle);
 		double s = Math.sin(orientationAngle);
 		positionX += (orientationX * orientationX * (1 - c) + c) * right
@@ -47,6 +49,14 @@ public class Camera implements Cloneable, Serializable {
 		positionZ += (orientationX * orientationZ * (1 - c) - orientationY * s) * right
 				+ (orientationY * orientationZ * (1 - c) + orientationX * s) * up
 				+ (orientationZ * orientationZ * (1 - c) + c) * forward;
+	}
+
+	public void pitch(double angle) {
+		rotate(1, 0, 0, angle);
+	}
+	
+	public void yaw(double angle) {
+		rotate(0, 1, 0, angle);
 	}
 
 	/**
@@ -61,6 +71,7 @@ public class Camera implements Cloneable, Serializable {
 	 */
 	public void changeOrientation(double horizontal, double vertical) {
 		{
+			
 			// We want to rotate around the local y axis
 			// First we rotate the absolute y axis to get the local y axis
 			double c = Math.cos(orientationAngle);
@@ -77,27 +88,19 @@ public class Camera implements Cloneable, Serializable {
 			double newZ = (orientationX * orientationZ * (1 - c) - orientationY * s) * x
 					+ (orientationY * orientationZ * (1 - c) + orientationX * s) * y
 					+ (orientationZ * orientationZ * (1 - c) + c) * z;
+			// TODO Is normalizing necessary here ?
 			double length = vectorLength(newX, newY, newZ);
 			x = newX / length;
 			y = newY / length;
 			z = newZ / length;
-			// We now rotate around the (x, y, z) axis
-			c = Math.cos(horizontal);
-			s = Math.sin(horizontal);
-			newX = (x * x * (1 - c) + c) * orientationX
-					+ (x * y * (1 - c) - z * s) * orientationY
-					+ (x * z * (1 - c) + y * s) * orientationZ;
-			newY = (y * x * (1 - c) + z * s) * orientationX
-					+ (y * y * (1 - c) + c) * orientationY
-					+ (y * z * (1 - c) - x * s) * orientationZ;
-			newZ = (x * z * (1 - c) - y * s) * orientationX
-					+ (y * z * (1 - c) + x * s) * orientationY
-					+ (z * z * (1 - c) + c) * orientationZ;
-			orientationX = newX;
-			orientationY = newY;
-			orientationZ = newZ;
+			// We now compute the new axis angle representation
+			Rotation r = new Rotation(orientationX, orientationY, orientationZ, orientationAngle, x, y, z, horizontal);
+			orientationX = r.x;
+			orientationY = r.y;
+			orientationZ = r.z;
+			orientationAngle = r.angle;
 		}
-		
+
 		{
 			// We want to rotate around the local x axis
 			// First we rotate the absolute x axis to get the local x axis
@@ -119,22 +122,39 @@ public class Camera implements Cloneable, Serializable {
 			x = newX / length;
 			y = newY / length;
 			z = newZ / length;
-			// We now rotate around the (x, y, z) axis
-			c = Math.cos(vertical);
-			s = Math.sin(vertical);
-			newX = (x * x * (1 - c) + c) * orientationX
-					+ (x * y * (1 - c) - z * s) * orientationY
-					+ (x * z * (1 - c) + y * s) * orientationZ;
-			newY = (y * x * (1 - c) + z * s) * orientationX
-					+ (y * y * (1 - c) + c) * orientationY
-					+ (y * z * (1 - c) - x * s) * orientationZ;
-			newZ = (x * z * (1 - c) - y * s) * orientationX
-					+ (y * z * (1 - c) + x * s) * orientationY
-					+ (z * z * (1 - c) + c) * orientationZ;
-			orientationX = newX;
-			orientationY = newY;
-			orientationZ = newZ;
+			// We now compute the new axis angle representation
+			Rotation r = new Rotation(orientationX, orientationY, orientationZ, orientationAngle, x, y, z, vertical);
+			orientationX = r.x;
+			orientationY = r.y;
+			orientationZ = r.z;
+			orientationAngle = r.angle;
 		}
+	}
+	
+	private void rotate(double x, double y, double z, double angle) {
+		// We want to rotate around the local axis
+		// First we rotate the absolute axis to get the local axis
+		double c = Math.cos(orientationAngle);
+		double s = Math.sin(orientationAngle);
+		double newX = (orientationX * orientationX * (1 - c) + c) * x
+				+ (orientationX * orientationY * (1 - c) - orientationZ * s) * y
+				+ (orientationX * orientationZ * (1 - c) + orientationY * s) * z;
+		double newY = (orientationY * orientationX * (1 - c) + orientationZ * s) * x
+				+ (orientationY * orientationY * (1 - c) + c) * y
+				+ (orientationY * orientationZ * (1 - c) - orientationX * s) * z;
+		double newZ = (orientationX * orientationZ * (1 - c) - orientationY * s) * x
+				+ (orientationY * orientationZ * (1 - c) + orientationX * s) * y
+				+ (orientationZ * orientationZ * (1 - c) + c) * z;
+		double length = vectorLength(newX, newY, newZ);
+		x = newX / length;
+		y = newY / length;
+		z = newZ / length;
+		// We now compute the new axis angle representation
+		Rotation r = new Rotation(orientationX, orientationY, orientationZ, orientationAngle, x, y, z, angle);
+		orientationX = r.x;
+		orientationY = r.y;
+		orientationZ = r.z;
+		orientationAngle = r.angle;
 	}
 
 	private static double vectorLength(double x, double y, double z) {
