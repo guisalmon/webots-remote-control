@@ -29,14 +29,13 @@ public class CameraClientTest {
 				Thread.sleep(100);
 				switch (i % 3) {
 				case 0:
-					camera.changeOrientation(1, 1);
+					camera.pitch(1);
 					break;
 				case 1:
-					camera.moveSideways(1, 1);
+					camera.move(1, 1, 1);
 					break;
 				case 2:
-					camera.moveStraight(1);
-					break;
+					camera.yaw(1);
 				}
 				Log.i("ClientTest", camera.toString());
 				client.onCameraChange(camera);
