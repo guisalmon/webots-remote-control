@@ -1,4 +1,4 @@
-package org.black_mesa.webots_remote_control;
+package org.black_mesa.webots_remote_control.views;
 
 public class Rotation {
 	public final double x, y, z, angle;

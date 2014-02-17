@@ -1,11 +1,12 @@
-package org.black_mesa.webots_remote_control;
+package org.black_mesa.webots_remote_control.views;
 
 import java.io.Serializable;
+
 
 /**
  * @author Ilja Kroonen
  */
-public class Camera implements Cloneable, Serializable {
+public class Camera implements Serializable, View {
 	private static final long serialVersionUID = -2000084337375288247L;
 	private double positionX, positionY, positionZ;
 	private double orientationX, orientationY, orientationZ, orientationAngle;
@@ -162,11 +163,6 @@ public class Camera implements Cloneable, Serializable {
 	}
 
 	@Override
-	public Camera clone() {
-		return new Camera(positionX, positionY, positionZ, orientationX, orientationY, orientationZ, orientationAngle);
-	}
-
-	@Override
 	public String toString() {
 		return "(" + positionX + "," + positionY + "," + positionZ + ") ; (" + orientationX + "," + orientationY + ","
 				+ orientationZ + "," + orientationAngle + ")";
@@ -182,5 +178,10 @@ public class Camera implements Cloneable, Serializable {
 
 	private static boolean compare(double a, double b, double epsilon) {
 		return (a - b) * (a - b) < epsilon;
+	}
+
+	@Override
+	public View copy() {
+		return new Camera(positionX, positionY, positionZ, orientationX, orientationY, orientationZ, orientationAngle);
 	}
 }

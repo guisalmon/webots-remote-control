@@ -2,7 +2,7 @@ package org.black_mesa.webots_remote_control.test;
 
 import static org.junit.Assert.*;
 
-import org.black_mesa.webots_remote_control.Camera;
+import org.black_mesa.webots_remote_control.views.Camera;
 import org.junit.Test;
 
 public class CameraTest {
