@@ -1,10 +1,6 @@
 package org.black_mesa.webots_remote_control.activities;
 
 import org.black_mesa.webots_remote_control.R;
-import org.black_mesa.webots_remote_control.R.array;
-import org.black_mesa.webots_remote_control.R.id;
-import org.black_mesa.webots_remote_control.R.layout;
-import org.black_mesa.webots_remote_control.R.menu;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -44,7 +40,7 @@ public class MainActivity extends Activity {
 	
 	private class DrawerItemClickListener implements ListView.OnItemClickListener {
 	    @Override
-	    public void onItemClick(AdapterView parent, View view, int position, long id) {
+	    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 	        selectItem(position);
 	    }
 	}
@@ -53,6 +49,11 @@ public class MainActivity extends Activity {
 	private void selectItem(int position) {
 		switch (position){
 		case 0:
+			Fragment cameraFragment = new CameraFragment();
+			FragmentManager fragmentManager = getFragmentManager();
+		    fragmentManager.beginTransaction()
+		                   .replace(R.id.content_frame, cameraFragment)
+		                   .commit();
 			break;
 		case 1:
 			break;
