@@ -1,5 +1,7 @@
 package org.black_mesa.webots_remote_control.remote_object_state;
 
-public interface RemoteObjectState {
+import java.io.Serializable;
+
+public interface RemoteObjectState extends Serializable {
 	public RemoteObjectState clone();
 }

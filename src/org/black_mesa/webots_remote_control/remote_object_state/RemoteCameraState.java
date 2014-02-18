@@ -1,11 +1,9 @@
 package org.black_mesa.webots_remote_control.remote_object_state;
 
-import java.io.Serializable;
-
 /**
  * @author Ilja Kroonen
  */
-public class RemoteCameraState implements Serializable, RemoteObjectState {
+public class RemoteCameraState implements RemoteObjectState {
 	private static final long serialVersionUID = -2000084337375288247L;
 	private double positionX, positionY, positionZ;
 	private double orientationX, orientationY, orientationZ, orientationAngle;
