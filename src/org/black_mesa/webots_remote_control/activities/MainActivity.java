@@ -47,10 +47,11 @@ public class MainActivity extends Activity {
 
 	/** Swaps fragments in the main content view */
 	private void selectItem(int position) {
+		FragmentManager fragmentManager;
 		switch (position){
 		case 0:
 			Fragment cameraFragment = new CameraFragment();
-			FragmentManager fragmentManager = getFragmentManager();
+			fragmentManager = getFragmentManager();
 		    fragmentManager.beginTransaction()
 		                   .replace(R.id.content_frame, cameraFragment)
 		                   .commit();
@@ -60,6 +61,11 @@ public class MainActivity extends Activity {
 		case 2:
 			break;
 		case 3:
+			Fragment preferencesFragment = new PreferencesFragment();
+			fragmentManager = getFragmentManager();
+		    fragmentManager.beginTransaction()
+		                   .replace(R.id.content_frame, preferencesFragment)
+		                   .commit();
 			break;
 		case 4:
 			break;
