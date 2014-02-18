@@ -3,7 +3,6 @@ package org.black_mesa.webots_remote_control.utils;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import android.app.Fragment;
 import android.util.Log;
 
 public class GesturesHandler {
