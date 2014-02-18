@@ -70,7 +70,7 @@ public class CameraFragment extends Fragment implements OnTouchListener{
 	@Override
 	public void onPause() {
 		super.onPause();
-		mGestureHandler.stopClient();
+		mGestureHandler.stop();
 	}
 
 	@Override
