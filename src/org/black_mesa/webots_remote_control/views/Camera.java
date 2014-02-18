@@ -2,7 +2,6 @@ package org.black_mesa.webots_remote_control.views;
 
 import java.io.Serializable;
 
-
 /**
  * @author Ilja Kroonen
  */
@@ -52,87 +51,11 @@ public class Camera implements Serializable, View {
 				+ (orientationZ * orientationZ * (1 - c) + c) * forward;
 	}
 
-	public void pitch(double angle) {
-		rotate(1, 0, 0, angle);
-	}
-	
 	public void yaw(double angle) {
-		rotate(0, 1, 0, angle);
+		rotateLocal(0, 1, 0, angle);
 	}
 
-	/**
-	 * Changes the orientation of the camera
-	 * 
-	 * @param horizontal
-	 *            Signed value representing a percentage of the horizontal field
-	 *            of view (typically between -50 and 50)
-	 * @param vertical
-	 *            Signed value representing a percentage of the vertical field
-	 *            of view (typically between -50 and 50)
-	 */
-	public void changeOrientation(double horizontal, double vertical) {
-		{
-			
-			// We want to rotate around the local y axis
-			// First we rotate the absolute y axis to get the local y axis
-			double c = Math.cos(orientationAngle);
-			double s = Math.sin(orientationAngle);
-			double x = 0;
-			double y = 1;
-			double z = 0;
-			double newX = (orientationX * orientationX * (1 - c) + c) * x
-					+ (orientationX * orientationY * (1 - c) - orientationZ * s) * y
-					+ (orientationX * orientationZ * (1 - c) + orientationY * s) * z;
-			double newY = (orientationY * orientationX * (1 - c) + orientationZ * s) * x
-					+ (orientationY * orientationY * (1 - c) + c) * y
-					+ (orientationY * orientationZ * (1 - c) - orientationX * s) * z;
-			double newZ = (orientationX * orientationZ * (1 - c) - orientationY * s) * x
-					+ (orientationY * orientationZ * (1 - c) + orientationX * s) * y
-					+ (orientationZ * orientationZ * (1 - c) + c) * z;
-			// TODO Is normalizing necessary here ?
-			double length = vectorLength(newX, newY, newZ);
-			x = newX / length;
-			y = newY / length;
-			z = newZ / length;
-			// We now compute the new axis angle representation
-			Rotation r = new Rotation(orientationX, orientationY, orientationZ, orientationAngle, x, y, z, horizontal);
-			orientationX = r.x;
-			orientationY = r.y;
-			orientationZ = r.z;
-			orientationAngle = r.angle;
-		}
-
-		{
-			// We want to rotate around the local x axis
-			// First we rotate the absolute x axis to get the local x axis
-			double c = Math.cos(orientationAngle);
-			double s = Math.sin(orientationAngle);
-			double x = 1;
-			double y = 0;
-			double z = 0;
-			double newX = (orientationX * orientationX * (1 - c) + c) * x
-					+ (orientationX * orientationY * (1 - c) - orientationZ * s) * y
-					+ (orientationX * orientationZ * (1 - c) + orientationY * s) * z;
-			double newY = (orientationY * orientationX * (1 - c) + orientationZ * s) * x
-					+ (orientationY * orientationY * (1 - c) + c) * y
-					+ (orientationY * orientationZ * (1 - c) - orientationX * s) * z;
-			double newZ = (orientationX * orientationZ * (1 - c) - orientationY * s) * x
-					+ (orientationY * orientationZ * (1 - c) + orientationX * s) * y
-					+ (orientationZ * orientationZ * (1 - c) + c) * z;
-			double length = vectorLength(newX, newY, newZ);
-			x = newX / length;
-			y = newY / length;
-			z = newZ / length;
-			// We now compute the new axis angle representation
-			Rotation r = new Rotation(orientationX, orientationY, orientationZ, orientationAngle, x, y, z, vertical);
-			orientationX = r.x;
-			orientationY = r.y;
-			orientationZ = r.z;
-			orientationAngle = r.angle;
-		}
-	}
-	
-	private void rotate(double x, double y, double z, double angle) {
+	private void rotateLocal(double x, double y, double z, double angle) {
 		// We want to rotate around the local axis
 		// First we rotate the absolute axis to get the local axis
 		double c = Math.cos(orientationAngle);
@@ -151,6 +74,12 @@ public class Camera implements Serializable, View {
 		y = newY / length;
 		z = newZ / length;
 		// We now compute the new axis angle representation
+		rotateAbsolute(x, y, z, angle);
+	}
+
+	private void rotateAbsolute(double x, double y, double z, double angle) {
+		// We want to rotate around the absolute axis
+		// We can do this directly
 		Rotation r = new Rotation(orientationX, orientationY, orientationZ, orientationAngle, x, y, z, angle);
 		orientationX = r.x;
 		orientationY = r.y;
@@ -180,8 +109,7 @@ public class Camera implements Serializable, View {
 		return (a - b) * (a - b) < epsilon;
 	}
 
-	@Override
-	public View copy() {
+	public View clone() {
 		return new Camera(positionX, positionY, positionZ, orientationX, orientationY, orientationZ, orientationAngle);
 	}
 }

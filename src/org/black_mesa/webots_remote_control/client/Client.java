@@ -84,7 +84,7 @@ public class Client {
 			throw new InvalidClientException();
 		}
 
-		next = view.copy();
+		next = view.clone();
 		synchronized (sender) {
 			sender.notify();
 		}
