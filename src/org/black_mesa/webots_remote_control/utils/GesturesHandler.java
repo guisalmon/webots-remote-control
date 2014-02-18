@@ -143,8 +143,8 @@ public class GesturesHandler implements ClientEventListener {
 	}
 	
 	private void move(){
-		dX = curX-(maxXwindow/2);
-		dY = (maxYwindow/2)-curY;
+		dX = (curX-(maxXwindow/2))/(maxXwindow/2);
+		dY = ((maxYwindow/2)-curY)/(maxYwindow/2);
 		mCamera.move(dX, dY, 0);
 		try {
 			mClient.onStateChange(mCamera);
