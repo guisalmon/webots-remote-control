@@ -9,7 +9,7 @@ import java.net.Socket;
 import org.black_mesa.webots_remote_control.exceptions.IncompatibleClientException;
 import org.black_mesa.webots_remote_control.exceptions.InvalidClientException;
 import org.black_mesa.webots_remote_control.exceptions.NotReadyClientException;
-import org.black_mesa.webots_remote_control.views.View;
+import org.black_mesa.webots_remote_control.views.RemoteObjectState;
 
 import android.util.Log;
 
@@ -22,10 +22,10 @@ public class Client {
 	private boolean valid = true;
 	private boolean serverCompatible = true;
 
-	View received = null;
+	RemoteObjectState received = null;
 
 	Thread sender;
-	View next;
+	RemoteObjectState next;
 
 	public Client(InetAddress address, int port) {
 		final InetAddress finalAddress = address;
@@ -72,7 +72,7 @@ public class Client {
 	 *             The client is not yet ready ; you should check if the client
 	 *             is ready with the isReady() method before using it
 	 */
-	public void onViewChange(View view) throws InvalidClientException, IncompatibleClientException,
+	public void onViewChange(RemoteObjectState view) throws InvalidClientException, IncompatibleClientException,
 			NotReadyClientException {
 		if (!ready) {
 			throw new NotReadyClientException();
@@ -101,7 +101,7 @@ public class Client {
 	 *             The server is not in a version compatible with the client
 	 */
 
-	public View get() throws InvalidClientException, IncompatibleClientException {
+	public RemoteObjectState get() throws InvalidClientException, IncompatibleClientException {
 		if (!serverCompatible) {
 			throw new IncompatibleClientException();
 		}
@@ -114,7 +114,7 @@ public class Client {
 	}
 
 	private void senderWork() {
-		View previous = next;
+		RemoteObjectState previous = next;
 		while (true) {
 			if (!serverCompatible || !valid) {
 				return;
@@ -132,7 +132,7 @@ public class Client {
 		}
 	}
 
-	private void send(View view) {
+	private void send(RemoteObjectState view) {
 		try {
 			if (outputStream == null) {
 				outputStream = new ObjectOutputStream(socket.getOutputStream());
@@ -147,7 +147,7 @@ public class Client {
 	private void recv() {
 		try {
 			ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-			received = (View) in.readObject();
+			received = (RemoteObjectState) in.readObject();
 		} catch (IOException e) {
 			Log.e(this.getClass().getName(), e.toString());
 			valid = false;
