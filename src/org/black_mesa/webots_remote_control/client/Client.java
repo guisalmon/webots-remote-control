@@ -5,58 +5,67 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-
 import org.black_mesa.webots_remote_control.exceptions.IncompatibleClientException;
 import org.black_mesa.webots_remote_control.exceptions.InvalidClientException;
 import org.black_mesa.webots_remote_control.exceptions.NotReadyClientException;
 import org.black_mesa.webots_remote_control.views.RemoteObjectState;
 
+import android.app.Activity;
 import android.util.Log;
 
+/**
+ * This class controls communications between the application and the server
+ * 
+ * @author Ilja Kroonen
+ * 
+ */
 public class Client {
+	private static final int REFRESH_TICK = 100;
 
 	private ObjectOutputStream outputStream = null;
 	private Socket socket;
 
-	private boolean ready = false;
 	private boolean valid = true;
 	private boolean serverCompatible = true;
 
-	RemoteObjectState received = null;
+	private RemoteObjectState received = null;
 
-	Thread sender;
-	RemoteObjectState next;
+	private Thread clientThread;
+	private RemoteObjectState next;
 
-	public Client(InetAddress address, int port) {
+	private ClientEventListener listener;
+	private Activity activity;
+
+	/**
+	 * Instantiates a Client
+	 * 
+	 * @param address
+	 *            Address of the server
+	 * @param port
+	 *            Port for the connection
+	 * @param listener
+	 *            Listener that will be notified when the server sends the
+	 *            initial state of the object
+	 */
+	public Client(InetAddress address, int port, ClientEventListener listener, Activity activity) {
 		final InetAddress finalAddress = address;
 		final int finalPort = port;
+		this.listener = listener;
+		this.activity = activity;
 
-		new Thread(new Runnable() {
+		clientThread = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
 				try {
 					socket = new Socket(finalAddress, finalPort);
-					sender = new Thread(new Runnable() {
-
-						@Override
-						public void run() {
-							senderWork();
-						}
-
-					});
-					sender.start();
 					recv();
-					ready = true;
+					clientRoutine();
 				} catch (IOException e) {
 					valid = false;
 				}
 			}
-		}).start();
-	}
-
-	public boolean isReady() {
-		return ready;
+		});
 	}
 
 	/**
@@ -69,63 +78,57 @@ public class Client {
 	 * @throws IncompatibleClientException
 	 *             The server is not in a version compatible with the client
 	 * @throws NotReadyClientException
-	 *             The client is not yet ready ; you should check if the client
-	 *             is ready with the isReady() method before using it
+	 *             The client is not yet ready ; you should not call
+	 *             onStateChange before the onObjectReceived event is dispatched
+	 *             by the client
 	 */
-	public void onViewChange(RemoteObjectState view) throws InvalidClientException, IncompatibleClientException,
+	public void onStateChange(RemoteObjectState state) throws InvalidClientException, IncompatibleClientException,
 			NotReadyClientException {
-		if (!ready) {
-			throw new NotReadyClientException();
-		}
 		if (!serverCompatible) {
 			throw new IncompatibleClientException();
 		}
 		if (!valid) {
 			throw new InvalidClientException();
 		}
+		if (received == null) {
+			throw new NotReadyClientException();
+		}
 
-		next = view.clone();
-		synchronized (sender) {
-			sender.notify();
+		next = state.clone();
+		synchronized (clientThread) {
+			clientThread.notify();
 		}
 	}
 
 	/**
-	 * Retrieves the view sent by the server and representing the intial state
-	 * of the view in the simulation
-	 * 
-	 * @return Instance of the View class sent by the server
-	 * @throws InvalidClientException
-	 *             No active connection with the server
-	 * @throws IncompatibleClientException
-	 *             The server is not in a version compatible with the client
+	 * Liberates the resources used by the Client: terminates the thread and
+	 * closes the socket
 	 */
-
-	public RemoteObjectState get() throws InvalidClientException, IncompatibleClientException {
-		if (!serverCompatible) {
-			throw new IncompatibleClientException();
-		}
-		if (!valid) {
-			throw new InvalidClientException();
-		}
-
-		// TODO Check if thread-safe statement
-		return received;
+	public void dispose() {
+		valid = false;
 	}
 
-	private void senderWork() {
-		RemoteObjectState previous = next;
+	private void clientRoutine() {
+		RemoteObjectState previous = null;
 		while (true) {
 			if (!serverCompatible || !valid) {
+				try {
+					outputStream.close();
+				} catch (Exception e) {
+				}
+				try {
+					socket.close();
+				} catch (Exception e) {
+				}
 				return;
 			}
-			if (ready && previous != next) {
+			if (previous != next) {
 				send(next);
 				previous = next;
 			}
 			try {
-				synchronized (sender) {
-					sender.wait(500);
+				synchronized (clientThread) {
+					clientThread.wait(REFRESH_TICK);
 				}
 			} catch (InterruptedException e) {
 			}
@@ -148,6 +151,16 @@ public class Client {
 		try {
 			ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 			received = (RemoteObjectState) in.readObject();
+			in.close();
+
+			activity.runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					listener.onObjectReceived(received);
+				}
+			});
+
 		} catch (IOException e) {
 			Log.e(this.getClass().getName(), e.toString());
 			valid = false;
