@@ -60,9 +60,23 @@ public class CameraFragment extends Fragment implements OnTouchListener{
 		}
 		
 		//Initiate gesture handler
-		mGestureHandler = new GesturesHandler(xMin, xMax, yMin, yMax);
+		mGestureHandler = new GesturesHandler(xMin, xMax, yMin, yMax, this);
 		mTouchState = 0;
 		super.onActivityCreated(savedInstanceState);
+	}
+	
+	
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		mGestureHandler.stopClient();
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		
 	}
 
 	@Override
