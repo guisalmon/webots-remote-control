@@ -71,6 +71,7 @@ public class Client {
 				}
 			}
 		});
+		clientThread.start();
 	}
 
 	/**
@@ -156,7 +157,6 @@ public class Client {
 		try {
 			ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 			received = (RemoteObjectState) in.readObject();
-			in.close();
 			activity.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
