@@ -7,7 +7,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import org.black_mesa.webots_remote_control.exceptions.IncompatibleClientException;
 import org.black_mesa.webots_remote_control.exceptions.InvalidClientException;
-import org.black_mesa.webots_remote_control.exceptions.NotReadyClientException;
 import org.black_mesa.webots_remote_control.listeners.ClientEventListener;
 import org.black_mesa.webots_remote_control.remote_object_state.RemoteObjectState;
 
@@ -75,29 +74,21 @@ public class Client {
 	}
 
 	/**
-	 * Sends the new state of the view to the server
+	 * Sends the new state to the server
 	 * 
-	 * @param view
+	 * @param state
 	 *            Reference to the state we want to send
 	 * @throws InvalidClientException
 	 *             There is no active connection with the server
 	 * @throws IncompatibleClientException
 	 *             The server is not in a version compatible with the client
-	 * @throws NotReadyClientException
-	 *             The client is not yet ready ; you should not call
-	 *             onStateChange before the onObjectReceived event is dispatched
-	 *             by the client
 	 */
-	public void onStateChange(RemoteObjectState state) throws InvalidClientException, IncompatibleClientException,
-			NotReadyClientException {
+	public void onStateChange(RemoteObjectState state) throws InvalidClientException, IncompatibleClientException {
 		if (!serverCompatible) {
 			throw new IncompatibleClientException();
 		}
 		if (!valid) {
 			throw new InvalidClientException();
-		}
-		if (received == null) {
-			throw new NotReadyClientException();
 		}
 
 		next = state.clone();
@@ -119,10 +110,6 @@ public class Client {
 		while (true) {
 			if (!serverCompatible || !valid) {
 				try {
-					outputStream.close();
-				} catch (Exception e) {
-				}
-				try {
 					socket.close();
 				} catch (Exception e) {
 				}
@@ -141,12 +128,12 @@ public class Client {
 		}
 	}
 
-	private void send(RemoteObjectState view) {
+	private void send(RemoteObjectState state) {
 		try {
 			if (outputStream == null) {
 				outputStream = new ObjectOutputStream(socket.getOutputStream());
 			}
-			outputStream.writeObject(view);
+			outputStream.writeObject(state);
 		} catch (IOException e) {
 			Log.e(this.getClass().getName(), e.toString());
 			valid = false;

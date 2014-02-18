@@ -1,7 +1,8 @@
 package org.black_mesa.webots_remote_control.exceptions;
 
 /**
- * Throws when the client is not correctly connected to a server
+ * Throws when the client is not correctly connected to a server (typically
+ * thrown if the client could not reach host or has been disposed)
  * 
  * @author Ilja Kroonen
  * 

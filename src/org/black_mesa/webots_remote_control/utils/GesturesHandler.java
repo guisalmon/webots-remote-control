@@ -8,7 +8,6 @@ import java.util.TimerTask;
 import org.black_mesa.webots_remote_control.client.Client;
 import org.black_mesa.webots_remote_control.exceptions.IncompatibleClientException;
 import org.black_mesa.webots_remote_control.exceptions.InvalidClientException;
-import org.black_mesa.webots_remote_control.exceptions.NotReadyClientException;
 import org.black_mesa.webots_remote_control.listeners.ClientEventListener;
 import org.black_mesa.webots_remote_control.remote_object_state.RemoteCameraState;
 import org.black_mesa.webots_remote_control.remote_object_state.RemoteObjectState;
@@ -87,8 +86,6 @@ public class GesturesHandler implements ClientEventListener {
 						Log.e(getClass().getName(), e.toString());
 					} catch (IncompatibleClientException e) {
 						Log.e(getClass().getName(), e.toString());
-					} catch (NotReadyClientException e) {
-						Log.e(getClass().getName(), e.toString());
 					}
 					Log.i(getClass().getName(), "Drag : x " + percX + ", y " + percY);
 				} else {
@@ -98,8 +95,6 @@ public class GesturesHandler implements ClientEventListener {
 					} catch (InvalidClientException e) {
 						Log.e(getClass().getName(), e.toString());
 					} catch (IncompatibleClientException e) {
-						Log.e(getClass().getName(), e.toString());
-					} catch (NotReadyClientException e) {
 						Log.e(getClass().getName(), e.toString());
 					}
 					Log.i(getClass().getName(), "Move : x " + percX + ", y " + percY);
