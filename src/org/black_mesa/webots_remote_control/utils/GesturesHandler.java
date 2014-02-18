@@ -66,38 +66,13 @@ public class GesturesHandler implements ClientEventListener {
 			@Override
 			public void run() {
 				if (mCamera == null) {
-					Log.e(getClass().getName(), "Event before camera was initialized");
+					Log.w(getClass().getName(), "Event before camera was initialized");
 					return;
 				}
-				dX = curX - prevX;
-				dY = curY - prevY;
-				float percX = dX / (maxXwindow - minXwindow);
-				float percY = dY / (maxYwindow - minYwindow);
 				if (isDrag) {
-					Log.i(getClass().getName(), "Pitch of " + percY);
-					mCamera.pitch(percY * Math.PI);
-					Log.i(getClass().getName(), "Camera received: " + mCamera);
-					Log.i(getClass().getName(), "Turn of " + percY);
-					mCamera.turn(percX * Math.PI);
-					Log.i(getClass().getName(), "Camera received: " + mCamera);
-					try {
-						mClient.onStateChange(mCamera);
-					} catch (InvalidClientException e) {
-						Log.e(getClass().getName(), e.toString());
-					} catch (IncompatibleClientException e) {
-						Log.e(getClass().getName(), e.toString());
-					}
-					Log.i(getClass().getName(), "Drag : x " + percX + ", y " + percY);
+					drag();
 				} else {
-					mCamera.move(percX, percY, 0);
-					try {
-						mClient.onStateChange(mCamera);
-					} catch (InvalidClientException e) {
-						Log.e(getClass().getName(), e.toString());
-					} catch (IncompatibleClientException e) {
-						Log.e(getClass().getName(), e.toString());
-					}
-					Log.i(getClass().getName(), "Move : x " + percX + ", y " + percY);
+					move();
 				}
 				prevX = curX;
 				prevY = curY;
@@ -144,6 +119,41 @@ public class GesturesHandler implements ClientEventListener {
 		// TODO
 		mCamera = (RemoteCameraState) state;
 		Log.i(getClass().getName(), "Camera received: " + mCamera);
+	}
+	
+	private void drag(){
+		dX = curX - prevX;
+		dY = curY - prevY;
+		float percX = dX / (maxXwindow - minXwindow);
+		float percY = dY / (maxYwindow - minYwindow);
+		Log.i(getClass().getName(), "Pitch of " + percY);
+		mCamera.pitch(percY * Math.PI);
+		Log.i(getClass().getName(), "Camera received: " + mCamera);
+		Log.i(getClass().getName(), "Turn of " + percY);
+		mCamera.turn(percX * Math.PI);
+		Log.i(getClass().getName(), "Camera received: " + mCamera);
+		try {
+			mClient.onStateChange(mCamera);
+		} catch (InvalidClientException e) {
+			Log.e(getClass().getName(), e.toString());
+		} catch (IncompatibleClientException e) {
+			Log.e(getClass().getName(), e.toString());
+		}
+		Log.i(getClass().getName(), "Drag : x " + percX + ", y " + percY);
+	}
+	
+	private void move(){
+		dX = curX-(maxXwindow/2);
+		dY = (maxYwindow/2)-curY;
+		mCamera.move(dX, dY, 0);
+		try {
+			mClient.onStateChange(mCamera);
+		} catch (InvalidClientException e) {
+			Log.e(getClass().getName(), e.toString());
+		} catch (IncompatibleClientException e) {
+			Log.e(getClass().getName(), e.toString());
+		}
+		Log.i(getClass().getName(), "Move : x " + dX + ", y " + dY);
 	}
 
 }
