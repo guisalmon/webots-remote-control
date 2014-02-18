@@ -52,7 +52,7 @@ public class GesturesHandler implements ClientEventListener {
 		} catch (UnknownHostException e) {
 			Log.e(getClass().getName(), e.toString());
 		}
-		mClient = new Client(address, 48200, this, frag.getActivity());
+		mClient = new Client(address, 42511, this, frag.getActivity());
 	}
 
 	public void touch(float x, float y) {
