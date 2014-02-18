@@ -46,6 +46,10 @@ public class Client {
 	 * @param listener
 	 *            Listener that will be notified when the server sends the
 	 *            initial state of the object
+	 * @param activity
+	 *            The activity of the application ; the onObjectReceived event
+	 *            will be dispatched using the runOnUiThread method on this
+	 *            activity
 	 */
 	public Client(InetAddress address, int port, ClientEventListener listener, Activity activity) {
 		final InetAddress finalAddress = address;
@@ -152,15 +156,12 @@ public class Client {
 			ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 			received = (RemoteObjectState) in.readObject();
 			in.close();
-
 			activity.runOnUiThread(new Runnable() {
-
 				@Override
 				public void run() {
 					listener.onObjectReceived(received);
 				}
 			});
-
 		} catch (IOException e) {
 			Log.e(this.getClass().getName(), e.toString());
 			valid = false;
