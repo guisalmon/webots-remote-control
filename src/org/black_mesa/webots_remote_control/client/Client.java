@@ -1,4 +1,4 @@
-package org.black_mesa.webots_remote_control;
+package org.black_mesa.webots_remote_control.client;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -6,15 +6,15 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
+import org.black_mesa.webots_remote_control.exceptions.IncompatibleClientException;
+import org.black_mesa.webots_remote_control.exceptions.InvalidClientException;
+import org.black_mesa.webots_remote_control.exceptions.NotReadyClientException;
+import org.black_mesa.webots_remote_control.views.View;
+
 import android.util.Log;
 
-/**
- * @author Ilja Kroonen
- */
-/*
- * TODO This class should probably have a close method
- */
-public class CameraClient {
+public class Client {
+
 	private ObjectOutputStream outputStream = null;
 	private Socket socket;
 
@@ -22,12 +22,12 @@ public class CameraClient {
 	private boolean valid = true;
 	private boolean serverCompatible = true;
 
-	Camera receivedCamera = null;
+	View received = null;
 
 	Thread sender;
-	Camera next;
+	View next;
 
-	public CameraClient(InetAddress address, int port) {
+	public Client(InetAddress address, int port) {
 		final InetAddress finalAddress = address;
 		final int finalPort = port;
 
@@ -46,7 +46,7 @@ public class CameraClient {
 
 					});
 					sender.start();
-					recvCamera();
+					recv();
 					ready = true;
 				} catch (IOException e) {
 					valid = false;
@@ -60,67 +60,67 @@ public class CameraClient {
 	}
 
 	/**
-	 * Sends the new state of the camera to the server
+	 * Sends the new state of the view to the server
 	 * 
-	 * @param camera
+	 * @param view
 	 *            Reference to the state we want to send
 	 * @throws InvalidClientException
 	 *             There is no active connection with the server
-	 * @throws IncompatibleServerException
+	 * @throws IncompatibleClientException
 	 *             The server is not in a version compatible with the client
-	 * @throws ClientNotReadyException
+	 * @throws NotReadyClientException
 	 *             The client is not yet ready ; you should check if the client
 	 *             is ready with the isReady() method before using it
 	 */
-	public void onCameraChange(Camera camera) throws InvalidClientException, IncompatibleServerException,
-			ClientNotReadyException {
+	public void onViewChange(View view) throws InvalidClientException, IncompatibleClientException,
+			NotReadyClientException {
 		if (!ready) {
-			throw new ClientNotReadyException();
+			throw new NotReadyClientException();
 		}
 		if (!serverCompatible) {
-			throw new IncompatibleServerException();
+			throw new IncompatibleClientException();
 		}
 		if (!valid) {
 			throw new InvalidClientException();
 		}
 
-		next = camera.clone();
+		next = view.clone();
 		synchronized (sender) {
 			sender.notify();
 		}
 	}
 
 	/**
-	 * Retrieves the camera sent by the server and representing the intial state
-	 * of the camera in the simulation
+	 * Retrieves the view sent by the server and representing the intial state
+	 * of the view in the simulation
 	 * 
-	 * @return Instance of the Camera class sent by the server
+	 * @return Instance of the View class sent by the server
 	 * @throws InvalidClientException
 	 *             No active connection with the server
-	 * @throws IncompatibleServerException
+	 * @throws IncompatibleClientException
 	 *             The server is not in a version compatible with the client
 	 */
 
-	public Camera getCamera() throws InvalidClientException, IncompatibleServerException {
+	public View get() throws InvalidClientException, IncompatibleClientException {
 		if (!serverCompatible) {
-			throw new IncompatibleServerException();
+			throw new IncompatibleClientException();
 		}
 		if (!valid) {
 			throw new InvalidClientException();
 		}
 
 		// TODO Check if thread-safe statement
-		return receivedCamera;
+		return received;
 	}
 
 	private void senderWork() {
-		Camera previous = next;
+		View previous = next;
 		while (true) {
 			if (!serverCompatible || !valid) {
 				return;
 			}
 			if (ready && previous != next) {
-				sendCamera(next);
+				send(next);
 				previous = next;
 			}
 			try {
@@ -132,22 +132,22 @@ public class CameraClient {
 		}
 	}
 
-	private void sendCamera(Camera camera) {
+	private void send(View view) {
 		try {
 			if (outputStream == null) {
 				outputStream = new ObjectOutputStream(socket.getOutputStream());
 			}
-			outputStream.writeObject(camera);
+			outputStream.writeObject(view);
 		} catch (IOException e) {
 			Log.e(this.getClass().getName(), e.toString());
 			valid = false;
 		}
 	}
 
-	private void recvCamera() {
+	private void recv() {
 		try {
 			ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-			receivedCamera = (Camera) in.readObject();
+			received = (View) in.readObject();
 		} catch (IOException e) {
 			Log.e(this.getClass().getName(), e.toString());
 			valid = false;
