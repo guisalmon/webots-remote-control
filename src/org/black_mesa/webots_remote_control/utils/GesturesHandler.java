@@ -42,6 +42,8 @@ public class GesturesHandler implements ClientEventListener {
 
 	private Client mClient;
 	private RemoteCameraState mCamera;
+	
+	private Fragment mFrag;
 
 	public GesturesHandler(float xMin, float xMax, float yMin, float yMax, Fragment frag) {
 		minXwindow = xMin;
@@ -53,14 +55,7 @@ public class GesturesHandler implements ClientEventListener {
 		pressed = false;
 		isDrag = false;
 		mIsPinch = false;
-		// TODO
-		InetAddress address = null;
-		try {
-			address = InetAddress.getByName("192.168.43.138");
-		} catch (UnknownHostException e) {
-			Log.e(getClass().getName(), e.toString());
-		}
-		mClient = new Client(address, 42511, this, frag.getActivity());
+		mFrag = frag;
 	}
 	
 	@Override
@@ -151,8 +146,18 @@ public class GesturesHandler implements ClientEventListener {
 	/**
 	 * Stops the client. It will be no longer waiting for position updates
 	 */
-	public void stop() {
+	public void onPause() {
 		mClient.dispose();
+	}
+	
+	public void onResume() {
+		InetAddress address = null;
+		try {
+			address = InetAddress.getByName("192.168.43.138");
+		} catch (UnknownHostException e) {
+			Log.e(getClass().getName(), e.toString());
+		}
+		mClient = new Client(address, 42511, this, mFrag.getActivity());
 	}
 
 	private void pinch() {
