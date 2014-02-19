@@ -150,6 +150,8 @@ public class GesturesHandler implements ClientEventListener {
 	 */
 	public void stop() {
 		mClient.dispose();
+		mTimer.cancel();
+		mTimer.purge();
 	}
 	
 	/**
