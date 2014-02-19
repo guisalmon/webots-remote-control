@@ -9,7 +9,7 @@ public class CameraTest {
 
 	@Test
 	public void test() {
-		double epsilon = .01;
+		double epsilon = .00000000001;
 		RemoteCameraState expected;
 
 		// We start with the position described in the documentation: we are at
@@ -45,6 +45,30 @@ public class CameraTest {
 		camera.move(0, 0, 1);
 		System.out.println(camera.toString());
 		expected = new RemoteCameraState(0, 1, -1, 0, 1, 0, Math.PI / 2);
+		assertTrue(camera.compare(expected, epsilon));
+		
+		camera = new RemoteCameraState(0, 0, 0, 0, 1, 0, Math.PI / 2);
+		camera.turn(Math.PI / 2);
+		System.out.println(camera.toString());
+		expected = new RemoteCameraState(0, 0, 0, 0, 1, 0, Math.PI);
+		assertTrue(camera.compare(expected, epsilon));
+		
+		camera.pitch(Math.PI);
+		System.out.println(camera.toString());
+		camera.turn(Math.PI);
+		System.out.println(camera.toString());
+		expected = new RemoteCameraState(0, 0, 0, -1, 0, 0, Math.PI);
+		assertTrue(camera.compare(expected, epsilon));
+		
+		camera.move(0, 0, 1);
+		System.out.println(camera.toString());
+		expected = new RemoteCameraState(0, 0, -1, -1, 0, 0, Math.PI);
+		assertTrue(camera.compare(expected, epsilon));
+		
+		camera = new RemoteCameraState(0, 0, 0, 0, 1, 0, 0);
+		camera.turn(0);
+		System.out.println(camera.toString());
+		expected = new RemoteCameraState(0, 0, 0, 0, 0, 1, 0);
 		assertTrue(camera.compare(expected, epsilon));
 	}
 

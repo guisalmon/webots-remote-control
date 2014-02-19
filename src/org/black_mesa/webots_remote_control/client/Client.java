@@ -5,6 +5,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+
+import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.exceptions.IncompatibleClientException;
 import org.black_mesa.webots_remote_control.exceptions.InvalidClientException;
 import org.black_mesa.webots_remote_control.listeners.ClientEventListener;
@@ -88,10 +90,10 @@ public class Client {
 	 */
 	public void onStateChange(RemoteObjectState state) throws InvalidClientException, IncompatibleClientException {
 		if (!serverCompatible) {
-			throw new IncompatibleClientException();
+			throw new IncompatibleClientException(R.string.server_incompatible_with_client);
 		}
 		if (!valid) {
-			throw new InvalidClientException();
+			throw new InvalidClientException(R.string.invalid_client);
 		}
 
 		next = state.clone();

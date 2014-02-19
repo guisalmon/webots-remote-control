@@ -41,78 +41,25 @@ public class AxisAngleComposition {
 
 		double[][] m = multiplyMatrix(m1, m2);
 
-		// http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToAngle/
-		// TODO Licence
-		// Checking for singularity
-		if (isSingularityMatrix(m)) {
-			if (isIdentityMatrix(m)) {
-				// Angle = 0, axis is arbitrary
-				x = 0;
-				y = 0;
-				z = 1;
-				angle = 0;
-			} else {
-				// Angle = 180
+		double cos = (m[0][0] + m[1][1] + m[2][2] - 1) / 2;
+		if (!(cos > -1 - EPSILON && cos < 1 + EPSILON)) {
 				angle = Math.PI;
-				double xx = (m[0][0] + 1) / 2;
-				double yy = (m[1][1] + 1) / 2;
-				double zz = (m[2][2] + 1) / 2;
-				double xy = (m[0][1] + m[1][0]) / 4;
-				double xz = (m[0][2] + m[2][0]) / 4;
-				double yz = (m[1][2] + m[2][1]) / 4;
-				if ((xx > yy) && (xx > zz)) {
-					// m[0][0] is the largest diagonal term
-					if (xx < EPSILON) {
-						x = 0;
-						y = 0.7071;
-						z = 0.7071;
-					} else {
-						x = Math.sqrt(xx);
-						y = xy / x;
-						z = xz / x;
-					}
-				} else if (yy > zz) {
-					// m[1][1] is the largest diagonal term
-					if (yy < EPSILON) {
-						x = 0.7071;
-						y = 0;
-						z = 0.7071;
-					} else {
-						y = Math.sqrt(yy);
-						x = xy / y;
-						z = yz / y;
-					}
-				} else {
-					// m[2][2] is the largest diagonal term
-					if (zz < EPSILON) {
-						x = 0.7071;
-						y = 0.7071;
-						z = 0;
-					} else {
-						z = Math.sqrt(zz);
-						x = xz / z;
-						y = yz / z;
-					}
-				}
-			}
+		} else {
+			angle = Math.acos((m[0][0] + m[1][1] + m[2][2] - 1) / 2);
+		}
+		
+		if(Math.abs(angle) < EPSILON) {
+			x = 0;
+			y = 0;
+			z = 1;
 			return;
 		}
-		angle = Math.acos((m[0][0] + m[1][1] + m[2][2] - 1) / 2);
+
 		double denom = Math.sqrt((m[2][1] - m[1][2]) * (m[2][1] - m[1][2]) + (m[0][2] - m[2][0]) * (m[0][2] - m[2][0])
 				+ (m[1][0] - m[0][1]) * (m[1][0] - m[0][1]));
 		x = (m[2][1] - m[1][2]) / denom;
 		y = (m[0][2] - m[2][0]) / denom;
 		z = (m[1][0] - m[0][1]) / denom;
-	}
-
-	private boolean isIdentityMatrix(double[][] m) {
-		return Math.abs(m[0][1] + m[1][0]) < EPSILON && Math.abs(m[0][2] + m[2][0]) < EPSILON
-				&& Math.abs(m[1][2] + m[2][1]) < EPSILON && Math.abs(m[0][0] + m[1][1] + m[2][2] - 3) < EPSILON;
-	}
-
-	private boolean isSingularityMatrix(double[][] m) {
-		return Math.abs(m[0][1] - m[1][0]) < EPSILON && Math.abs(m[0][2] - m[2][0]) < EPSILON
-				&& Math.abs(m[1][2] - m[2][1]) < EPSILON;
 	}
 
 	private static double[][] axisAngleToMatrix(double x, double y, double z, double angle) {
