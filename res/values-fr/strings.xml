@@ -1,19 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">Webots-remote-control</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
-    <string name="server_based_preferences">Server settings</string>
-    <string name="title_address_edittext_preference">IP address</string>
+    <string name="server_based_preferences">Paramètres du serveur</string>
+    <string name="title_address_edittext_preference">Adresse IP</string>
 	<string name="summary_address_edittext_preference">Insert current value here</string>
-	<string name="dialog_title_address_edittext_preference">Server IP address</string>
+	<string name="dialog_title_address_edittext_preference">Adresse ip du serveur</string>
 	<string name="address_hint">0.0.0.0</string>
 	<string name="port_hint">0000</string>
 	<string name="title_port_edittext_preference">Port</string>
 	<string name="summary_port_edittext_preference">Insert current value here</string>
-	<string name="dialog_title_port_edittext_preference">Port used by the server</string>
+	<string name="dialog_title_port_edittext_preference">Port utilisé par le serveur</string>
 	<string name="server_preference"></string>
-    <string name="server_incompatible_with_client"></string>
-    <string name="invalid_client">The client is invalid ; it has been disposed, or connection has failed</string>
 </resources>

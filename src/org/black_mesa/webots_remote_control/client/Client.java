@@ -5,6 +5,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+
+import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.exceptions.IncompatibleClientException;
 import org.black_mesa.webots_remote_control.exceptions.InvalidClientException;
 import org.black_mesa.webots_remote_control.listeners.ClientEventListener;
@@ -20,6 +22,8 @@ import android.util.Log;
  * 
  */
 public class Client {
+	// TODO This should be a parameter
+	// TODO Timeout
 	private static final int REFRESH_TICK = 100;
 
 	private ObjectOutputStream outputStream = null;
@@ -30,6 +34,7 @@ public class Client {
 
 	private RemoteObjectState received = null;
 
+	private Object lock = new Object();
 	private Thread clientThread;
 	private RemoteObjectState next;
 
@@ -85,15 +90,15 @@ public class Client {
 	 */
 	public void onStateChange(RemoteObjectState state) throws InvalidClientException, IncompatibleClientException {
 		if (!serverCompatible) {
-			throw new IncompatibleClientException();
+			throw new IncompatibleClientException(R.string.server_incompatible_with_client);
 		}
 		if (!valid) {
-			throw new InvalidClientException();
+			throw new InvalidClientException(R.string.invalid_client);
 		}
 
 		next = state.clone();
-		synchronized (clientThread) {
-			clientThread.notify();
+		synchronized (lock) {
+			lock.notify();
 		}
 	}
 
@@ -120,8 +125,8 @@ public class Client {
 				previous = next;
 			}
 			try {
-				synchronized (clientThread) {
-					clientThread.wait(REFRESH_TICK);
+				synchronized (lock) {
+					lock.wait(REFRESH_TICK);
 				}
 			} catch (InterruptedException e) {
 			}

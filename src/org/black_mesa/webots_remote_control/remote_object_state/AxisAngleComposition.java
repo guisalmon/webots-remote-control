@@ -10,6 +10,8 @@ package org.black_mesa.webots_remote_control.remote_object_state;
  * 
  */
 public class AxisAngleComposition {
+	// TODO EPSILON should probably not be here
+	private static final double EPSILON = 0.0000000001;
 	public final double x, y, z, angle;
 
 	/**
@@ -34,14 +36,28 @@ public class AxisAngleComposition {
 	 */
 	public AxisAngleComposition(double x1, double y1, double z1, double angle1, double x2, double y2, double z2,
 			double angle2) {
-		// TODO Singularities at 0 and 180 degrees ?
 		double[][] m1 = axisAngleToMatrix(x1, y1, z1, angle1);
 		double[][] m2 = axisAngleToMatrix(x2, y2, z2, angle2);
 
 		double[][] m = multiplyMatrix(m1, m2);
 
-		// http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToAngle/
-		angle = Math.acos((m[0][0] + m[1][1] + m[2][2] - 1) / 2);
+		double cos = (m[0][0] + m[1][1] + m[2][2] - 1) / 2;
+
+		if (!(cos > -1 - EPSILON && cos < 1 + EPSILON)) {
+			// Case angle = pi
+			angle = Math.PI;
+		} else {
+			angle = Math.acos((m[0][0] + m[1][1] + m[2][2] - 1) / 2);
+		}
+
+		if (Math.abs(angle) < EPSILON) {
+			// Case angle = 0, axis is irrelevant
+			x = 0;
+			y = 0;
+			z = 1;
+			return;
+		}
+
 		double denom = Math.sqrt((m[2][1] - m[1][2]) * (m[2][1] - m[1][2]) + (m[0][2] - m[2][0]) * (m[0][2] - m[2][0])
 				+ (m[1][0] - m[0][1]) * (m[1][0] - m[0][1]));
 		x = (m[2][1] - m[1][2]) / denom;

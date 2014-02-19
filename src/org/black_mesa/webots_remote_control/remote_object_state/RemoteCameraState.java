@@ -5,8 +5,6 @@ package org.black_mesa.webots_remote_control.remote_object_state;
  */
 public class RemoteCameraState implements RemoteObjectState {
 	private static final long serialVersionUID = -2000084337375288247L;
-	// Angles with an absolute value below epsilon will be ignored
-	private static final double epsilon = 0.0000000001;
 	private double positionX, positionY, positionZ;
 	private double orientationX, orientationY, orientationZ, orientationAngle;
 
@@ -58,9 +56,6 @@ public class RemoteCameraState implements RemoteObjectState {
 	 *            Angle of the rotation in radians
 	 */
 	public void pitch(double angle) {
-		if (angle > -epsilon && angle < epsilon) {
-			return;
-		}
 		rotateLocal(1, 0, 0, angle);
 	}
 
@@ -72,9 +67,6 @@ public class RemoteCameraState implements RemoteObjectState {
 	 * 
 	 */
 	public void turn(double angle) {
-		if (angle > -epsilon && angle < epsilon) {
-			return;
-		}
 		rotateAbsolute(0, 1, 0, angle);
 	}
 
