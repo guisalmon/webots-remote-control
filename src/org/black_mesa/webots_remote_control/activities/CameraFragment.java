@@ -95,7 +95,7 @@ public class CameraFragment extends Fragment implements OnTouchListener{
 			break;
 		case android.view.MotionEvent.ACTION_UP:
 			if(mTouchState == 1){
-	    		mGestureHandler.release(event.getRawX(), event.getRawY());
+	    		mGestureHandler.release();
 	    		((Button)getView()).setText("touchEvent Release");
 	    	}/*else{
 	    		mGestureHandler.pinch(event.getRawX(), event.getRawY());
