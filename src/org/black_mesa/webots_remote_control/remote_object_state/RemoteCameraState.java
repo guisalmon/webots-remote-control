@@ -1,17 +1,15 @@
-package org.black_mesa.webots_remote_control.views;
-
-import java.io.Serializable;
+package org.black_mesa.webots_remote_control.remote_object_state;
 
 /**
  * @author Ilja Kroonen
  */
-public class Camera implements Serializable, View {
+public class RemoteCameraState implements RemoteObjectState {
 	private static final long serialVersionUID = -2000084337375288247L;
 	private double positionX, positionY, positionZ;
 	private double orientationX, orientationY, orientationZ, orientationAngle;
 
-	public Camera(double positionX, double positionY, double positionZ, double orientationX, double orientationY,
-			double orientationZ, double orientationAngle) {
+	public RemoteCameraState(double positionX, double positionY, double positionZ, double orientationX,
+			double orientationY, double orientationZ, double orientationAngle) {
 		this.positionX = positionX;
 		this.positionY = positionY;
 		this.positionZ = positionZ;
@@ -26,13 +24,13 @@ public class Camera implements Serializable, View {
 	 * 
 	 * @param right
 	 *            Signed value representing the distance of the movement along
-	 *            the right vector
+	 *            the local right vector
 	 * @param up
 	 *            Signed value representing the distance of the movement along
-	 *            the up vector
+	 *            the local up vector
 	 * @param forward
 	 *            Signed value representing the distance of the movement along
-	 *            the forward vector
+	 *            the local forward vector
 	 */
 	public void move(double right, double up, double forward) {
 		// right = local x axis, up = local y axis, forward = local z axis
@@ -51,8 +49,25 @@ public class Camera implements Serializable, View {
 				+ (orientationZ * orientationZ * (1 - c) + c) * forward;
 	}
 
-	public void yaw(double angle) {
-		rotateLocal(0, 1, 0, angle);
+	/**
+	 * Rotates around the local right axis
+	 * 
+	 * @param angle
+	 *            Angle of the rotation in radians
+	 */
+	public void pitch(double angle) {
+		rotateLocal(1, 0, 0, angle);
+	}
+
+	/**
+	 * Rotates around the absolute up axis
+	 * 
+	 * @param angle
+	 *            Angle of the rotation in radians
+	 * 
+	 */
+	public void turn(double angle) {
+		rotateAbsolute(0, 1, 0, angle);
 	}
 
 	private void rotateLocal(double x, double y, double z, double angle) {
@@ -80,7 +95,8 @@ public class Camera implements Serializable, View {
 	private void rotateAbsolute(double x, double y, double z, double angle) {
 		// We want to rotate around the absolute axis
 		// We can do this directly
-		Rotation r = new Rotation(orientationX, orientationY, orientationZ, orientationAngle, x, y, z, angle);
+		AxisAngleComposition r = new AxisAngleComposition(orientationX, orientationY, orientationZ, orientationAngle,
+				x, y, z, angle);
 		orientationX = r.x;
 		orientationY = r.y;
 		orientationZ = r.z;
@@ -97,7 +113,7 @@ public class Camera implements Serializable, View {
 				+ orientationZ + "," + orientationAngle + ")";
 	}
 
-	public boolean compare(Camera camera, double epsilon) {
+	public boolean compare(RemoteCameraState camera, double epsilon) {
 		return compare(positionX, camera.positionX, epsilon) && compare(positionY, camera.positionY, epsilon)
 				&& compare(positionZ, camera.positionZ, epsilon) && compare(orientationX, camera.orientationX, epsilon)
 				&& compare(orientationY, camera.orientationY, epsilon)
@@ -109,7 +125,9 @@ public class Camera implements Serializable, View {
 		return (a - b) * (a - b) < epsilon;
 	}
 
-	public View clone() {
-		return new Camera(positionX, positionY, positionZ, orientationX, orientationY, orientationZ, orientationAngle);
+	@Override
+	public RemoteObjectState clone() {
+		return new RemoteCameraState(positionX, positionY, positionZ, orientationX, orientationY, orientationZ,
+				orientationAngle);
 	}
 }

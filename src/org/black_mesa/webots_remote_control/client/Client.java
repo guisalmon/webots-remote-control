@@ -6,138 +6,139 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
+import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.exceptions.IncompatibleClientException;
 import org.black_mesa.webots_remote_control.exceptions.InvalidClientException;
-import org.black_mesa.webots_remote_control.exceptions.NotReadyClientException;
-import org.black_mesa.webots_remote_control.views.View;
+import org.black_mesa.webots_remote_control.listeners.ClientEventListener;
+import org.black_mesa.webots_remote_control.remote_object_state.RemoteObjectState;
 
+import android.app.Activity;
 import android.util.Log;
 
+/**
+ * This class controls communications between the application and the server
+ * 
+ * @author Ilja Kroonen
+ * 
+ */
 public class Client {
+	// TODO This should be a parameter
+	// TODO Timeout
+	private static final int REFRESH_TICK = 100;
 
 	private ObjectOutputStream outputStream = null;
 	private Socket socket;
 
-	private boolean ready = false;
 	private boolean valid = true;
 	private boolean serverCompatible = true;
 
-	View received = null;
+	private RemoteObjectState received = null;
 
-	Thread sender;
-	View next;
+	private Object lock = new Object();
+	private Thread clientThread;
+	private RemoteObjectState next;
 
-	public Client(InetAddress address, int port) {
+	private ClientEventListener listener;
+	private Activity activity;
+
+	/**
+	 * Instantiates a Client
+	 * 
+	 * @param address
+	 *            Address of the server
+	 * @param port
+	 *            Port for the connection
+	 * @param listener
+	 *            Listener that will be notified when the server sends the
+	 *            initial state of the object
+	 * @param activity
+	 *            The activity of the application ; the onObjectReceived event
+	 *            will be dispatched using the runOnUiThread method on this
+	 *            activity
+	 */
+	public Client(InetAddress address, int port, ClientEventListener listener, Activity activity) {
 		final InetAddress finalAddress = address;
 		final int finalPort = port;
+		this.listener = listener;
+		this.activity = activity;
 
-		new Thread(new Runnable() {
+		clientThread = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
 				try {
 					socket = new Socket(finalAddress, finalPort);
-					sender = new Thread(new Runnable() {
-
-						@Override
-						public void run() {
-							senderWork();
-						}
-
-					});
-					sender.start();
 					recv();
-					ready = true;
+					clientRoutine();
 				} catch (IOException e) {
 					valid = false;
 				}
 			}
-		}).start();
-	}
-
-	public boolean isReady() {
-		return ready;
+		});
+		clientThread.start();
 	}
 
 	/**
-	 * Sends the new state of the view to the server
+	 * Sends the new state to the server
 	 * 
-	 * @param view
+	 * @param state
 	 *            Reference to the state we want to send
 	 * @throws InvalidClientException
 	 *             There is no active connection with the server
 	 * @throws IncompatibleClientException
 	 *             The server is not in a version compatible with the client
-	 * @throws NotReadyClientException
-	 *             The client is not yet ready ; you should check if the client
-	 *             is ready with the isReady() method before using it
 	 */
-	public void onViewChange(View view) throws InvalidClientException, IncompatibleClientException,
-			NotReadyClientException {
-		if (!ready) {
-			throw new NotReadyClientException();
-		}
+	public void onStateChange(RemoteObjectState state) throws InvalidClientException, IncompatibleClientException {
 		if (!serverCompatible) {
-			throw new IncompatibleClientException();
+			throw new IncompatibleClientException(R.string.server_incompatible_with_client);
 		}
 		if (!valid) {
-			throw new InvalidClientException();
+			throw new InvalidClientException(R.string.invalid_client);
 		}
 
-		next = view.clone();
-		synchronized (sender) {
-			sender.notify();
+		next = state.clone();
+		synchronized (lock) {
+			lock.notify();
 		}
 	}
 
 	/**
-	 * Retrieves the view sent by the server and representing the intial state
-	 * of the view in the simulation
-	 * 
-	 * @return Instance of the View class sent by the server
-	 * @throws InvalidClientException
-	 *             No active connection with the server
-	 * @throws IncompatibleClientException
-	 *             The server is not in a version compatible with the client
+	 * Liberates the resources used by the Client: terminates the thread and
+	 * closes the socket
 	 */
-
-	public View get() throws InvalidClientException, IncompatibleClientException {
-		if (!serverCompatible) {
-			throw new IncompatibleClientException();
-		}
-		if (!valid) {
-			throw new InvalidClientException();
-		}
-
-		// TODO Check if thread-safe statement
-		return received;
+	public void dispose() {
+		valid = false;
 	}
 
-	private void senderWork() {
-		View previous = next;
+	private void clientRoutine() {
+		RemoteObjectState previous = null;
 		while (true) {
 			if (!serverCompatible || !valid) {
+				try {
+					socket.close();
+				} catch (Exception e) {
+				}
 				return;
 			}
-			if (ready && previous != next) {
+			if (previous != next) {
 				send(next);
 				previous = next;
 			}
 			try {
-				synchronized (sender) {
-					sender.wait(500);
+				synchronized (lock) {
+					lock.wait(REFRESH_TICK);
 				}
 			} catch (InterruptedException e) {
 			}
 		}
 	}
 
-	private void send(View view) {
+	private void send(RemoteObjectState state) {
 		try {
 			if (outputStream == null) {
 				outputStream = new ObjectOutputStream(socket.getOutputStream());
 			}
-			outputStream.writeObject(view);
+			outputStream.writeObject(state);
 		} catch (IOException e) {
 			Log.e(this.getClass().getName(), e.toString());
 			valid = false;
@@ -147,7 +148,13 @@ public class Client {
 	private void recv() {
 		try {
 			ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-			received = (View) in.readObject();
+			received = (RemoteObjectState) in.readObject();
+			activity.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					listener.onObjectReceived(received);
+				}
+			});
 		} catch (IOException e) {
 			Log.e(this.getClass().getName(), e.toString());
 			valid = false;

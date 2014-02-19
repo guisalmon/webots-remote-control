@@ -14,4 +14,6 @@
 	<string name="summary_port_edittext_preference">Insert current value here</string>
 	<string name="dialog_title_port_edittext_preference">Port used by the server</string>
 	<string name="server_preference"></string>
+    <string name="server_incompatible_with_client"></string>
+    <string name="invalid_client">The client is invalid ; it has been disposed, or connection has failed</string>
 </resources>
