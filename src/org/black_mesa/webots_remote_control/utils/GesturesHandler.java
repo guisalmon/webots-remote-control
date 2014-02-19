@@ -47,7 +47,7 @@ public class GesturesHandler implements ClientEventListener {
 		// TODO
 		InetAddress address = null;
 		try {
-			address = InetAddress.getByName("192.168.1.2");
+			address = InetAddress.getByName("130.120.210.218");
 		} catch (UnknownHostException e) {
 			Log.e(getClass().getName(), e.toString());
 		}
@@ -67,6 +67,7 @@ public class GesturesHandler implements ClientEventListener {
 			public void run() {
 				if (mCamera == null) {
 					Log.w(getClass().getName(), "Event before camera was initialized");
+					// State of the connection should be displayed at all times for the user
 					return;
 				}
 				if (isDrag) {
@@ -120,8 +121,8 @@ public class GesturesHandler implements ClientEventListener {
 		mCamera = (RemoteCameraState) state;
 		Log.i(getClass().getName(), "Camera received: " + mCamera);
 	}
-	
-	private void drag(){
+
+	private void drag() {
 		dX = curX - prevX;
 		dY = curY - prevY;
 		float percX = dX / (maxXwindow - minXwindow);
@@ -135,22 +136,36 @@ public class GesturesHandler implements ClientEventListener {
 		try {
 			mClient.onStateChange(mCamera);
 		} catch (InvalidClientException e) {
+			// Connection is broken
+			// We should notify the user and give him the choice between
+			// changing connection parameters and trying to establish a new
+			// connection
 			Log.e(getClass().getName(), e.toString());
 		} catch (IncompatibleClientException e) {
+			// Server not compatible with client
+			// User should be notified and given the choice of changing
+			// connection parameters
 			Log.e(getClass().getName(), e.toString());
 		}
 		Log.i(getClass().getName(), "Drag : x " + percX + ", y " + percY);
 	}
-	
-	private void move(){
-		dX = (curX-(maxXwindow/2))/(maxXwindow/2);
-		dY = ((maxYwindow/2)-curY)/(maxYwindow/2);
+
+	private void move() {
+		dX = (curX - (maxXwindow / 2)) / (maxXwindow / 2);
+		dY = ((maxYwindow / 2) - curY) / (maxYwindow / 2);
 		mCamera.move(dX, dY, 0);
 		try {
 			mClient.onStateChange(mCamera);
 		} catch (InvalidClientException e) {
+			// Connection is broken
+			// We should notify the user and give him the choice between
+			// changing connection parameters and trying to establish a new
+			// connection
 			Log.e(getClass().getName(), e.toString());
 		} catch (IncompatibleClientException e) {
+			// Server not compatible with client
+			// User should be notified and given the choice of changing
+			// connection parameters
 			Log.e(getClass().getName(), e.toString());
 		}
 		Log.i(getClass().getName(), "Move : x " + dX + ", y " + dY);

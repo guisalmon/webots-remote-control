@@ -20,6 +20,8 @@ import android.util.Log;
  * 
  */
 public class Client {
+	// TODO This should be a parameter
+	// TODO Timeout
 	private static final int REFRESH_TICK = 100;
 
 	private ObjectOutputStream outputStream = null;
