@@ -15,6 +15,13 @@ import org.black_mesa.webots_remote_control.remote_object_state.RemoteObjectStat
 import android.app.Fragment;
 import android.util.Log;
 
+/**
+ * Handles the positions of the events returned from the view and calls the
+ * remote objects with the right parameters
+ * 
+ * @author guisalmon@gmail.com
+ * 
+ */
 public class GesturesHandler implements ClientEventListener {
 	private float minXwindow;
 	private float minYwindow;
@@ -53,7 +60,26 @@ public class GesturesHandler implements ClientEventListener {
 		}
 		mClient = new Client(address, 42511, this, frag.getActivity());
 	}
+	
+	@Override
+	public void onObjectReceived(RemoteObjectState state) {
+		// TODO
+		mCamera = (RemoteCameraState) state;
+		Log.i(getClass().getName(), "Camera received: " + mCamera);
+	}
 
+	/**
+	 * Is called when the user touches the screen. Determines if the gesture
+	 * aims at moving the remote object or rotating it, and starts a timer to
+	 * give regularly new informations to the remote object
+	 * 
+	 * @param x
+	 *            coordinate of the touch event along the x axis (in pixels from
+	 *            the left side of the screen)
+	 * @param y
+	 *            coordinate of the touch event along the y axis (in pixels from
+	 *            the upper side of the screen)
+	 */
 	public void touch(float x, float y) {
 		prevX = x;
 		prevY = y;
@@ -67,7 +93,8 @@ public class GesturesHandler implements ClientEventListener {
 			public void run() {
 				if (mCamera == null) {
 					Log.w(getClass().getName(), "Event before camera was initialized");
-					// State of the connection should be displayed at all times for the user
+					// State of the connection should be displayed at all times
+					// for the user
 					return;
 				}
 				if (isDrag) {
@@ -83,7 +110,11 @@ public class GesturesHandler implements ClientEventListener {
 		pressed = true;
 	}
 
-	public void release(float x, float y) {
+	/**
+	 * Is called when the user stops touching the screen. Cancels the timer.
+	 * 
+	 */
+	public void release() {
 		if (pressed) {
 			dX = 0;
 			dY = 0;
@@ -93,6 +124,31 @@ public class GesturesHandler implements ClientEventListener {
 		pressed = false;
 	}
 
+	/**
+	 * Updates the current position informations when the user moves his finger
+	 * on the screen
+	 * 
+	 * @param rawX
+	 *            current coordinate of the touch event along the x axis (in
+	 *            pixels from the left side of the screen)
+	 * @param rawY
+	 *            current coordinate of the touch event along the y axis (in
+	 *            pixels from the upper side of the screen)
+	 */
+	public void update(float rawX, float rawY) {
+		curX = rawX;
+		curY = rawY;
+	}
+	
+	/**
+	 * Stops the client. It will be no longer waiting for position updates
+	 */
+	public void stop() {
+		mClient.dispose();
+	}
+
+
+	
 	private boolean isCenter() {
 		boolean b = true;
 		float sizeX = maxXwindow - minXwindow;
@@ -104,22 +160,6 @@ public class GesturesHandler implements ClientEventListener {
 		b = b && (x > 0.25 * sizeX);
 		b = b && (y > 0.25 * sizeY);
 		return b;
-	}
-
-	public void update(float rawX, float rawY) {
-		curX = rawX;
-		curY = rawY;
-	}
-
-	public void stop() {
-		mClient.dispose();
-	}
-
-	@Override
-	public void onObjectReceived(RemoteObjectState state) {
-		// TODO
-		mCamera = (RemoteCameraState) state;
-		Log.i(getClass().getName(), "Camera received: " + mCamera);
 	}
 
 	private void drag() {
