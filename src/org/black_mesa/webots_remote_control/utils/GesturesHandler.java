@@ -13,6 +13,8 @@ import org.black_mesa.webots_remote_control.remote_object_state.RemoteCameraStat
 import org.black_mesa.webots_remote_control.remote_object_state.RemoteObjectState;
 
 import android.app.Fragment;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 /**
@@ -55,12 +57,13 @@ public class GesturesHandler implements ClientEventListener {
 		mIsPinch = false;
 		// TODO
 		InetAddress address = null;
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(frag.getActivity());
 		try {
-			address = InetAddress.getByName("192.168.43.138");
+			address = InetAddress.getByName(prefs.getString("edittext_address_preference", "0.0.0.0"));
 		} catch (UnknownHostException e) {
 			Log.e(getClass().getName(), e.toString());
 		}
-		mClient = new Client(address, 42511, this, frag.getActivity());
+		mClient = new Client(address, prefs.getInt("edittext_port_preference", 42511), this, frag.getActivity());
 	}
 	
 	@Override
