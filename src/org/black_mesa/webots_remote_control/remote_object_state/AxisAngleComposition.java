@@ -10,6 +10,8 @@ package org.black_mesa.webots_remote_control.remote_object_state;
  * 
  */
 public class AxisAngleComposition {
+	// TODO EPSILON should probably not be here
+	private static final double EPSILON = 0.0000000001;
 	public final double x, y, z, angle;
 
 	/**
@@ -34,19 +36,83 @@ public class AxisAngleComposition {
 	 */
 	public AxisAngleComposition(double x1, double y1, double z1, double angle1, double x2, double y2, double z2,
 			double angle2) {
-		// TODO Singularities at 0 and 180 degrees ?
 		double[][] m1 = axisAngleToMatrix(x1, y1, z1, angle1);
 		double[][] m2 = axisAngleToMatrix(x2, y2, z2, angle2);
 
 		double[][] m = multiplyMatrix(m1, m2);
 
 		// http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToAngle/
+		// TODO Licence
+		// Checking for singularity
+		if (isSingularityMatrix(m)) {
+			if (isIdentityMatrix(m)) {
+				// Angle = 0, axis is arbitrary
+				x = 0;
+				y = 0;
+				z = 1;
+				angle = 0;
+			} else {
+				// Angle = 180
+				angle = Math.PI;
+				double xx = (m[0][0] + 1) / 2;
+				double yy = (m[1][1] + 1) / 2;
+				double zz = (m[2][2] + 1) / 2;
+				double xy = (m[0][1] + m[1][0]) / 4;
+				double xz = (m[0][2] + m[2][0]) / 4;
+				double yz = (m[1][2] + m[2][1]) / 4;
+				if ((xx > yy) && (xx > zz)) {
+					// m[0][0] is the largest diagonal term
+					if (xx < EPSILON) {
+						x = 0;
+						y = 0.7071;
+						z = 0.7071;
+					} else {
+						x = Math.sqrt(xx);
+						y = xy / x;
+						z = xz / x;
+					}
+				} else if (yy > zz) {
+					// m[1][1] is the largest diagonal term
+					if (yy < EPSILON) {
+						x = 0.7071;
+						y = 0;
+						z = 0.7071;
+					} else {
+						y = Math.sqrt(yy);
+						x = xy / y;
+						z = yz / y;
+					}
+				} else {
+					// m[2][2] is the largest diagonal term
+					if (zz < EPSILON) {
+						x = 0.7071;
+						y = 0.7071;
+						z = 0;
+					} else {
+						z = Math.sqrt(zz);
+						x = xz / z;
+						y = yz / z;
+					}
+				}
+			}
+			return;
+		}
 		angle = Math.acos((m[0][0] + m[1][1] + m[2][2] - 1) / 2);
 		double denom = Math.sqrt((m[2][1] - m[1][2]) * (m[2][1] - m[1][2]) + (m[0][2] - m[2][0]) * (m[0][2] - m[2][0])
 				+ (m[1][0] - m[0][1]) * (m[1][0] - m[0][1]));
 		x = (m[2][1] - m[1][2]) / denom;
 		y = (m[0][2] - m[2][0]) / denom;
 		z = (m[1][0] - m[0][1]) / denom;
+	}
+
+	private boolean isIdentityMatrix(double[][] m) {
+		return Math.abs(m[0][1] + m[1][0]) < EPSILON && Math.abs(m[0][2] + m[2][0]) < EPSILON
+				&& Math.abs(m[1][2] + m[2][1]) < EPSILON && Math.abs(m[0][0] + m[1][1] + m[2][2] - 3) < EPSILON;
+	}
+
+	private boolean isSingularityMatrix(double[][] m) {
+		return Math.abs(m[0][1] - m[1][0]) < EPSILON && Math.abs(m[0][2] - m[2][0]) < EPSILON
+				&& Math.abs(m[1][2] - m[2][1]) < EPSILON;
 	}
 
 	private static double[][] axisAngleToMatrix(double x, double y, double z, double angle) {

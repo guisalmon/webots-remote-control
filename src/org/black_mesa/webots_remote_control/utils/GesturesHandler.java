@@ -47,7 +47,7 @@ public class GesturesHandler implements ClientEventListener {
 		// TODO
 		InetAddress address = null;
 		try {
-			address = InetAddress.getByName("130.120.210.218");
+			address = InetAddress.getByName("192.168.137.198");
 		} catch (UnknownHostException e) {
 			Log.e(getClass().getName(), e.toString());
 		}
@@ -129,10 +129,10 @@ public class GesturesHandler implements ClientEventListener {
 		float percY = dY / (maxYwindow - minYwindow);
 		Log.i(getClass().getName(), "Pitch of " + percY);
 		mCamera.pitch(percY * Math.PI);
-		Log.i(getClass().getName(), "Camera received: " + mCamera);
+		Log.i(getClass().getName(), "New camera: " + mCamera);
 		Log.i(getClass().getName(), "Turn of " + percY);
 		mCamera.turn(percX * Math.PI);
-		Log.i(getClass().getName(), "Camera received: " + mCamera);
+		Log.i(getClass().getName(), "New camera: " + mCamera);
 		try {
 			mClient.onStateChange(mCamera);
 		} catch (InvalidClientException e) {

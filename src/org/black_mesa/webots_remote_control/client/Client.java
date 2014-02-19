@@ -32,6 +32,7 @@ public class Client {
 
 	private RemoteObjectState received = null;
 
+	private Object lock = new Object();
 	private Thread clientThread;
 	private RemoteObjectState next;
 
@@ -94,8 +95,8 @@ public class Client {
 		}
 
 		next = state.clone();
-		synchronized (clientThread) {
-			clientThread.notify();
+		synchronized (lock) {
+			lock.notify();
 		}
 	}
 
@@ -122,8 +123,8 @@ public class Client {
 				previous = next;
 			}
 			try {
-				synchronized (clientThread) {
-					clientThread.wait(REFRESH_TICK);
+				synchronized (lock) {
+					lock.wait(REFRESH_TICK);
 				}
 			} catch (InterruptedException e) {
 			}
