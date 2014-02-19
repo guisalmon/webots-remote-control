@@ -4,5 +4,7 @@
     <string name="app_name">Webots-remote-control</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="server_incompatible_with_client"></string>
+    <string name="invalid_client">The client is invalid ; it has been disposed, or connection has failed</string>
 
 </resources>
