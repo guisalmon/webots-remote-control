@@ -42,13 +42,16 @@ public class AxisAngleComposition {
 		double[][] m = multiplyMatrix(m1, m2);
 
 		double cos = (m[0][0] + m[1][1] + m[2][2] - 1) / 2;
+
 		if (!(cos > -1 - EPSILON && cos < 1 + EPSILON)) {
-				angle = Math.PI;
+			// Case angle = pi
+			angle = Math.PI;
 		} else {
 			angle = Math.acos((m[0][0] + m[1][1] + m[2][2] - 1) / 2);
 		}
-		
-		if(Math.abs(angle) < EPSILON) {
+
+		if (Math.abs(angle) < EPSILON) {
+			// Case angle = 0, axis is irrelevant
 			x = 0;
 			y = 0;
 			z = 1;

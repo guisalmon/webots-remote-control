@@ -44,6 +44,8 @@ public class GesturesHandler implements ClientEventListener {
 
 	private Client mClient;
 	private RemoteCameraState mCamera;
+	
+	private Fragment mFrag;
 
 	public GesturesHandler(float xMin, float xMax, float yMin, float yMax, Fragment frag) {
 		minXwindow = xMin;
@@ -55,15 +57,7 @@ public class GesturesHandler implements ClientEventListener {
 		pressed = false;
 		isDrag = false;
 		mIsPinch = false;
-		// TODO
-		InetAddress address = null;
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(frag.getActivity());
-		try {
-			address = InetAddress.getByName(prefs.getString("edittext_address_preference", "0.0.0.0"));
-		} catch (UnknownHostException e) {
-			Log.e(getClass().getName(), e.toString());
-		}
-		mClient = new Client(address, prefs.getInt("edittext_port_preference", 42511), this, frag.getActivity());
+		mFrag = frag;
 	}
 	
 	@Override
@@ -154,8 +148,19 @@ public class GesturesHandler implements ClientEventListener {
 	/**
 	 * Stops the client. It will be no longer waiting for position updates
 	 */
-	public void stop() {
+	public void onPause() {
 		mClient.dispose();
+	}
+	
+	public void onResume() {
+		InetAddress address = null;
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mFrag.getActivity());
+		try {
+			address = InetAddress.getByName(prefs.getString("edittext_address_preference", "0.0.0.0"));
+		} catch (UnknownHostException e) {
+			Log.e(getClass().getName(), e.toString());
+		}
+		mClient = new Client(address, prefs.getInt("edittext_port_preference", 42511), this, mFrag.getActivity());
 	}
 
 	private void pinch() {

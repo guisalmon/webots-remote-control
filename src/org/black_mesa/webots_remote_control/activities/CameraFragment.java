@@ -8,12 +8,9 @@ import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
-import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
@@ -70,13 +67,13 @@ public class CameraFragment extends Fragment implements OnTouchListener{
 	@Override
 	public void onPause() {
 		super.onPause();
-		mGestureHandler.stop();
+		mGestureHandler.onPause();
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-
+		mGestureHandler.onResume();
 	}
 
 	@Override
