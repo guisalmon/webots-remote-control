@@ -9,7 +9,7 @@ public class CameraTest {
 
 	@Test
 	public void test() {
-		double epsilon = .01;
+		double epsilon = .00000000001;
 		RemoteCameraState expected;
 
 		// We start with the position described in the documentation: we are at
