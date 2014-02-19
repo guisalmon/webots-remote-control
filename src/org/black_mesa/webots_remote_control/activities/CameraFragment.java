@@ -9,18 +9,16 @@ import android.content.res.TypedArray;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.view.Display;
-import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnDragListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
 
-public class CameraFragment extends Fragment implements OnTouchListener, OnDragListener{
+public class CameraFragment extends Fragment implements OnTouchListener{
 	private GesturesHandler mGestureHandler;
+	private int mTouchState;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -31,7 +29,6 @@ public class CameraFragment extends Fragment implements OnTouchListener, OnDragL
 	public void onActivityCreated(Bundle savedInstanceState) {
 		//handle touch events
 		this.getView().setOnTouchListener(this);
-		this.getView().setOnDragListener(this);
 		
 		//get the size of the screen
 		Display display = getActivity().getWindowManager().getDefaultDisplay();
@@ -63,24 +60,52 @@ public class CameraFragment extends Fragment implements OnTouchListener, OnDragL
 		}
 		
 		//Initiate gesture handler
-		mGestureHandler = new GesturesHandler(xMin, xMax, yMin, yMax);
+		mGestureHandler = new GesturesHandler(xMin, xMax, yMin, yMax, this);
+		mTouchState = 0;
 		super.onActivityCreated(savedInstanceState);
+	}
+	
+	
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		mGestureHandler.stop();
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		
 	}
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
-		if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+		switch (event.getAction()){
+		case android.view.MotionEvent.ACTION_DOWN:
+			if (mTouchState == 0){
 				mGestureHandler.touch(event.getRawX(), event.getRawY());
-		    } else if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
-		    	mGestureHandler.release(event.getRawX(), event.getRawY(), event.getEventTime() - event.getDownTime());
-		    }
-		return false;
-	}
-
-
-	@Override
-	public boolean onDrag(View v, DragEvent event) {
-		((TextView)getView()).setText("OnDrag !");
+				((Button)getView()).setText("touchEvent");
+			}
+			/*if (mTouchState == 1){
+				mGestureHandler.secondaryTouch(event.getRawX(), event.getRawY());
+				((Button)getView()).setText("pinchEvent");
+			}*/
+			mTouchState++;
+			break;
+		case android.view.MotionEvent.ACTION_UP:
+			if(mTouchState == 1){
+	    		mGestureHandler.release();
+	    		((Button)getView()).setText("touchEvent Release");
+	    	}/*else{
+	    		mGestureHandler.pinch(event.getRawX(), event.getRawY());
+	    		((Button)getView()).setText("pinchEvent Release");
+	    	}*/
+	    	mTouchState = 0;
+		case android.view.MotionEvent.ACTION_MOVE:
+			mGestureHandler.update(event.getRawX(), event.getRawY());
+		
+		}
 		return false;
 	}
 }
