@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
 import android.view.Menu;
 import android.view.View;
 import android.view.WindowManager;
@@ -16,7 +17,8 @@ import android.widget.ListView;
 public class MainActivity extends Activity {
 	private String[] mDrawerListItems;
     private ListView mDrawerList;
-
+    private DrawerLayout mDrawerLayout;
+    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -25,10 +27,12 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		
         mDrawerListItems = getResources().getStringArray(R.array.drawer_list_array);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         mDrawerList.setAdapter(new ArrayAdapter<String>(this,
                 R.layout.drawer_list_item, mDrawerListItems));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+        mDrawerLayout.openDrawer(mDrawerList);
 	}
 
 	@Override
@@ -88,6 +92,7 @@ public class MainActivity extends Activity {
 	    // Highlight the selected item, update the title, and close the drawer
 	    mDrawerList.setItemChecked(position, true);
 	    setTitle(mDrawerListItems[position]);
+	    mDrawerLayout.closeDrawer(mDrawerList);
 	}
 
 	@Override

@@ -4,7 +4,7 @@
     android:id="@+id/drawer_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:textColor="#fff"
+    android:textColor="@drawable/drawer_item_text_color"
     android:textSize="20sp"
     android:gravity="center_vertical"
     android:paddingStart="20sp"
