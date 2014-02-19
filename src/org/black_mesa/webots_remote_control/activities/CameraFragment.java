@@ -8,9 +8,12 @@ import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
+import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
@@ -18,8 +21,8 @@ import android.widget.Button;
 
 public class CameraFragment extends Fragment implements OnTouchListener{
 	private GesturesHandler mGestureHandler;
-	private int mTouchState;
-	
+	private boolean mIsPinch;
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.camera_fragment, container, false);
@@ -27,45 +30,42 @@ public class CameraFragment extends Fragment implements OnTouchListener{
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
-		//handle touch events
+		// handle touch events
 		this.getView().setOnTouchListener(this);
-		
-		//get the size of the screen
+
+		// get the size of the screen
 		Display display = getActivity().getWindowManager().getDefaultDisplay();
 		Point size = new Point();
 		display.getSize(size);
-		
-		//get the size of the action bar
+
+		// get the size of the action bar
 		int actionBarSize;
-		final TypedArray styledAttributes = getActivity().getBaseContext().getTheme().obtainStyledAttributes(
-                new int[] { android.R.attr.actionBarSize });
+		final TypedArray styledAttributes = getActivity().getBaseContext().getTheme()
+				.obtainStyledAttributes(new int[] { android.R.attr.actionBarSize });
 		actionBarSize = (int) styledAttributes.getDimension(0, 0);
 		styledAttributes.recycle();
-		
-		//compute the size of the usable part of the screen
+
+		// compute the size of the usable part of the screen
 		float xMin;
 		float xMax;
 		float yMin;
 		float yMax;
-		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
+		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
 			xMin = 0;
 			xMax = size.x;
-			yMin = (float)actionBarSize;
+			yMin = (float) actionBarSize;
 			yMax = size.y;
-		}else{
+		} else {
 			xMin = 0;
 			xMax = size.x;
-			yMin = (float)actionBarSize;
+			yMin = (float) actionBarSize;
 			yMax = size.y;
 		}
-		
-		//Initiate gesture handler
+
+		// Initiate gesture handler
 		mGestureHandler = new GesturesHandler(xMin, xMax, yMin, yMax, this);
-		mTouchState = 0;
 		super.onActivityCreated(savedInstanceState);
 	}
-	
-	
 
 	@Override
 	public void onPause() {
@@ -76,35 +76,22 @@ public class CameraFragment extends Fragment implements OnTouchListener{
 	@Override
 	public void onResume() {
 		super.onResume();
-		
+
 	}
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
-		switch (event.getAction()){
+		mIsPinch = (event.getPointerCount() == 2);
+		switch (event.getAction()) {
 		case android.view.MotionEvent.ACTION_DOWN:
-			if (mTouchState == 0){
-				mGestureHandler.touch(event.getRawX(), event.getRawY());
-				((Button)getView()).setText("touchEvent");
-			}
-			/*if (mTouchState == 1){
-				mGestureHandler.secondaryTouch(event.getRawX(), event.getRawY());
-				((Button)getView()).setText("pinchEvent");
-			}*/
-			mTouchState++;
+			mGestureHandler.touch(event.getRawX(), event.getRawY());
 			break;
 		case android.view.MotionEvent.ACTION_UP:
-			if(mTouchState == 1){
-	    		mGestureHandler.release();
-	    		((Button)getView()).setText("touchEvent Release");
-	    	}/*else{
-	    		mGestureHandler.pinch(event.getRawX(), event.getRawY());
-	    		((Button)getView()).setText("pinchEvent Release");
-	    	}*/
-	    	mTouchState = 0;
+			mGestureHandler.release();
+			((Button) getView()).setText("touchEvent Release");
 		case android.view.MotionEvent.ACTION_MOVE:
-			mGestureHandler.update(event.getRawX(), event.getRawY());
-		
+			mGestureHandler.update(event.getRawX(), event.getRawY(), mIsPinch);
+			((Button) getView()).setText("touchEvent is pinch : "+mIsPinch);
 		}
 		return false;
 	}

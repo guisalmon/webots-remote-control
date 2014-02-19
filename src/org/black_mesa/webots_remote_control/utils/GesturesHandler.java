@@ -37,6 +37,7 @@ public class GesturesHandler implements ClientEventListener {
 
 	private boolean pressed;
 	private boolean isDrag;
+	private boolean mIsPinch;
 	private Timer mTimer;
 
 	private Client mClient;
@@ -51,10 +52,11 @@ public class GesturesHandler implements ClientEventListener {
 		curY = 0;
 		pressed = false;
 		isDrag = false;
+		mIsPinch = false;
 		// TODO
 		InetAddress address = null;
 		try {
-			address = InetAddress.getByName("192.168.137.198");
+			address = InetAddress.getByName("192.168.43.138");
 		} catch (UnknownHostException e) {
 			Log.e(getClass().getName(), e.toString());
 		}
@@ -97,10 +99,14 @@ public class GesturesHandler implements ClientEventListener {
 					// for the user
 					return;
 				}
-				if (isDrag) {
-					drag();
+				if (mIsPinch) {
+					pinch();
 				} else {
-					move();
+					if (isDrag){
+						drag();
+					}else{
+						move();
+					}
 				}
 				prevX = curX;
 				prevY = curY;
@@ -122,6 +128,7 @@ public class GesturesHandler implements ClientEventListener {
 		mTimer.cancel();
 		mTimer.purge();
 		pressed = false;
+		mIsPinch = false;
 	}
 
 	/**
@@ -135,7 +142,8 @@ public class GesturesHandler implements ClientEventListener {
 	 *            current coordinate of the touch event along the y axis (in
 	 *            pixels from the upper side of the screen)
 	 */
-	public void update(float rawX, float rawY) {
+	public void update(float rawX, float rawY, boolean isPinch) {
+		mIsPinch = mIsPinch || isPinch;
 		curX = rawX;
 		curY = rawY;
 	}
@@ -147,7 +155,17 @@ public class GesturesHandler implements ClientEventListener {
 		mClient.dispose();
 	}
 
-
+	private void pinch() {
+		dX = (curX - (maxXwindow / 2)) / (maxXwindow / 2);
+		dY = ((maxYwindow / 2) - curY) / (maxYwindow / 2);
+		float delta = (float)Math.sqrt(Math.pow(dX, 2)+Math.pow(dY, 2));
+		float prevDX = (prevX - (maxXwindow / 2)) / (maxXwindow / 2);
+		float prevDY = ((maxYwindow / 2) - prevY) / (maxYwindow / 2);
+		float prevDelta = (float)Math.sqrt(Math.pow(prevDX, 2)+Math.pow(prevDY, 2));
+		delta = delta - prevDelta;
+		Log.i(getClass().getName(), "Delta : "+delta);
+		mCamera.move(0, 0, delta);
+	}
 	
 	private boolean isCenter() {
 		boolean b = true;
