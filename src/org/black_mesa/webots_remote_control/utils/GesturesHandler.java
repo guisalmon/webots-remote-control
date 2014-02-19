@@ -148,11 +148,14 @@ public class GesturesHandler implements ClientEventListener {
 	/**
 	 * Stops the client. It will be no longer waiting for position updates
 	 */
-	public void onPause() {
+	public void stop() {
 		mClient.dispose();
 	}
 	
-	public void onResume() {
+	/**
+	 * Initiates the client with the right IP and port from the preferences
+	 */
+	public void initiate() {
 		InetAddress address = null;
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mFrag.getActivity());
 		try {
