@@ -29,8 +29,7 @@ public class Client {
 	private ObjectOutputStream outputStream = null;
 	private Socket socket;
 
-	private boolean valid = true;
-	private boolean serverCompatible = true;
+	private ClientState s = ClientState.CREATED;
 
 	private RemoteObjectState received = null;
 
@@ -71,7 +70,7 @@ public class Client {
 					recv();
 					clientRoutine();
 				} catch (IOException e) {
-					valid = false;
+					s = ClientState.INVALID;
 				}
 			}
 		});
@@ -89,11 +88,13 @@ public class Client {
 	 *             The server is not in a version compatible with the client
 	 */
 	public void onStateChange(RemoteObjectState state) throws InvalidClientException, IncompatibleClientException {
-		if (!serverCompatible) {
-			throw new IncompatibleClientException(R.string.server_incompatible_with_client);
-		}
-		if (!valid) {
+		switch (s) {
+		case INVALID:
 			throw new InvalidClientException(R.string.invalid_client);
+		case INCOMPATIBLE:
+			throw new IncompatibleClientException(R.string.server_incompatible_with_client);
+		default:
+			break;
 		}
 
 		next = state.clone();
@@ -107,18 +108,22 @@ public class Client {
 	 * closes the socket
 	 */
 	public void dispose() {
-		valid = false;
+		s = ClientState.INVALID;
 	}
 
 	private void clientRoutine() {
 		RemoteObjectState previous = null;
 		while (true) {
-			if (!serverCompatible || !valid) {
+			switch (s) {
+			case INCOMPATIBLE:
+			case INVALID:
 				try {
 					socket.close();
 				} catch (Exception e) {
 				}
 				return;
+			default:
+				break;
 			}
 			if (previous != next) {
 				send(next);
@@ -141,7 +146,7 @@ public class Client {
 			outputStream.writeObject(state);
 		} catch (IOException e) {
 			Log.e(this.getClass().getName(), e.toString());
-			valid = false;
+			s = ClientState.INVALID;
 		}
 	}
 
@@ -157,11 +162,10 @@ public class Client {
 			});
 		} catch (IOException e) {
 			Log.e(this.getClass().getName(), e.toString());
-			valid = false;
+			s = ClientState.INVALID;
 		} catch (ClassNotFoundException e) {
 			Log.e(this.getClass().getName(), e.toString());
-			serverCompatible = false;
-			valid = false;
+			s = ClientState.INCOMPATIBLE;
 		}
 	}
 }
