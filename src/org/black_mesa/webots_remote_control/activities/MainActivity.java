@@ -117,13 +117,13 @@ public class MainActivity extends Activity {
 		FragmentManager fragmentManager;
 		switch (position){
 		case 0:
+			break;
+		case 1:
 			Fragment cameraFragment = new CameraFragment();
 			fragmentManager = getFragmentManager();
 		    fragmentManager.beginTransaction()
 		                   .replace(R.id.content_frame, cameraFragment)
 		                   .commit();
-			break;
-		case 1:
 			break;
 		case 2:
 			break;
