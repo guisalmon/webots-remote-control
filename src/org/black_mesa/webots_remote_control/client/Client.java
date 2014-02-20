@@ -34,12 +34,12 @@ public class Client {
 
 	private RemoteObjectState received = null;
 
-	private Object lock = new Object();
-	private Thread clientThread;
+	private final Object lock = new Object();
+	private final Thread clientThread;
 	private RemoteObjectState next;
 
-	private ClientEventListener listener;
-	private Activity activity;
+	private final ClientEventListener listener;
+	private final Activity activity;
 
 	/**
 	 * Instantiates a Client
