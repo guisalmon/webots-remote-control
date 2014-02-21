@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 
 import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.exceptions.IncompatibleClientException;
@@ -22,9 +24,8 @@ import android.util.Log;
  * 
  */
 public class Client {
-	// TODO This should be a parameter
-	// TODO Timeout
 	private static final int REFRESH_TICK = 100;
+	private static final int TIMEOUT = 1000;
 
 	private ObjectOutputStream outputStream = null;
 	private Socket socket;
@@ -66,7 +67,10 @@ public class Client {
 			@Override
 			public void run() {
 				try {
-					socket = new Socket(finalAddress, finalPort);
+					SocketAddress destination = new InetSocketAddress(finalAddress, finalPort);
+					socket = new Socket();
+					socket.connect(destination, TIMEOUT);
+					socket.setSoTimeout(TIMEOUT);
 					recv();
 					clientRoutine();
 				} catch (IOException e) {
