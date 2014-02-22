@@ -7,6 +7,9 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
 
 import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.exceptions.IncompatibleClientException;
@@ -31,15 +34,21 @@ public class Client {
 	private Socket socket;
 
 	private ClientState s = ClientState.CREATED;
+	private boolean dispose = false;
 
-	private RemoteObjectState received = null;
-
-	private final Object lock = new Object();
-	private final Thread clientThread;
-	private RemoteObjectState next;
+	private final Object threadWaitingObject = new Object();
+	private final Thread thread;
 
 	private final ClientEventListener listener;
 	private final Activity activity;
+
+	/*
+	 * We use a Hashtable because we do not want objects about to be sent to
+	 * accumulate ; if one object gets updated 10 times before it can be sent,
+	 * we only want to send the most recent value
+	 */
+	private final Object boardingLock = new Object();
+	private final Hashtable<Integer, RemoteObjectState> boarding = new Hashtable<Integer, RemoteObjectState>();
 
 	/**
 	 * Instantiates a Client
@@ -62,7 +71,7 @@ public class Client {
 		this.listener = listener;
 		this.activity = activity;
 
-		clientThread = new Thread(new Runnable() {
+		thread = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
@@ -78,7 +87,7 @@ public class Client {
 				}
 			}
 		});
-		clientThread.start();
+		thread.start();
 	}
 
 	/**
@@ -101,9 +110,12 @@ public class Client {
 			break;
 		}
 
-		next = state.clone();
-		synchronized (lock) {
-			lock.notify();
+		synchronized (boardingLock) {
+			boarding.put(state.getId(), state.clone());
+		}
+
+		synchronized (threadWaitingObject) {
+			threadWaitingObject.notify();
 		}
 	}
 
@@ -112,30 +124,39 @@ public class Client {
 	 * closes the socket
 	 */
 	public void dispose() {
-		s = ClientState.INVALID;
+		dispose = true;
 	}
 
-	private void clientRoutine() {
-		RemoteObjectState previous = null;
+	private void clientRoutine() throws IOException {
+		outputStream = new ObjectOutputStream(socket.getOutputStream());
 		while (true) {
-			switch (s) {
-			case INCOMPATIBLE:
-			case INVALID:
+			if (dispose || s == ClientState.INCOMPATIBLE || s == ClientState.INVALID) {
+				if (dispose && s != ClientState.INCOMPATIBLE) {
+					s = ClientState.INVALID;
+				}
 				try {
 					socket.close();
 				} catch (Exception e) {
 				}
 				return;
-			default:
-				break;
 			}
-			if (previous != next) {
-				send(next);
-				previous = next;
+
+			List<RemoteObjectState> l;
+
+			synchronized (boardingLock) {
+				// We have to entirely copy the the references while we have the
+				// lock because the iterator on Hashtable is only fail-fast
+				l = new ArrayList<RemoteObjectState>(boarding.values());
+				boarding.clear();
 			}
+
+			for (RemoteObjectState s : l) {
+				send(s);
+			}
+
 			try {
-				synchronized (lock) {
-					lock.wait(REFRESH_TICK);
+				synchronized (threadWaitingObject) {
+					threadWaitingObject.wait(REFRESH_TICK);
 				}
 			} catch (InterruptedException e) {
 			}
@@ -144,9 +165,6 @@ public class Client {
 
 	private void send(RemoteObjectState state) {
 		try {
-			if (outputStream == null) {
-				outputStream = new ObjectOutputStream(socket.getOutputStream());
-			}
 			outputStream.writeObject(state);
 		} catch (IOException e) {
 			Log.e(this.getClass().getName(), e.toString());
@@ -157,18 +175,30 @@ public class Client {
 	private void recv() {
 		try {
 			ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-			received = (RemoteObjectState) in.readObject();
+			Integer nb = (Integer) in.readObject();
+
+			// We use a Hashtable to check for doubles
+			final Hashtable<Integer, RemoteObjectState> receptionTable = new Hashtable<Integer, RemoteObjectState>();
+
+			for (int i = 0; i < nb; i++) {
+				RemoteObjectState o = (RemoteObjectState) in.readObject();
+				receptionTable.put(o.getId(), o);
+			}
+
 			activity.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					listener.onObjectReceived(received);
+					listener.onReception(new ArrayList<RemoteObjectState>(receptionTable.values()));
 				}
 			});
 		} catch (IOException e) {
-			Log.e(this.getClass().getName(), e.toString());
+			Log.d(this.getClass().getName(), e.toString());
 			s = ClientState.INVALID;
 		} catch (ClassNotFoundException e) {
-			Log.e(this.getClass().getName(), e.toString());
+			Log.d(this.getClass().getName(), e.toString());
+			s = ClientState.INCOMPATIBLE;
+		} catch (ClassCastException e) {
+			Log.d(this.getClass().getName(), e.toString());
 			s = ClientState.INCOMPATIBLE;
 		}
 	}

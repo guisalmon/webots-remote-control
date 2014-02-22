@@ -4,4 +4,5 @@ import java.io.Serializable;
 
 public interface RemoteObjectState extends Serializable {
 	public RemoteObjectState clone();
+	public int getId();
 }
