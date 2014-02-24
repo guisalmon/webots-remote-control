@@ -150,8 +150,10 @@ public class GesturesHandler implements ClientEventListener {
 	 */
 	public void stop() {
 		mClient.dispose();
-		mTimer.cancel();
-		mTimer.purge();
+		if (mTimer != null){
+			mTimer.cancel();
+			mTimer.purge();
+		}
 	}
 	
 	/**
@@ -165,7 +167,7 @@ public class GesturesHandler implements ClientEventListener {
 		} catch (UnknownHostException e) {
 			Log.e(getClass().getName(), e.toString());
 		}
-		mClient = new Client(address, prefs.getInt("edittext_port_preference", 42511), this, mFrag.getActivity());
+		mClient = new Client(address, Integer.parseInt(prefs.getString("edittext_port_preference", "42511")), this, mFrag.getActivity());
 	}
 
 	private void pinch() {
