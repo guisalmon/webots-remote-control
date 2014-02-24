@@ -61,7 +61,7 @@ public class GesturesHandler implements ClientEventListener {
 		mFrag = frag;
 	}
 
-
+	@Override
 	public void onReception(List<RemoteObjectState> states) {
 		// TODO
 		mCamera = (RemoteCameraState) states.get(0);
@@ -247,7 +247,7 @@ public class GesturesHandler implements ClientEventListener {
 		Log.i(getClass().getName(), "Move : x " + dX + ", y " + dY);
 	}
 
-	@Override
+	//@Override
 	public void onObjectReceived(RemoteObjectState state) {
 		// TODO Auto-generated method stub
 		mCamera = (RemoteCameraState) state;
