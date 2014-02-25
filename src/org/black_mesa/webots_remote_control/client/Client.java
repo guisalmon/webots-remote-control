@@ -203,4 +203,12 @@ public class Client {
 			s = ClientState.INCOMPATIBLE;
 		}
 	}
+	
+	private enum ClientState {
+		CREATED,
+		CONNECTED,
+		INCOMPATIBLE,
+		INVALID
+	}
+
 }
