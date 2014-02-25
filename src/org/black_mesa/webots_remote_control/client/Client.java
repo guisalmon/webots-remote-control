@@ -27,7 +27,12 @@ import android.util.Log;
  * 
  */
 public class Client {
+	// We will send the modified data to the server each REFRESH_TICK
+	// milliseconds
+	// TODO This should be a parameter of the application
 	private static final int REFRESH_TICK = 100;
+	// Timeout for the socket
+	// TODO This should be a parameter of the application
 	private static final int TIMEOUT = 1000;
 
 	private ObjectOutputStream outputStream = null;
@@ -36,7 +41,6 @@ public class Client {
 	private ClientState s = ClientState.CREATED;
 	private boolean dispose = false;
 
-	private final Object threadWaitingObject = new Object();
 	private final Thread thread;
 
 	private final ClientEventListener listener;
@@ -80,7 +84,7 @@ public class Client {
 					socket = new Socket();
 					socket.connect(destination, TIMEOUT);
 					socket.setSoTimeout(TIMEOUT);
-					recv();
+					receiveInitialStates();
 					clientRoutine();
 				} catch (IOException e) {
 					s = ClientState.INVALID;
@@ -114,10 +118,6 @@ public class Client {
 		synchronized (boardingLock) {
 			boarding.put(state.getId(), state.clone());
 		}
-
-		synchronized (threadWaitingObject) {
-			threadWaitingObject.notify();
-		}
 	}
 
 	/**
@@ -147,33 +147,28 @@ public class Client {
 			synchronized (boardingLock) {
 				// We have to entirely copy the the references while we have the
 				// lock because the iterator on Hashtable is only fail-fast
+				// Remember we can not perform IO operations while holding this
+				// lock, because it can be held by the UI thread
 				l = new ArrayList<RemoteObjectState>(boarding.values());
 				boarding.clear();
 			}
 
 			for (RemoteObjectState s : l) {
-				send(s);
+				outputStream.writeObject(s);
 			}
 
 			try {
-				synchronized (threadWaitingObject) {
-					threadWaitingObject.wait(REFRESH_TICK);
+				synchronized (thread) {
+					thread.wait(REFRESH_TICK);
 				}
 			} catch (InterruptedException e) {
+				// This should not happen, we should check who woke us
+				Log.d(getClass().getName(), e.toString());
 			}
 		}
 	}
 
-	private void send(RemoteObjectState state) {
-		try {
-			outputStream.writeObject(state);
-		} catch (IOException e) {
-			Log.e(this.getClass().getName(), e.toString());
-			s = ClientState.INVALID;
-		}
-	}
-
-	private void recv() {
+	private void receiveInitialStates() {
 		try {
 			ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 			Integer nb = (Integer) in.readObject();
@@ -193,22 +188,24 @@ public class Client {
 				}
 			});
 		} catch (IOException e) {
-			Log.d(this.getClass().getName(), e.toString());
+			// We have a serious problem with the stream
+			Log.d(getClass().getName(), e.toString());
 			s = ClientState.INVALID;
 		} catch (ClassNotFoundException e) {
-			Log.d(this.getClass().getName(), e.toString());
+			// The server sent us a class that we don't have, check the server
+			// specifications to solve this problem
+			Log.d(getClass().getName(), e.toString());
 			s = ClientState.INCOMPATIBLE;
 		} catch (ClassCastException e) {
-			Log.d(this.getClass().getName(), e.toString());
+			// The server did send an expected type, check the server
+			// specifications to solve this problem
+			Log.d(getClass().getName(), e.toString());
 			s = ClientState.INCOMPATIBLE;
 		}
 	}
-	
+
 	private enum ClientState {
-		CREATED,
-		CONNECTED,
-		INCOMPATIBLE,
-		INVALID
+		CREATED, CONNECTED, INCOMPATIBLE, INVALID
 	}
 
 }
