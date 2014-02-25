@@ -84,6 +84,7 @@ public class Client {
 					clientRoutine();
 				} catch (IOException e) {
 					s = ClientState.INVALID;
+					Log.e(getClass().getName(), e.toString());
 				}
 			}
 		});
