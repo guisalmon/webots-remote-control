@@ -5,10 +5,11 @@ package org.black_mesa.webots_remote_control.remote_object_state;
  */
 public class RemoteCameraState implements RemoteObjectState {
 	private static final long serialVersionUID = -2000084337375288247L;
+	private int id;
 	private double positionX, positionY, positionZ;
 	private double orientationX, orientationY, orientationZ, orientationAngle;
 
-	public RemoteCameraState(double positionX, double positionY, double positionZ, double orientationX,
+	public RemoteCameraState(int id, double positionX, double positionY, double positionZ, double orientationX,
 			double orientationY, double orientationZ, double orientationAngle) {
 		this.positionX = positionX;
 		this.positionY = positionY;
@@ -127,7 +128,12 @@ public class RemoteCameraState implements RemoteObjectState {
 
 	@Override
 	public RemoteObjectState clone() {
-		return new RemoteCameraState(positionX, positionY, positionZ, orientationX, orientationY, orientationZ,
+		return new RemoteCameraState(id, positionX, positionY, positionZ, orientationX, orientationY, orientationZ,
 				orientationAngle);
+	}
+
+	@Override
+	public int getId() {
+		return id;
 	}
 }

@@ -5,10 +5,11 @@ package org.black_mesa.webots_remote_control.remote_object_state;
  */
 public class RemoteRobotState implements RemoteObjectState {
 	private static final long serialVersionUID = -3590254358706938917L;
+	private int id;
 	private int leftSpeed;
 	private int rightSpeed;
 
-	public RemoteRobotState(int leftSpeed, int rightSpeed) {
+	public RemoteRobotState(int id, int leftSpeed, int rightSpeed) {
 		this.leftSpeed = leftSpeed;
 		this.rightSpeed = rightSpeed;
 	}
@@ -27,5 +28,10 @@ public class RemoteRobotState implements RemoteObjectState {
 
 	public String toString() {
 		return "Left speed: " + leftSpeed + " ; RIght speed: " + rightSpeed;
+	}
+
+	@Override
+	public int getId() {
+		return id;
 	}
 }

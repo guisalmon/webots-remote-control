@@ -4,7 +4,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
 
 import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.exceptions.IncompatibleClientException;
@@ -22,24 +27,32 @@ import android.util.Log;
  * 
  */
 public class Client {
-	// TODO This should be a parameter
-	// TODO Timeout
+	// We will send the modified data to the server each REFRESH_TICK
+	// milliseconds
+	// TODO This should be a parameter of the application
 	private static final int REFRESH_TICK = 100;
+	// Timeout for the socket
+	// TODO This should be a parameter of the application
+	private static final int TIMEOUT = 1000;
 
 	private ObjectOutputStream outputStream = null;
 	private Socket socket;
 
-	private boolean valid = true;
-	private boolean serverCompatible = true;
+	private ClientState s = ClientState.CREATED;
+	private boolean dispose = false;
 
-	private RemoteObjectState received = null;
+	private final Thread thread;
 
-	private Object lock = new Object();
-	private Thread clientThread;
-	private RemoteObjectState next;
+	private final ClientEventListener listener;
+	private final Activity activity;
 
-	private ClientEventListener listener;
-	private Activity activity;
+	/*
+	 * We use a Hashtable because we do not want objects about to be sent to
+	 * accumulate ; if one object gets updated 10 times before it can be sent,
+	 * we only want to send the most recent value
+	 */
+	private final Object boardingLock = new Object();
+	private final Hashtable<Integer, RemoteObjectState> boarding = new Hashtable<Integer, RemoteObjectState>();
 
 	/**
 	 * Instantiates a Client
@@ -62,20 +75,24 @@ public class Client {
 		this.listener = listener;
 		this.activity = activity;
 
-		clientThread = new Thread(new Runnable() {
+		thread = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
 				try {
-					socket = new Socket(finalAddress, finalPort);
-					recv();
+					SocketAddress destination = new InetSocketAddress(finalAddress, finalPort);
+					socket = new Socket();
+					socket.connect(destination, TIMEOUT);
+					socket.setSoTimeout(TIMEOUT);
+					receiveInitialStates();
 					clientRoutine();
 				} catch (IOException e) {
-					valid = false;
+					s = ClientState.INVALID;
+					Log.e(getClass().getName(), e.toString());
 				}
 			}
 		});
-		clientThread.start();
+		thread.start();
 	}
 
 	/**
@@ -89,16 +106,17 @@ public class Client {
 	 *             The server is not in a version compatible with the client
 	 */
 	public void onStateChange(RemoteObjectState state) throws InvalidClientException, IncompatibleClientException {
-		if (!serverCompatible) {
-			throw new IncompatibleClientException(R.string.server_incompatible_with_client);
-		}
-		if (!valid) {
+		switch (s) {
+		case INVALID:
 			throw new InvalidClientException(R.string.invalid_client);
+		case INCOMPATIBLE:
+			throw new IncompatibleClientException(R.string.server_incompatible_with_client);
+		default:
+			break;
 		}
 
-		next = state.clone();
-		synchronized (lock) {
-			lock.notify();
+		synchronized (boardingLock) {
+			boarding.put(state.getId(), state.clone());
 		}
 	}
 
@@ -107,61 +125,87 @@ public class Client {
 	 * closes the socket
 	 */
 	public void dispose() {
-		valid = false;
+		dispose = true;
 	}
 
-	private void clientRoutine() {
-		RemoteObjectState previous = null;
+	private void clientRoutine() throws IOException {
+		outputStream = new ObjectOutputStream(socket.getOutputStream());
 		while (true) {
-			if (!serverCompatible || !valid) {
+			if (dispose || s == ClientState.INCOMPATIBLE || s == ClientState.INVALID) {
+				if (dispose && s != ClientState.INCOMPATIBLE) {
+					s = ClientState.INVALID;
+				}
 				try {
 					socket.close();
 				} catch (Exception e) {
 				}
 				return;
 			}
-			if (previous != next) {
-				send(next);
-				previous = next;
+
+			List<RemoteObjectState> l;
+
+			synchronized (boardingLock) {
+				// We have to entirely copy the the references while we have the
+				// lock because the iterator on Hashtable is only fail-fast
+				// Remember we can not perform IO operations while holding this
+				// lock, because it can be held by the UI thread
+				l = new ArrayList<RemoteObjectState>(boarding.values());
+				boarding.clear();
 			}
+
+			for (RemoteObjectState s : l) {
+				outputStream.writeObject(s);
+			}
+
 			try {
-				synchronized (lock) {
-					lock.wait(REFRESH_TICK);
+				synchronized (thread) {
+					thread.wait(REFRESH_TICK);
 				}
 			} catch (InterruptedException e) {
+				// This should not happen, we should check who woke us
+				Log.d(getClass().getName(), e.toString());
 			}
 		}
 	}
 
-	private void send(RemoteObjectState state) {
-		try {
-			if (outputStream == null) {
-				outputStream = new ObjectOutputStream(socket.getOutputStream());
-			}
-			outputStream.writeObject(state);
-		} catch (IOException e) {
-			Log.e(this.getClass().getName(), e.toString());
-			valid = false;
-		}
-	}
-
-	private void recv() {
+	private void receiveInitialStates() {
 		try {
 			ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-			received = (RemoteObjectState) in.readObject();
+			Integer nb = (Integer) in.readObject();
+
+			// We use a Hashtable to check for doubles
+			final Hashtable<Integer, RemoteObjectState> receptionTable = new Hashtable<Integer, RemoteObjectState>();
+
+			for (int i = 0; i < nb; i++) {
+				RemoteObjectState o = (RemoteObjectState) in.readObject();
+				receptionTable.put(o.getId(), o);
+			}
+
 			activity.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					listener.onObjectReceived(received);
+					listener.onReception(new ArrayList<RemoteObjectState>(receptionTable.values()));
 				}
 			});
 		} catch (IOException e) {
-			Log.e(this.getClass().getName(), e.toString());
-			valid = false;
+			// We have a serious problem with the stream
+			Log.d(getClass().getName(), e.toString());
+			s = ClientState.INVALID;
 		} catch (ClassNotFoundException e) {
-			Log.e(this.getClass().getName(), e.toString());
-			serverCompatible = false;
-			valid = false;
+			// The server sent us a class that we don't have, check the server
+			// specifications to solve this problem
+			Log.d(getClass().getName(), e.toString());
+			s = ClientState.INCOMPATIBLE;
+		} catch (ClassCastException e) {
+			// The server did send an expected type, check the server
+			// specifications to solve this problem
+			Log.d(getClass().getName(), e.toString());
+			s = ClientState.INCOMPATIBLE;
 		}
 	}
+
+	private enum ClientState {
+		CREATED, CONNECTED, INCOMPATIBLE, INVALID
+	}
+
 }

@@ -14,7 +14,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 public class CameraFragment extends Fragment implements OnTouchListener{
 	private GesturesHandler mGestureHandler;
@@ -73,7 +72,7 @@ public class CameraFragment extends Fragment implements OnTouchListener{
 	@Override
 	public void onResume() {
 		super.onResume();
-
+		mGestureHandler.initiate();
 	}
 
 	@Override
@@ -85,10 +84,8 @@ public class CameraFragment extends Fragment implements OnTouchListener{
 			break;
 		case android.view.MotionEvent.ACTION_UP:
 			mGestureHandler.release();
-			((Button) getView()).setText("touchEvent Release");
 		case android.view.MotionEvent.ACTION_MOVE:
 			mGestureHandler.update(event.getRawX(), event.getRawY(), mIsPinch);
-			((Button) getView()).setText("touchEvent is pinch : "+mIsPinch);
 		}
 		return false;
 	}

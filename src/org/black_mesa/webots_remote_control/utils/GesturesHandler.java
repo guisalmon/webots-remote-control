@@ -2,6 +2,7 @@ package org.black_mesa.webots_remote_control.utils;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -13,6 +14,8 @@ import org.black_mesa.webots_remote_control.remote_object_state.RemoteCameraStat
 import org.black_mesa.webots_remote_control.remote_object_state.RemoteObjectState;
 
 import android.app.Fragment;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 /**
@@ -43,6 +46,8 @@ public class GesturesHandler implements ClientEventListener {
 	private Client mClient;
 	private RemoteCameraState mCamera;
 
+	private Fragment mFrag;
+
 	public GesturesHandler(float xMin, float xMax, float yMin, float yMax, Fragment frag) {
 		minXwindow = xMin;
 		minYwindow = yMin;
@@ -53,20 +58,13 @@ public class GesturesHandler implements ClientEventListener {
 		pressed = false;
 		isDrag = false;
 		mIsPinch = false;
-		// TODO
-		InetAddress address = null;
-		try {
-			address = InetAddress.getByName("192.168.43.138");
-		} catch (UnknownHostException e) {
-			Log.e(getClass().getName(), e.toString());
-		}
-		mClient = new Client(address, 42511, this, frag.getActivity());
+		mFrag = frag;
 	}
-	
+
 	@Override
-	public void onObjectReceived(RemoteObjectState state) {
+	public void onReception(List<RemoteObjectState> states) {
 		// TODO
-		mCamera = (RemoteCameraState) state;
+		mCamera = (RemoteCameraState) states.get(0);
 		Log.i(getClass().getName(), "Camera received: " + mCamera);
 	}
 
@@ -102,9 +100,9 @@ public class GesturesHandler implements ClientEventListener {
 				if (mIsPinch) {
 					pinch();
 				} else {
-					if (isDrag){
+					if (isDrag) {
 						drag();
-					}else{
+					} else {
 						move();
 					}
 				}
@@ -147,26 +145,46 @@ public class GesturesHandler implements ClientEventListener {
 		curX = rawX;
 		curY = rawY;
 	}
-	
+
 	/**
 	 * Stops the client. It will be no longer waiting for position updates
 	 */
 	public void stop() {
 		mClient.dispose();
+		if (mTimer != null){
+			mTimer.cancel();
+			mTimer.purge();
+		}
+	}
+
+	/**
+	 * Initiates the client with the right IP and port from the preferences
+	 */
+	public void initiate() {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mFrag.getActivity());
+		InetAddress address = null;
+		int port = Integer.parseInt(prefs.getString("edittext_port_preference", "42511"));
+		try {
+			address = InetAddress.getByName(prefs.getString("edittext_address_preference", "0.0.0.0"));
+		} catch (UnknownHostException e) {
+			Log.e(getClass().getName(), e.toString());
+		}
+
+		mClient = new Client(address, port, this, mFrag.getActivity());
 	}
 
 	private void pinch() {
 		dX = (curX - (maxXwindow / 2)) / (maxXwindow / 2);
 		dY = ((maxYwindow / 2) - curY) / (maxYwindow / 2);
-		float delta = (float)Math.sqrt(Math.pow(dX, 2)+Math.pow(dY, 2));
+		float delta = (float) Math.sqrt(Math.pow(dX, 2) + Math.pow(dY, 2));
 		float prevDX = (prevX - (maxXwindow / 2)) / (maxXwindow / 2);
 		float prevDY = ((maxYwindow / 2) - prevY) / (maxYwindow / 2);
-		float prevDelta = (float)Math.sqrt(Math.pow(prevDX, 2)+Math.pow(prevDY, 2));
+		float prevDelta = (float) Math.sqrt(Math.pow(prevDX, 2) + Math.pow(prevDY, 2));
 		delta = delta - prevDelta;
-		Log.i(getClass().getName(), "Delta : "+delta);
+		Log.i(getClass().getName(), "Delta : " + delta);
 		mCamera.move(0, 0, delta);
 	}
-	
+
 	private boolean isCenter() {
 		boolean b = true;
 		float sizeX = maxXwindow - minXwindow;
@@ -227,6 +245,13 @@ public class GesturesHandler implements ClientEventListener {
 			Log.e(getClass().getName(), e.toString());
 		}
 		Log.i(getClass().getName(), "Move : x " + dX + ", y " + dY);
+	}
+
+	//@Override
+	public void onObjectReceived(RemoteObjectState state) {
+		// TODO Auto-generated method stub
+		mCamera = (RemoteCameraState) state;
+		Log.i(getClass().getName(), "Camera received: " + mCamera);
 	}
 
 }
