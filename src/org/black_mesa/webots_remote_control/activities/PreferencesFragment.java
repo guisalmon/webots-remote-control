@@ -14,7 +14,6 @@ public class PreferencesFragment extends PreferenceFragment {
          Log.i("args", "Arguments: " + getArguments());
          // Load the preferences from an XML resource
          addPreferencesFromResource(R.xml.preferences_fragment);
-	 }
-	
+	 }	
 }
 
