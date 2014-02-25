@@ -5,9 +5,9 @@
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="server_based_preferences">Server settings</string>
-    <string name="title_address_edittext_preference">IP address</string>
+    <string name="title_address_edittext_preference">address</string>
 	<string name="summary_address_edittext_preference">Insert current value here</string>
-	<string name="dialog_title_address_edittext_preference">Server IP address</string>
+	<string name="dialog_title_address_edittext_preference">Server address</string>
 	<string name="address_hint">0.0.0.0</string>
 	<string name="port_hint">0000</string>
 	<string name="title_port_edittext_preference">Port</string>
