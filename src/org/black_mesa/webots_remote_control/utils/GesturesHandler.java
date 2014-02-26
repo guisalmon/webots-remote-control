@@ -182,7 +182,7 @@ public class GesturesHandler implements ClientEventListener {
 		float prevDelta = (float) Math.sqrt(Math.pow(prevDX, 2) + Math.pow(prevDY, 2));
 		delta = delta - prevDelta;
 		Log.i(getClass().getName(), "Delta : " + delta);
-		mCamera.move(0, 0, delta);
+		mCamera.move(0, 0, 50 * delta);
 	}
 
 	private boolean isCenter() {

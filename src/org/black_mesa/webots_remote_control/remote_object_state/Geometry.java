@@ -66,11 +66,6 @@ public class Geometry {
 			ret[0] = quaternion[0] / Math.sqrt(1 - quaternion[3] * quaternion[3]);
 			ret[1] = quaternion[1] / Math.sqrt(1 - quaternion[3] * quaternion[3]);
 			ret[2] = quaternion[2] / Math.sqrt(1 - quaternion[3] * quaternion[3]);
-
-			double d = Math.sqrt(ret[0] * ret[0] + ret[1] * ret[1] + ret[2] * ret[2]);
-			ret[0] /= d;
-			ret[1] /= d;
-			ret[2] /= d;
 		}
 
 		return ret;

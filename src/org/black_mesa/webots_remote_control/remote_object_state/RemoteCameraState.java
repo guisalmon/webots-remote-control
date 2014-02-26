@@ -25,8 +25,8 @@ public class RemoteCameraState implements RemoteObjectState {
 		double[] translation = new double[4];
 		translation[0] = right;
 		translation[1] = up;
-		translation[2] = forward;
-		translate(translation);
+		translation[2] = -forward;
+		translateLocal(translation);
 	}
 
 	public void pitch(double angle) {
@@ -47,7 +47,12 @@ public class RemoteCameraState implements RemoteObjectState {
 		rotateAbsolute(rotation);
 	}
 
-	private void translate(double[] translation) {
+	private void translateLocal(double[] translation) {
+		double[] invR = new double[4];
+		invR[0] = -r[0];
+		invR[1] = -r[1];
+		invR[2] = -r[2];
+		invR[3] = r[3];
 		t = Geometry.add3DVector3DVector(t, Geometry.rotate3DVectorAxisAngle(translation, r));
 	}
 
