@@ -48,12 +48,9 @@ public class RemoteCameraState implements RemoteObjectState {
 	}
 
 	private void translateLocal(double[] translation) {
-		double[] invR = new double[4];
-		invR[0] = -r[0];
-		invR[1] = -r[1];
-		invR[2] = -r[2];
-		invR[3] = r[3];
-		t = Geometry.add3DVector3DVector(t, Geometry.rotate3DVectorAxisAngle(translation, r));
+		double[][] mat = Geometry.axisAngleToMatrix(r);
+		double[] newT = Geometry.rotate3DVectorMatrix(translation, mat);
+		t = Geometry.add3DVector3DVector(t, newT);
 	}
 
 	private void rotateLocal(double[] rotation) {

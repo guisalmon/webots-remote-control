@@ -3,23 +3,50 @@ package org.black_mesa.webots_remote_control.remote_object_state;
 public class Geometry {
 	private static final double EPSILON = 0.00000000001;
 
-	public static double[] rotate3DVectorAxisAngle(double[] t, double[] r) {
+	public static double[] invertAxisAngle(double[] r) {
+		double[] ret = new double[4];
+
+		ret[0] = r[0];
+		ret[1] = r[1];
+		ret[2] = r[2];
+		ret[3] = -r[3];
+
+		return ret;
+	}
+
+	public static double[] rotate3DVectorMatrix(double[] t, double[][] m) {
 		double[] ret = new double[3];
+
+		for (int i = 0; i < 3; i++) {
+			ret[i] = 0;
+			for (int j = 0; j < 3; j++) {
+				ret[i] += m[i][j] * t[j];
+			}
+		}
+
+		return ret;
+	}
+
+	public static double[][] axisAngleToMatrix(double[] r) {
+		double[][] ret = new double[3][];
+		for (int i = 0; i < 3; i++) {
+			ret[i] = new double[3];
+		}
 
 		double c = Math.cos(r[3]);
 		double s = Math.sin(r[3]);
 
-		ret[0] = (r[0] * r[0] + (1 - r[0] * r[0]) * c) * t[0];
-		ret[0] += (r[0] * r[1] * (1 - c) - r[2] * s) * t[1];
-		ret[0] += (r[0] * r[2] * (1 - c) + r[1] * s) * t[2];
+		ret[0][0] = c + r[0] * r[0] * (1 - c);
+		ret[0][1] = r[0] * r[1] * (1 - c) - r[2] * s;
+		ret[0][2] = r[0] * r[2] * (1 - c) + r[1] * s;
 
-		ret[1] = (r[0] * r[1] * (1 - c) + r[2] * s) * t[0];
-		ret[1] += (r[1] * r[1] + (1 - r[1] * r[1]) * c) * t[1];
-		ret[1] += (r[1] * r[2] * (1 - c) - r[0] * s) * t[2];
+		ret[1][0] = r[1] * r[0] * (1 - c) + r[2] * s;
+		ret[1][1] = c + r[1] * r[1] * (1 - c);
+		ret[1][2] = r[1] * r[2] * (1 - c) - r[0] * s;
 
-		ret[2] = (r[0] * r[2] * (1 - c) - r[0] * s) * t[0];
-		ret[2] += (r[1] * r[2] * (1 - c) + r[0] * s) * t[1];
-		ret[2] += (r[2] * r[2] + (1 - r[2] * r[2]) * c) * t[2];
+		ret[2][0] = r[2] * r[0] * (1 - c) - r[1] * s;
+		ret[2][1] = r[2] * r[1] * (1 - c) + r[0] * s;
+		ret[2][2] = c + r[2] * r[2] * (1 - c);
 
 		return ret;
 	}
