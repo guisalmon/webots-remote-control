@@ -21,7 +21,7 @@ import android.app.Activity;
 import android.util.Log;
 
 /**
- * This class controls communications between the application and the server
+ * This class controls communications between the application and the server.
  * 
  * @author Ilja Kroonen
  * 
@@ -30,7 +30,7 @@ public class Client {
 	// We will send the modified data to the server each REFRESH_TICK
 	// milliseconds
 	// TODO This should be a parameter of the application
-	private static final int REFRESH_TICK = 100;
+	private static final int REFRESH_TICK = 32;
 	// Timeout for the socket
 	// TODO This should be a parameter of the application
 	private static final int TIMEOUT = 1000;
@@ -55,19 +55,19 @@ public class Client {
 	private final Hashtable<Integer, RemoteObject> boarding = new Hashtable<Integer, RemoteObject>();
 
 	/**
-	 * Instantiates a Client
+	 * Instantiates a Client.
 	 * 
 	 * @param address
-	 *            Address of the server
+	 *            Address of the server.
 	 * @param port
-	 *            Port for the connection
+	 *            Port for the connection.
 	 * @param listener
 	 *            Listener that will be notified when the server sends the
-	 *            initial state of the object
+	 *            initial state of the object.
 	 * @param activity
 	 *            The activity of the application ; the onObjectReceived event
 	 *            will be dispatched using the runOnUiThread method on this
-	 *            activity
+	 *            activity.
 	 */
 	public Client(InetAddress address, int port, ClientEventListener listener, Activity activity) {
 		final InetAddress finalAddress = address;
@@ -96,14 +96,14 @@ public class Client {
 	}
 
 	/**
-	 * Sends the new state to the server
+	 * Sends the new state to the server.
 	 * 
 	 * @param state
-	 *            Reference to the state we want to send
+	 *            Reference to the state we want to send.
 	 * @throws InvalidClientException
-	 *             There is no active connection with the server
+	 *             There is no active connection with the server.
 	 * @throws IncompatibleClientException
-	 *             The server is not in a version compatible with the client
+	 *             The server is not in a version compatible with the client.
 	 */
 	public void onStateChange(RemoteObject state) throws InvalidClientException, IncompatibleClientException {
 		switch (s) {
@@ -122,7 +122,7 @@ public class Client {
 
 	/**
 	 * Liberates the resources used by the Client: terminates the thread and
-	 * closes the socket
+	 * closes the socket.
 	 */
 	public void dispose() {
 		dispose = true;
