@@ -207,5 +207,4 @@ public class Client {
 	private enum ClientState {
 		CREATED, CONNECTED, INCOMPATIBLE, INVALID
 	}
-
 }
