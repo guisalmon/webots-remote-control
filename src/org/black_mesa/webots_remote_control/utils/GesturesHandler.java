@@ -10,8 +10,9 @@ import org.black_mesa.webots_remote_control.client.Client;
 import org.black_mesa.webots_remote_control.exceptions.IncompatibleClientException;
 import org.black_mesa.webots_remote_control.exceptions.InvalidClientException;
 import org.black_mesa.webots_remote_control.listeners.ClientEventListener;
-import org.black_mesa.webots_remote_control.remote_object_state.RemoteCameraState;
-import org.black_mesa.webots_remote_control.remote_object_state.RemoteObjectState;
+import org.black_mesa.webots_remote_control.remote_object.CameraInstruction;
+import org.black_mesa.webots_remote_control.remote_object.InstructionQueue;
+import org.black_mesa.webots_remote_control.remote_object.RemoteObject;
 
 import android.app.Fragment;
 import android.content.SharedPreferences;
@@ -44,7 +45,7 @@ public class GesturesHandler implements ClientEventListener {
 	private Timer mTimer;
 
 	private Client mClient;
-	private RemoteCameraState mCamera;
+	private InstructionQueue mCamera;
 
 	private Fragment mFrag;
 
@@ -62,9 +63,9 @@ public class GesturesHandler implements ClientEventListener {
 	}
 
 	@Override
-	public void onReception(List<RemoteObjectState> states) {
+	public void onReception(List<RemoteObject> states) {
 		// TODO
-		mCamera = (RemoteCameraState) states.get(0);
+		mCamera = (InstructionQueue) states.get(0);
 		Log.i(getClass().getName(), "Camera received: " + mCamera);
 	}
 
@@ -182,7 +183,8 @@ public class GesturesHandler implements ClientEventListener {
 		float prevDelta = (float) Math.sqrt(Math.pow(prevDX, 2) + Math.pow(prevDY, 2));
 		delta = delta - prevDelta;
 		Log.i(getClass().getName(), "Delta : " + delta);
-		mCamera.move(0, 0, 50 * delta);
+		mCamera.add(CameraInstruction.move(0, 0, 10 * delta));
+		//mCamera.move(0, 0, 50 * delta);
 	}
 
 	private boolean isCenter() {
@@ -204,10 +206,12 @@ public class GesturesHandler implements ClientEventListener {
 		float percX = dX / (maxXwindow - minXwindow);
 		float percY = dY / (maxYwindow - minYwindow);
 		Log.i(getClass().getName(), "Pitch of " + percY);
-		mCamera.pitch(percY * Math.PI);
+		mCamera.add(CameraInstruction.pitch(percY * Math.PI));
+		//mCamera.pitch(percY * Math.PI);
 		Log.i(getClass().getName(), "New camera: " + mCamera);
 		Log.i(getClass().getName(), "Turn of " + percY);
-		mCamera.turn(percX * Math.PI);
+		mCamera.add(CameraInstruction.turn(percX * Math.PI));
+		//mCamera.turn(percX * Math.PI);
 		Log.i(getClass().getName(), "New camera: " + mCamera);
 		try {
 			mClient.onStateChange(mCamera);
@@ -229,7 +233,8 @@ public class GesturesHandler implements ClientEventListener {
 	private void move() {
 		dX = (curX - (maxXwindow / 2)) / (maxXwindow / 2);
 		dY = ((maxYwindow / 2) - curY) / (maxYwindow / 2);
-		mCamera.move(dX, dY, 0);
+		mCamera.add(CameraInstruction.move(dX / 5, dY / 5, 0));
+		//mCamera.move(dX, dY, 0);
 		try {
 			mClient.onStateChange(mCamera);
 		} catch (InvalidClientException e) {
@@ -248,9 +253,9 @@ public class GesturesHandler implements ClientEventListener {
 	}
 
 	//@Override
-	public void onObjectReceived(RemoteObjectState state) {
+	public void onObjectReceived(RemoteObject state) {
 		// TODO Auto-generated method stub
-		mCamera = (RemoteCameraState) state;
+		mCamera = (InstructionQueue) state;
 		Log.i(getClass().getName(), "Camera received: " + mCamera);
 	}
 

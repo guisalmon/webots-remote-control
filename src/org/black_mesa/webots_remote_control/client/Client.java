@@ -15,7 +15,7 @@ import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.exceptions.IncompatibleClientException;
 import org.black_mesa.webots_remote_control.exceptions.InvalidClientException;
 import org.black_mesa.webots_remote_control.listeners.ClientEventListener;
-import org.black_mesa.webots_remote_control.remote_object_state.RemoteObjectState;
+import org.black_mesa.webots_remote_control.remote_object.RemoteObject;
 
 import android.app.Activity;
 import android.util.Log;
@@ -52,7 +52,7 @@ public class Client {
 	 * we only want to send the most recent value
 	 */
 	private final Object boardingLock = new Object();
-	private final Hashtable<Integer, RemoteObjectState> boarding = new Hashtable<Integer, RemoteObjectState>();
+	private final Hashtable<Integer, RemoteObject> boarding = new Hashtable<Integer, RemoteObject>();
 
 	/**
 	 * Instantiates a Client
@@ -105,7 +105,7 @@ public class Client {
 	 * @throws IncompatibleClientException
 	 *             The server is not in a version compatible with the client
 	 */
-	public void onStateChange(RemoteObjectState state) throws InvalidClientException, IncompatibleClientException {
+	public void onStateChange(RemoteObject state) throws InvalidClientException, IncompatibleClientException {
 		switch (s) {
 		case INVALID:
 			throw new InvalidClientException(R.string.invalid_client);
@@ -116,7 +116,7 @@ public class Client {
 		}
 
 		synchronized (boardingLock) {
-			boarding.put(state.getId(), state.clone());
+			boarding.put(state.getId(), state.board());
 		}
 	}
 
@@ -142,18 +142,18 @@ public class Client {
 				return;
 			}
 
-			List<RemoteObjectState> l;
+			List<RemoteObject> l;
 
 			synchronized (boardingLock) {
 				// We have to entirely copy the the references while we have the
 				// lock because the iterator on Hashtable is only fail-fast
 				// Remember we can not perform IO operations while holding this
 				// lock, because it can be held by the UI thread
-				l = new ArrayList<RemoteObjectState>(boarding.values());
+				l = new ArrayList<RemoteObject>(boarding.values());
 				boarding.clear();
 			}
 
-			for (RemoteObjectState s : l) {
+			for (RemoteObject s : l) {
 				outputStream.writeObject(s);
 			}
 
@@ -174,17 +174,17 @@ public class Client {
 			Integer nb = (Integer) in.readObject();
 
 			// We use a Hashtable to check for doubles
-			final Hashtable<Integer, RemoteObjectState> receptionTable = new Hashtable<Integer, RemoteObjectState>();
+			final Hashtable<Integer, RemoteObject> receptionTable = new Hashtable<Integer, RemoteObject>();
 
 			for (int i = 0; i < nb; i++) {
-				RemoteObjectState o = (RemoteObjectState) in.readObject();
+				RemoteObject o = (RemoteObject) in.readObject();
 				receptionTable.put(o.getId(), o);
 			}
 
 			activity.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					listener.onReception(new ArrayList<RemoteObjectState>(receptionTable.values()));
+					listener.onReception(new ArrayList<RemoteObject>(receptionTable.values()));
 				}
 			});
 		} catch (IOException e) {
