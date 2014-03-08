@@ -1,37 +1,33 @@
 package org.black_mesa.webots_remote_control.remote_object;
 
-import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.Queue;
 
-
-public class InstructionQueue implements Serializable, RemoteObject {
+public class InstructionQueue extends RemoteObject {
 	private static final long serialVersionUID = 228351533118850327L;
-	private final int id;
-	private Queue<Instruction> queue;
-
+	private Queue<Instruction> queue = new LinkedList<Instruction>();
+	
 	public InstructionQueue(int id) {
-		this.id = id;
-		this.queue = new LinkedList<Instruction>();
-	}
-
-	private InstructionQueue(int id, Queue<Instruction> queue) {
-		this.id = id;
-		this.queue = queue;
-	}
-
-	public int getId() {
-		return id;
+		super(id);
 	}
 
 	public void add(Instruction i) {
 		queue.add(i);
 	}
 
+	private void add(InstructionQueue queue) {
+		while (!queue.queue.isEmpty()) {
+			this.queue.add(queue.queue.poll());
+		}
+	}
+
 	@Override
-	public RemoteObject board() {
-		InstructionQueue ret = new InstructionQueue(id, queue);
-		queue = new LinkedList<Instruction>();
-		return ret;
+	public RemoteObject board(RemoteObject previous) {
+		if (previous == null) {
+			previous = new InstructionQueue(getId());
+		}
+		((InstructionQueue) previous).add(this);
+		queue.clear();
+		return previous;
 	}
 }

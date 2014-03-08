@@ -116,7 +116,7 @@ public class Client {
 		}
 
 		synchronized (boardingLock) {
-			boarding.put(state.getId(), state.board());
+			boarding.put(state.getId(), state.board(boarding.get(state.getId())));
 		}
 	}
 
