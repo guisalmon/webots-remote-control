@@ -24,6 +24,8 @@ public class MainActivity extends Activity {
     private ListView mDrawerList;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
+    private int mSelectedItem;
+    private boolean mClosed;
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +51,7 @@ public class MainActivity extends Activity {
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
+                mClosed = true;
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
 
@@ -56,22 +59,24 @@ public class MainActivity extends Activity {
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
                 getActionBar().setTitle(R.string.app_name);
+                mClosed = false;
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
-        
-        //Set drawer open, display application name and select preferences
-        selectItem(3);
-        getActionBar().setTitle(R.string.app_name);
-        mDrawerLayout.openDrawer(mDrawerList);
+        selectItem(0);
+        mClosed = true;
+
 	}
 
 	@Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        // If the nav drawer is open, hide action items related to the content view
+		menu.clear();
+		if ((mSelectedItem == 0)&&(mClosed)){
+			getMenuInflater().inflate(R.menu.connexion, menu);
+		}
         return super.onPrepareOptionsMenu(menu);
     }
 	
@@ -116,8 +121,10 @@ public class MainActivity extends Activity {
 	/** Swaps fragments in the main content view */
 	private void selectItem(int position) {
 		FragmentManager fragmentManager;
+		mSelectedItem = position;
 		switch (position){
 		case 0:
+			invalidateOptionsMenu();
 			Fragment connexionFragment = new ConnexionFragment();
 			fragmentManager = getFragmentManager();
 		    fragmentManager.beginTransaction()

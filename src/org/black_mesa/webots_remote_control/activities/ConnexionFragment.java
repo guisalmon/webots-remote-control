@@ -9,6 +9,7 @@ import org.black_mesa.webots_remote_control.database.ServerListAdapter;
 
 import android.app.ListFragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -41,7 +42,8 @@ public class ConnexionFragment extends ListFragment{
 	@Override
 	public void onPrepareOptionsMenu(Menu menu) {
 		getActivity().getMenuInflater().inflate(R.menu.connexion, menu);
-		super.onPrepareOptionsMenu(menu);
+		Log.i(getClass().getName(), "Menu inflated");
+		//super.onPrepareOptionsMenu(menu);
 	}
 
 	@Override
