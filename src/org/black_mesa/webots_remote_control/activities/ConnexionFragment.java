@@ -11,7 +11,6 @@ import android.app.ListFragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -38,10 +37,11 @@ public class ConnexionFragment extends ListFragment{
 		setListAdapter(adapter);
 		
 	}
-	
+
 	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		inflater.inflate(R.menu.connexion, menu);
+	public void onPrepareOptionsMenu(Menu menu) {
+		getActivity().getMenuInflater().inflate(R.menu.connexion, menu);
+		super.onPrepareOptionsMenu(menu);
 	}
 
 	@Override
