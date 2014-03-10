@@ -196,7 +196,7 @@ public class Client {
 			Log.d(getClass().getName(), e.toString());
 			s = ClientState.INCOMPATIBLE;
 		} catch (ClassCastException e) {
-			// The server did send an expected type, check the server
+			// The server did send an unexpected type, check the server
 			// specifications to solve this problem
 			Log.d(getClass().getName(), e.toString());
 			s = ClientState.INCOMPATIBLE;
