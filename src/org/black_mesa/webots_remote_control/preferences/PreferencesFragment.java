@@ -1,4 +1,4 @@
-package org.black_mesa.webots_remote_control.activities;
+package org.black_mesa.webots_remote_control.preferences;
 
 import org.black_mesa.webots_remote_control.R;
 

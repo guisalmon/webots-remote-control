@@ -1,6 +1,7 @@
 package org.black_mesa.webots_remote_control.activities;
 
 import org.black_mesa.webots_remote_control.R;
+import org.black_mesa.webots_remote_control.preferences.PreferencesFragment;
 
 import android.app.Activity;
 import android.app.Fragment;

@@ -1,9 +1,10 @@
-package org.black_mesa.webots_remote_control.activities;
+package org.black_mesa.webots_remote_control.preferences;
 
 import android.content.Context;
+import android.preference.EditTextPreference;
 import android.util.AttributeSet;
 
-public class EditTextPreferenceWithSummary extends android.preference.EditTextPreference {
+public class EditTextPreferenceWithSummary extends EditTextPreference {
 	public EditTextPreferenceWithSummary(Context context, AttributeSet attrs) {
 		super(context, attrs);
 	}
