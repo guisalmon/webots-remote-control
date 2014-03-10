@@ -11,10 +11,9 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.exceptions.IncompatibleClientException;
 import org.black_mesa.webots_remote_control.exceptions.InvalidClientException;
-import org.black_mesa.webots_remote_control.listeners.ClientEventListener;
+import org.black_mesa.webots_remote_control.listeners.ClientListener;
 import org.black_mesa.webots_remote_control.remote_object.RemoteObject;
 
 import android.app.Activity;
@@ -43,7 +42,7 @@ public class Client {
 
 	private final Thread thread;
 
-	private final ClientEventListener listener;
+	private final ClientListener listener;
 	private final Activity activity;
 
 	/*
@@ -69,7 +68,7 @@ public class Client {
 	 *            will be dispatched using the runOnUiThread method on this
 	 *            activity.
 	 */
-	public Client(InetAddress address, int port, ClientEventListener listener, Activity activity) {
+	public Client(InetAddress address, int port, ClientListener listener, Activity activity) {
 		final InetAddress finalAddress = address;
 		final int finalPort = port;
 		this.listener = listener;
@@ -108,9 +107,9 @@ public class Client {
 	public void onStateChange(RemoteObject state) throws InvalidClientException, IncompatibleClientException {
 		switch (s) {
 		case INVALID:
-			throw new InvalidClientException(R.string.invalid_client);
+			throw new InvalidClientException("The client is in an invalid state");
 		case INCOMPATIBLE:
-			throw new IncompatibleClientException(R.string.server_incompatible_with_client);
+			throw new IncompatibleClientException("The client and the server are not compatible");
 		default:
 			break;
 		}
