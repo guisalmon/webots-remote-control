@@ -10,8 +10,11 @@ import org.black_mesa.webots_remote_control.database.ServerListAdapter;
 import android.app.ListFragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 public class ConnexionFragment extends ListFragment{
 	private DataSource mDatasource;
@@ -37,6 +40,17 @@ public class ConnexionFragment extends ListFragment{
 	}
 	
 	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		inflater.inflate(R.menu.connexion, menu);
+	}
+
+	@Override
+	public void onListItemClick(ListView l, View v, int position, long id) {
+		
+		super.onListItemClick(l, v, position, id);
+	}
+
+	@Override
 	public void onPause() {
 		mDatasource.close();
 		super.onPause();
@@ -47,8 +61,6 @@ public class ConnexionFragment extends ListFragment{
 		mDatasource.open();
 		super.onResume();
 	}
-	
-
 	
 
 }

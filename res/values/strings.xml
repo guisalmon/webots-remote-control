@@ -17,4 +17,5 @@
     <string name="server_incompatible_with_client"></string>
     <string name="invalid_client">The client is invalid ; it has been disposed, or connection has failed</string>
     <string name="drawer_open"></string>
+    <string name="connexion_add">Add server</string>
 </resources>
