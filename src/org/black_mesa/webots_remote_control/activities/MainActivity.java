@@ -19,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 public class MainActivity extends Activity {
+	
 	private String[] mDrawerListItems;
     private ListView mDrawerList;
     private DrawerLayout mDrawerLayout;
@@ -30,6 +31,8 @@ public class MainActivity extends Activity {
 		//Set application in fullscreen mode
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, 
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		
+		
 		
 		//Create and populate the left drawer
 		setContentView(R.layout.activity_main);
@@ -118,6 +121,11 @@ public class MainActivity extends Activity {
 		FragmentManager fragmentManager;
 		switch (position){
 		case 0:
+			Fragment connexionFragment = new ConnexionFragment();
+			fragmentManager = getFragmentManager();
+		    fragmentManager.beginTransaction()
+		                   .replace(R.id.content_frame, connexionFragment)
+		                   .commit();
 			break;
 		case 1:
 			Fragment cameraFragment = new CameraFragment();
@@ -164,5 +172,6 @@ public class MainActivity extends Activity {
 	public void setTitle(CharSequence title) {
 	    getActionBar().setTitle(title);
 	}
+
 
 }

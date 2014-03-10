@@ -5,14 +5,14 @@
     android:orientation="vertical" >
     <PreferenceCategory
         android:title="@string/server_based_preferences">
-        <org.black_mesa.webots_remote_control.activities.EditTextPreferenceWithSummary
+        <org.black_mesa.webots_remote_control.preferences.EditTextPreferenceWithSummary
                 android:key="edittext_address_preference"
                 android:title="@string/title_address_edittext_preference"
                 android:hint="@string/address_hint"
                 android:summary="@string/summary_address_edittext_preference"
                 android:dialogTitle="@string/dialog_title_address_edittext_preference"
                  />
-        <org.black_mesa.webots_remote_control.activities.EditTextPreferenceWithSummary
+        <org.black_mesa.webots_remote_control.preferences.EditTextPreferenceWithSummary
                 android:key="edittext_port_preference"
                 android:title="@string/title_port_edittext_preference"
                 android:hint="@string/port_hint"

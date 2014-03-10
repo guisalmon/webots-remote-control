@@ -1,6 +1,6 @@
 package org.black_mesa.webots_remote_control.database;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.classes.Server;
@@ -15,9 +15,9 @@ import android.widget.TextView;
 public class ServerListAdapter extends ArrayAdapter<Server>{
 
 	private final Context context;
-	private final ArrayList<Server> servers;
+	private final List<Server> servers;
 
-	public ServerListAdapter(Context context,  ArrayList<Server> servers) {
+	public ServerListAdapter(Context context,  List<Server> servers) {
 		super(context,  R.layout.server_list_item, servers);
 		this.context = context;
 		this.servers = servers;

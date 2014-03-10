@@ -39,7 +39,7 @@ public class DataSource {
 		values.put(DataBaseContract.ServerTable.PORT, port);
 		long insertId = database.insert(DataBaseContract.ServerTable.TABLE_NAME,
 				null, values);
-		Cursor cursor = database.query(DataBaseContract.ServerTable.NAME,
+		Cursor cursor = database.query(DataBaseContract.ServerTable.TABLE_NAME,
 				allServerColumns, DataBaseContract.ServerTable._ID + " = "
 						+ insertId, null, null, null, null);
 		cursor.moveToFirst();

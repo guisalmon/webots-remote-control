@@ -26,7 +26,7 @@ public final class DataBaseContract {
                 _ID + " INTEGER PRIMARY KEY," +
                 NAME + TEXT_TYPE + COMMA_SEP + 
                 ADRESS + TEXT_TYPE + COMMA_SEP +
-                PORT + INTEGER_TYPE + COMMA_SEP + " )";
+                PORT + INTEGER_TYPE + " )";
         
         public static final String DELETE_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;
     }
