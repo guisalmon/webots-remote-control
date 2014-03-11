@@ -35,6 +35,7 @@ public class ServerListAdapter extends ArrayAdapter<Server>{
 		nameText.setText(server.getName());
 		adressText.setText(server.getAdress()+":"+server.getPort());
 		
+		rowView.setClickable(true);
 		return rowView;
 	}
 }

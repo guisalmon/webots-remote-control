@@ -24,7 +24,6 @@ public class MainActivity extends Activity {
     private ListView mDrawerList;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
-    private int mSelectedItem;
     private boolean mClosed;
     
 	@Override
@@ -52,7 +51,7 @@ public class MainActivity extends Activity {
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
                 mClosed = true;
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                //invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
 
             /** Called when a drawer has settled in a completely open state. */
@@ -60,7 +59,7 @@ public class MainActivity extends Activity {
                 super.onDrawerOpened(drawerView);
                 getActionBar().setTitle(R.string.app_name);
                 mClosed = false;
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                //invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
@@ -73,9 +72,8 @@ public class MainActivity extends Activity {
 
 	@Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-		menu.clear();
-		if ((mSelectedItem == 0)&&(mClosed)){
-			getMenuInflater().inflate(R.menu.connexion, menu);
+		if (!mClosed){
+			menu.clear();
 		}
         return super.onPrepareOptionsMenu(menu);
     }
@@ -121,10 +119,9 @@ public class MainActivity extends Activity {
 	/** Swaps fragments in the main content view */
 	private void selectItem(int position) {
 		FragmentManager fragmentManager;
-		mSelectedItem = position;
 		switch (position){
 		case 0:
-			invalidateOptionsMenu();
+			//invalidateOptionsMenu();
 			Fragment connexionFragment = new ConnexionFragment();
 			fragmentManager = getFragmentManager();
 		    fragmentManager.beginTransaction()
