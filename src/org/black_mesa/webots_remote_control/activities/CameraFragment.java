@@ -108,7 +108,7 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 	@Override
 	public void moveForward(float forward) {
 		if (camera == null) {
-			Log.d(getClass().getName(), "turnPitch event before camera was initialized");
+			Log.d(getClass().getName(), "moveForward event before camera was initialized");
 			return;
 		}
 		CameraInstruction instruction = CameraInstruction.move(0, 0, forward * 16);
@@ -125,7 +125,7 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 	@Override
 	public void moveSide(float right, float up, long time) {
 		if (camera == null) {
-			Log.d(getClass().getName(), "turnPitch event before camera was initialized");
+			Log.d(getClass().getName(), "moveSide event before camera was initialized");
 			return;
 		}
 		CameraInstruction instruction = CameraInstruction.move((right * time) / 128., (-up * time) / 128., 0);

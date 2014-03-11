@@ -26,13 +26,10 @@ import android.util.Log;
  * 
  */
 public class Client {
-	// We will send the modified data to the server each REFRESH_TICK
-	// milliseconds
-	// TODO This should be a parameter of the application
-	private static final int REFRESH_TICK = 32;
+	// Time the Client thread will wait if not woken up
+	private static final int WAIT_DURATION = 100;
 	// Timeout for the socket
-	// TODO This should be a parameter of the application
-	private static final int TIMEOUT = 1000;
+	private static final int SOCKET_TIMEOUT = 5000;
 
 	private ObjectOutputStream outputStream = null;
 	private Socket socket;
@@ -45,11 +42,6 @@ public class Client {
 	private final ClientListener listener;
 	private final Activity activity;
 
-	/*
-	 * We use a Hashtable because we do not want objects about to be sent to
-	 * accumulate ; if one object gets updated 10 times before it can be sent,
-	 * we only want to send the most recent value
-	 */
 	private final Object boardingLock = new Object();
 	private final Hashtable<Integer, RemoteObject> boarding = new Hashtable<Integer, RemoteObject>();
 
@@ -81,8 +73,8 @@ public class Client {
 				try {
 					SocketAddress destination = new InetSocketAddress(finalAddress, finalPort);
 					socket = new Socket();
-					socket.connect(destination, TIMEOUT);
-					socket.setSoTimeout(TIMEOUT);
+					socket.connect(destination, SOCKET_TIMEOUT);
+					socket.setSoTimeout(SOCKET_TIMEOUT);
 					receiveInitialStates();
 					clientRoutine();
 				} catch (IOException e) {
@@ -116,6 +108,10 @@ public class Client {
 
 		synchronized (boardingLock) {
 			boarding.put(state.getId(), state.board(boarding.get(state.getId())));
+		}
+
+		synchronized (thread) {
+			thread.notify();
 		}
 	}
 
@@ -158,11 +154,9 @@ public class Client {
 
 			try {
 				synchronized (thread) {
-					thread.wait(REFRESH_TICK);
+					thread.wait(WAIT_DURATION);
 				}
 			} catch (InterruptedException e) {
-				// This should not happen, we should check who woke us
-				Log.d(getClass().getName(), e.toString());
 			}
 		}
 	}
