@@ -1,5 +1,10 @@
 package org.black_mesa.webots_remote_control.classes;
 
+/**
+ * Simple class to represent a server
+ * @author guisalmon@gmail.com
+ *
+ */
 public class Server {
 	private long id;
 	private String name;

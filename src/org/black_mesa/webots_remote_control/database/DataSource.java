@@ -22,14 +22,28 @@ public class DataSource {
 		dbHelper = new DataBaseHelper(context);
 	}
 
+	/**
+	 * Opens the database or throws an exception
+	 * @throws SQLException
+	 */
 	public void open() throws SQLException {
 		database = dbHelper.getWritableDatabase();
 	}
 
+	/**
+	 * Closes the database
+	 */
 	public void close() {
 		dbHelper.close();
 	}
 
+	/**
+	 * Creates a new Server and inserts it into the database
+	 * @param name of the Server
+	 * @param adress of the Server
+	 * @param port of the Server
+	 * @return created Server
+	 */
 	public Server createServer(String name, String adress, int port) {
 		ContentValues values = new ContentValues();
 		values.put(DataBaseContract.ServerTable.NAME, name);
@@ -45,11 +59,19 @@ public class DataSource {
 
 	}
 
+	/**
+	 * Deletes the Server from the database
+	 * @param Server to delete
+	 */
 	public void deleteServer(Server server) {
 		long id = server.getId();
 		database.delete(DataBaseContract.ServerTable.TABLE_NAME, DataBaseContract.ServerTable._ID + " = " + id, null);
 	}
 
+	/**
+	 * Retrieves all the servers from the database
+	 * @return List of Server
+	 */
 	public List<Server> getAllServers() {
 		List<Server> servers = new ArrayList<Server>();
 		Cursor cursor = database.query(DataBaseContract.ServerTable.TABLE_NAME, allServerColumns, null, null, null,
@@ -64,6 +86,10 @@ public class DataSource {
 		return servers;
 	}
 	
+	/**
+	 * Updates the server in the database
+	 * @param server to update
+	 */
 	public void updateServer(Server server){
 		String strFilter = DataBaseContract.ServerTable._ID + "=" + server.getId();
 		ContentValues values = new ContentValues();

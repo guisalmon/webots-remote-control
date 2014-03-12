@@ -167,6 +167,7 @@ public class ConnexionFragment extends ListFragment implements OnListEventsListe
 		}
 		return i;
 	}
+	
 	private void updateMenu(boolean isSelection){
 		if(isSelection){
 			switch (countChecks()){

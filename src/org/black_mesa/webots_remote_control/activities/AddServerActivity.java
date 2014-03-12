@@ -15,6 +15,12 @@ import android.widget.EditText;
 public class AddServerActivity extends Activity {
 	private DataSource mDatasource;
 	private boolean mIsEdit;
+	
+	
+	
+	//Activity lifecycle
+	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -34,7 +40,6 @@ public class AddServerActivity extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.add_server, menu);
 		return true;
 	}
@@ -53,6 +58,23 @@ public class AddServerActivity extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+
+	@Override
+	protected void onPause() {
+		mDatasource.close();
+		super.onPause();
+	}
+
+	@Override
+	protected void onResume() {
+		mDatasource.open();
+		super.onResume();
+	}
+	
+	
+	
+	//Private methods
+	
 	
 	private void saveServer (){
 		if (mIsEdit){
@@ -67,18 +89,6 @@ public class AddServerActivity extends Activity {
 			int port = Integer.parseInt(((EditText)findViewById(R.id.serverPort)).getText().toString());
 			mDatasource.createServer(name, adress, port);
 		}
-	}
-
-	@Override
-	protected void onPause() {
-		mDatasource.close();
-		super.onPause();
-	}
-
-	@Override
-	protected void onResume() {
-		mDatasource.open();
-		super.onResume();
 	}
 	
 	private Server getServerById(long id){
