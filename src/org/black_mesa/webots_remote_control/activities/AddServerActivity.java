@@ -1,6 +1,9 @@
 package org.black_mesa.webots_remote_control.activities;
 
+import java.util.List;
+
 import org.black_mesa.webots_remote_control.R;
+import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.database.DataSource;
 
 import android.app.Activity;
@@ -11,14 +14,22 @@ import android.widget.EditText;
 
 public class AddServerActivity extends Activity {
 	private DataSource mDatasource;
+	private boolean mIsEdit;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		mIsEdit = getIntent().hasExtra("id");
 		setContentView(R.layout.activity_add_server);
 		getActionBar().setHomeButtonEnabled(false);
 		getActionBar().setDisplayHomeAsUpEnabled(false);
 		mDatasource = new DataSource(this);
 		mDatasource.open();
+		if(mIsEdit){
+			Server server = getServerById(getIntent().getExtras().getLong("id"));
+			((EditText)findViewById(R.id.serverName)).setText(server.getName());
+			((EditText)findViewById(R.id.serverAdress)).setText(server.getAdress());
+			((EditText)findViewById(R.id.serverPort)).setText(String.valueOf(server.getPort()));
+		}
 	}
 
 	@Override
@@ -39,16 +50,23 @@ public class AddServerActivity extends Activity {
 		case R.id.new_server_cancel:
 			finish();
 			break;
-
 		}
 		return super.onOptionsItemSelected(item);
 	}
 	
 	private void saveServer (){
-		String name = ((EditText)findViewById(R.id.serverName)).getText().toString();
-		String adress = ((EditText)findViewById(R.id.serverAdress)).getText().toString();
-		int port = Integer.parseInt(((EditText)findViewById(R.id.serverPort)).getText().toString());
-		mDatasource.createServer(name, adress, port);
+		if (mIsEdit){
+			Server server = getServerById(getIntent().getExtras().getLong("id"));
+			server.setName(((EditText)findViewById(R.id.serverName)).getText().toString());
+			server.setAdress(((EditText)findViewById(R.id.serverAdress)).getText().toString());
+			server.setPort(Integer.parseInt(((EditText)findViewById(R.id.serverPort)).getText().toString()));
+			mDatasource.updateServer(server);
+		}else{
+			String name = ((EditText)findViewById(R.id.serverName)).getText().toString();
+			String adress = ((EditText)findViewById(R.id.serverAdress)).getText().toString();
+			int port = Integer.parseInt(((EditText)findViewById(R.id.serverPort)).getText().toString());
+			mDatasource.createServer(name, adress, port);
+		}
 	}
 
 	@Override
@@ -61,6 +79,16 @@ public class AddServerActivity extends Activity {
 	protected void onResume() {
 		mDatasource.open();
 		super.onResume();
+	}
+	
+	private Server getServerById(long id){
+		List<Server> servers = mDatasource.getAllServers();
+		for(Server s : servers){
+			if(s.getId() == id){
+				return s;
+			}
+		}
+		return null;
 	}
 	
 	

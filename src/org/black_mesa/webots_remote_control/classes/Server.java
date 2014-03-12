@@ -29,4 +29,16 @@ public class Server {
 		return port;
 	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setAdress(String adress) {
+		this.adress = adress;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
 }

@@ -63,6 +63,7 @@ public class ConnexionFragment extends ListFragment implements OnListEventsListe
 	public void onResume() {
 		mDatasource.open();
 		updateView();
+		getActivity().invalidateOptionsMenu();
 		super.onResume();
 	}
 
@@ -146,8 +147,17 @@ public class ConnexionFragment extends ListFragment implements OnListEventsListe
 	}
 	
 	private void editServer() {
-		// TODO Auto-generated method stub
-		
+		Bundle b = new Bundle();
+		Intent intent = new Intent(getActivity(), AddServerActivity.class);
+		Long id = (long) 0;
+		for (int i = 0; i < getListView().getChildCount(); i++){
+			if(((CheckBox)getListView().getChildAt(i).findViewById(R.id.server_select)).isChecked()){
+				id = ((Server)getListView().getItemAtPosition(i)).getId();
+			}
+		}
+		b.putLong("id", id);
+		intent.putExtras(b);
+		startActivity(intent);
 	}
 	
 	private int countChecks(){
