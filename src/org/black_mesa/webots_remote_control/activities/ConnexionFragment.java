@@ -1,6 +1,5 @@
 package org.black_mesa.webots_remote_control.activities;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.black_mesa.webots_remote_control.R;
@@ -11,7 +10,6 @@ import org.black_mesa.webots_remote_control.listeners.OnListEventsListener;
 
 import android.app.ListFragment;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,13 +18,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 
 public class ConnexionFragment extends ListFragment implements OnListEventsListener{
 	private DataSource mDatasource;
 	private ArrayAdapter<Server> mAdapter;
 	private List<Server> mServers;
 	private Menu mMenu;
-	private List<Server> mSelectedServers;
 	
 	
 	
@@ -53,8 +51,6 @@ public class ConnexionFragment extends ListFragment implements OnListEventsListe
 				
 		mServers = mDatasource.getAllServers();
 		updateView();
-		
-		mSelectedServers = new ArrayList<Server>();
 	}
 	
 	@Override
@@ -105,24 +101,19 @@ public class ConnexionFragment extends ListFragment implements OnListEventsListe
 
 	@Override
 	public void onCheckChanged(boolean isChecked, int position) {
-		if (isChecked){
-			mSelectedServers.add((Server)getListView().getItemAtPosition(position));
-		}else{
-			mSelectedServers.remove((Server)getListView().getItemAtPosition(position));
-		}
 		updateMenu(true);
 	}
 
 	@Override
 	public void onItemClicked(int position) {
-		//TODO Launch server here
+		clearChecks();
+		updateMenu(true);
 		Log.i(getClass().getName(), position+" Click !");
 	}
 
 	@Override
 	public void onItemLongClicked(int position) {
-		getListView().getChildAt(position).setBackgroundColor(Color.CYAN);
-		mSelectedServers.add((Server)getListView().getItemAtPosition(position));
+		getListView().getChildAt(position).findViewById(R.id.server_select);
 		updateMenu(true);
 	}
 	
@@ -130,6 +121,13 @@ public class ConnexionFragment extends ListFragment implements OnListEventsListe
 	
 	//Private methods
 	
+	
+	private void clearChecks() {
+		for(int i = 0; i < getListView().getChildCount(); i++){
+			((CheckBox)getListView().getChildAt(i).findViewById(R.id.server_select)).setChecked(false);
+		}
+		
+	}
 	
 	private void updateView(){
 		Log.i(getClass().getName(), "Update View");
@@ -139,10 +137,10 @@ public class ConnexionFragment extends ListFragment implements OnListEventsListe
 	}
 	
 	private void deleteSelection() {
-		for(Server s : mSelectedServers){
-			mDatasource.deleteServer(s);
+		for(int i = 0; i < getListView().getChildCount(); i++){
+			boolean check = ((CheckBox)getListView().getChildAt(i).findViewById(R.id.server_select)).isChecked();
+			if(check) mDatasource.deleteServer(mServers.get(i));
 		}
-		mSelectedServers.clear();
 		updateView();
 		updateMenu(false);
 	}
@@ -152,9 +150,16 @@ public class ConnexionFragment extends ListFragment implements OnListEventsListe
 		
 	}
 	
+	private int countChecks(){
+		int i = 0;
+		for (int j = 0; j < getListView().getChildCount(); j++){
+			if(((CheckBox)getListView().getChildAt(j).findViewById(R.id.server_select)).isChecked()) i++;
+		}
+		return i;
+	}
 	private void updateMenu(boolean isSelection){
 		if(isSelection){
-			switch (mSelectedServers.size()){
+			switch (countChecks()){
 			case 0:
 				updateMenu(false);
 				break;
