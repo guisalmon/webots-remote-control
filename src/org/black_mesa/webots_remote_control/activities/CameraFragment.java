@@ -2,7 +2,6 @@ package org.black_mesa.webots_remote_control.activities;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.List;
 
 import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.client.Client;
@@ -12,7 +11,6 @@ import org.black_mesa.webots_remote_control.listeners.CameraTouchHandlerListener
 import org.black_mesa.webots_remote_control.listeners.ClientListener;
 import org.black_mesa.webots_remote_control.remote_object.CameraInstruction;
 import org.black_mesa.webots_remote_control.remote_object.InstructionQueue;
-import org.black_mesa.webots_remote_control.remote_object.RemoteObject;
 import org.black_mesa.webots_remote_control.utils.CameraTouchHandler;
 
 import android.app.Fragment;
@@ -114,7 +112,7 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 		CameraInstruction instruction = CameraInstruction.move(0, 0, forward * 16);
 		camera.add(instruction);
 		try {
-			client.onStateChange(camera);
+			client.board(camera);
 		} catch (InvalidClientException e) {
 			Log.e(getClass().getName(), "Invalid client exception catched");
 		} catch (IncompatibleClientException e) {
@@ -131,7 +129,7 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 		CameraInstruction instruction = CameraInstruction.move((right * time) / 128., (-up * time) / 128., 0);
 		camera.add(instruction);
 		try {
-			client.onStateChange(camera);
+			client.board(camera);
 		} catch (InvalidClientException e) {
 			Log.e(getClass().getName(), "Invalid client exception catched");
 		} catch (IncompatibleClientException e) {
@@ -150,7 +148,7 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 		instruction = CameraInstruction.pitch(pitch * Math.PI);
 		camera.add(instruction);
 		try {
-			client.onStateChange(camera);
+			client.board(camera);
 		} catch (InvalidClientException e) {
 			Log.e(getClass().getName(), "Invalid client exception catched");
 		} catch (IncompatibleClientException e) {
@@ -159,7 +157,12 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 	}
 
 	@Override
-	public void onReception(List<RemoteObject> list) {
-		camera = (InstructionQueue) list.get(0);
+	public void onConnectionSuccess() {
+		camera = (InstructionQueue) client.getReceivedObjects().get(0);
+	}
+
+	@Override
+	public void onConnectionFailure() {
+		Log.d(getClass().getName(), "Connection failure");
 	}
 }

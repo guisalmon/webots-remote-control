@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.exceptions.IncompatibleClientException;
 import org.black_mesa.webots_remote_control.exceptions.InvalidClientException;
 import org.black_mesa.webots_remote_control.listeners.ClientListener;
@@ -34,13 +35,15 @@ public class Client {
 	private ObjectOutputStream outputStream = null;
 	private Socket socket;
 
-	private ClientState s = ClientState.CREATED;
+	private State s = State.CREATED;
 	private boolean dispose = false;
 
 	private final Thread thread;
 
 	private final ClientListener listener;
 	private final Activity activity;
+	
+	private List<RemoteObject> received = null;
 
 	private final Object boardingLock = new Object();
 	private final Hashtable<Integer, RemoteObject> boarding = new Hashtable<Integer, RemoteObject>();
@@ -78,7 +81,34 @@ public class Client {
 					receiveInitialStates();
 					clientRoutine();
 				} catch (IOException e) {
-					s = ClientState.INVALID;
+					s = State.INVALID;
+					Log.e(getClass().getName(), e.toString());
+				}
+			}
+		});
+		thread.start();
+	}
+
+	public Client(Server server, ClientListener listener, Activity activity) {
+		this(new InetSocketAddress(server.getAdress(), server.getPort()), listener, activity);
+	}
+
+	public Client(final SocketAddress address, ClientListener listener, Activity activity) {
+		this.listener = listener;
+		this.activity = activity;
+
+		thread = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					socket = new Socket();
+					socket.connect(address, SOCKET_TIMEOUT);
+					socket.setSoTimeout(SOCKET_TIMEOUT);
+					receiveInitialStates();
+					clientRoutine();
+				} catch (IOException e) {
+					s = State.INVALID;
 					Log.e(getClass().getName(), e.toString());
 				}
 			}
@@ -96,7 +126,7 @@ public class Client {
 	 * @throws IncompatibleClientException
 	 *             The server is not in a version compatible with the client.
 	 */
-	public void onStateChange(RemoteObject state) throws InvalidClientException, IncompatibleClientException {
+	public void board(RemoteObject state) throws InvalidClientException, IncompatibleClientException {
 		switch (s) {
 		case INVALID:
 			throw new InvalidClientException("The client is in an invalid state");
@@ -122,13 +152,21 @@ public class Client {
 	public void dispose() {
 		dispose = true;
 	}
+	
+	public State getState() {
+		return s;
+	}
+	
+	public List<RemoteObject> getReceivedObjects() {
+		return received;
+	}
 
 	private void clientRoutine() throws IOException {
 		outputStream = new ObjectOutputStream(socket.getOutputStream());
 		while (true) {
-			if (dispose || s == ClientState.INCOMPATIBLE || s == ClientState.INVALID) {
-				if (dispose && s != ClientState.INCOMPATIBLE) {
-					s = ClientState.INVALID;
+			if (dispose || s == State.INCOMPATIBLE || s == State.INVALID) {
+				if (dispose && s != State.INCOMPATIBLE) {
+					s = State.INVALID;
 				}
 				try {
 					socket.close();
@@ -173,31 +211,48 @@ public class Client {
 				RemoteObject o = (RemoteObject) in.readObject();
 				receptionTable.put(o.getId(), o);
 			}
+			
+			received = new ArrayList<RemoteObject>(receptionTable.values());
 
 			activity.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					listener.onReception(new ArrayList<RemoteObject>(receptionTable.values()));
+					listener.onConnectionSuccess();
 				}
 			});
 		} catch (IOException e) {
 			// We have a serious problem with the stream
-			Log.d(getClass().getName(), e.toString());
-			s = ClientState.INVALID;
+			activity.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					listener.onConnectionFailure();
+				}
+			});
+			s = State.INVALID;
 		} catch (ClassNotFoundException e) {
 			// The server sent us a class that we don't have, check the server
 			// specifications to solve this problem
-			Log.d(getClass().getName(), e.toString());
-			s = ClientState.INCOMPATIBLE;
+			activity.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					listener.onConnectionFailure();
+				}
+			});
+			s = State.INCOMPATIBLE;
 		} catch (ClassCastException e) {
 			// The server did send an unexpected type, check the server
 			// specifications to solve this problem
-			Log.d(getClass().getName(), e.toString());
-			s = ClientState.INCOMPATIBLE;
+			activity.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					listener.onConnectionFailure();
+				}
+			});
+			s = State.INCOMPATIBLE;
 		}
 	}
 
-	private enum ClientState {
+	public enum State {
 		CREATED, CONNECTED, INCOMPATIBLE, INVALID
 	}
 }
