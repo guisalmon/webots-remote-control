@@ -6,16 +6,21 @@
     <string name="hello_world">Hello world!</string>
     <string name="server_based_preferences">Server settings</string>
     <string name="title_address_edittext_preference">address</string>
-	<string name="summary_address_edittext_preference">Insert current value here</string>
-	<string name="dialog_title_address_edittext_preference">Server address</string>
-	<string name="address_hint">0.0.0.0</string>
-	<string name="port_hint">0000</string>
-	<string name="title_port_edittext_preference">Port</string>
-	<string name="summary_port_edittext_preference">Insert current value here</string>
-	<string name="dialog_title_port_edittext_preference">Port used by the server</string>
-	<string name="server_preference"></string>
+    <string name="summary_address_edittext_preference">Insert current value here</string>
+    <string name="dialog_title_address_edittext_preference">Server address</string>
+    <string name="address_hint">0.0.0.0</string>
+    <string name="port_hint">0000</string>
+    <string name="title_port_edittext_preference">Port</string>
+    <string name="summary_port_edittext_preference">Insert current value here</string>
+    <string name="dialog_title_port_edittext_preference">Port used by the server</string>
+    <string name="server_preference"></string>
     <string name="server_incompatible_with_client"></string>
     <string name="invalid_client">The client is invalid ; it has been disposed, or connection has failed</string>
     <string name="drawer_open"></string>
     <string name="connexion_add">Add server</string>
+    <string name="title_activity_add_server">Add Server</string>
+    <string name="add_server_name">Server name</string>
+    <string name="add_server_adress">Server address</string>
+    <string name="add_server_port">Port</string>
+
 </resources>
