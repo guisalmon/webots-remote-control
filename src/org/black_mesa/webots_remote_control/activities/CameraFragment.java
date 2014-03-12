@@ -9,6 +9,7 @@ import org.black_mesa.webots_remote_control.exceptions.IncompatibleClientExcepti
 import org.black_mesa.webots_remote_control.exceptions.InvalidClientException;
 import org.black_mesa.webots_remote_control.listeners.CameraTouchHandlerListener;
 import org.black_mesa.webots_remote_control.listeners.ClientListener;
+import org.black_mesa.webots_remote_control.remote_object.RemoteObject;
 import org.black_mesa.webots_remote_control.remote_object.CameraInstruction;
 import org.black_mesa.webots_remote_control.remote_object.InstructionQueue;
 import org.black_mesa.webots_remote_control.utils.CameraTouchHandler;
@@ -157,12 +158,13 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 	}
 
 	@Override
-	public void onConnectionSuccess() {
+	public void onStateChange() {
 		camera = (InstructionQueue) client.getReceivedObjects().get(0);
 	}
 
 	@Override
-	public void onConnectionFailure() {
-		Log.d(getClass().getName(), "Connection failure");
+	public void onReception(RemoteObject data) {
+		// TODO Auto-generated method stub
+		
 	}
 }

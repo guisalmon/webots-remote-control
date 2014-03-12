@@ -43,7 +43,7 @@ public class Client {
 	private final ClientListener listener;
 	private final Activity activity;
 	
-	private List<RemoteObject> received = null;
+	private List<RemoteObject> received;
 
 	private final Object boardingLock = new Object();
 	private final Hashtable<Integer, RemoteObject> boarding = new Hashtable<Integer, RemoteObject>();
@@ -217,7 +217,7 @@ public class Client {
 			activity.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					listener.onConnectionSuccess();
+					listener.onStateChange();
 				}
 			});
 		} catch (IOException e) {
@@ -225,7 +225,7 @@ public class Client {
 			activity.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					listener.onConnectionFailure();
+					listener.onStateChange();
 				}
 			});
 			s = State.INVALID;
@@ -235,7 +235,7 @@ public class Client {
 			activity.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					listener.onConnectionFailure();
+					listener.onStateChange();
 				}
 			});
 			s = State.INCOMPATIBLE;
@@ -245,7 +245,7 @@ public class Client {
 			activity.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					listener.onConnectionFailure();
+					listener.onStateChange();
 				}
 			});
 			s = State.INCOMPATIBLE;

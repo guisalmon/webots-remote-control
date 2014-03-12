@@ -8,6 +8,7 @@ import java.util.Map;
 import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.listeners.ClientListener;
 import org.black_mesa.webots_remote_control.listeners.ConnectionManagerListener;
+import org.black_mesa.webots_remote_control.remote_object.RemoteObject;
 
 import android.app.Activity;
 
@@ -48,14 +49,7 @@ public class ConnectionManager implements ClientListener {
 	}
 
 	@Override
-	public void onConnectionSuccess() {
-		for (ConnectionManagerListener l : listeners) {
-			l.onStateChange();
-		}
-	}
-
-	@Override
-	public void onConnectionFailure() {
+	public void onStateChange() {
 		for (ConnectionManagerListener l : listeners) {
 			l.onStateChange();
 		}
@@ -63,5 +57,11 @@ public class ConnectionManager implements ClientListener {
 
 	public Client getClient(Server server) {
 		return connections.get(server);
+	}
+
+	@Override
+	public void onReception(RemoteObject data) {
+		// TODO Auto-generated method stub
+		
 	}
 }
