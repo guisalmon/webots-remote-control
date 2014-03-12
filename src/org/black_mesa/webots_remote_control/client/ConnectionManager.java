@@ -10,10 +10,9 @@ import org.black_mesa.webots_remote_control.listeners.ClientListener;
 import org.black_mesa.webots_remote_control.listeners.ConnectionManagerListener;
 import org.black_mesa.webots_remote_control.remote_object.RemoteObject;
 
-import android.app.Activity;
+import android.util.Log;
 
 public class ConnectionManager implements ClientListener {
-	private Activity activity;
 	private List<ConnectionManagerListener> listeners = new ArrayList<ConnectionManagerListener>();
 	private Map<Server, Client> connections = new Hashtable<Server, Client>();
 
@@ -25,23 +24,21 @@ public class ConnectionManager implements ClientListener {
 		listeners.remove(listener);
 	}
 
-	public void onPause() {
+	public void stop() {
 		for (Client c : connections.values()) {
 			c.dispose();
 		}
 		connections.clear();
-		activity = null;
 	}
 
-	public void onResume(Activity activity) {
-		this.activity = activity;
+	public void start() {
 	}
 
 	public void addServer(Server server) {
 		if (connections.containsKey(server)) {
 			throw new IllegalArgumentException(server + " was already present in the manager");
 		}
-		connections.put(server, new Client(server, this, activity));
+		connections.put(server, new Client(server, this));
 	}
 
 	public void removeServer(Server server) {
@@ -49,10 +46,11 @@ public class ConnectionManager implements ClientListener {
 	}
 
 	@Override
-	public void onStateChange() {
+	public void onStateChange(Client.State state) {
 		for (ConnectionManagerListener l : listeners) {
 			l.onStateChange();
 		}
+		Log.d(getClass().getName(), state.toString());
 	}
 
 	public Client getClient(Server server) {
@@ -61,7 +59,5 @@ public class ConnectionManager implements ClientListener {
 
 	@Override
 	public void onReception(RemoteObject data) {
-		// TODO Auto-generated method stub
-		
 	}
 }

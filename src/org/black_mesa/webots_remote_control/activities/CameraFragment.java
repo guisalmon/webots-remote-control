@@ -1,15 +1,10 @@
 package org.black_mesa.webots_remote_control.activities;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
 import org.black_mesa.webots_remote_control.R;
-import org.black_mesa.webots_remote_control.client.Client;
-import org.black_mesa.webots_remote_control.exceptions.IncompatibleClientException;
-import org.black_mesa.webots_remote_control.exceptions.InvalidClientException;
+import org.black_mesa.webots_remote_control.classes.Server;
+import org.black_mesa.webots_remote_control.client.ConnectionManager;
 import org.black_mesa.webots_remote_control.listeners.CameraTouchHandlerListener;
-import org.black_mesa.webots_remote_control.listeners.ClientListener;
-import org.black_mesa.webots_remote_control.remote_object.RemoteObject;
+import org.black_mesa.webots_remote_control.listeners.ConnectionManagerListener;
 import org.black_mesa.webots_remote_control.remote_object.CameraInstruction;
 import org.black_mesa.webots_remote_control.remote_object.InstructionQueue;
 import org.black_mesa.webots_remote_control.utils.CameraTouchHandler;
@@ -29,13 +24,24 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 
-public class CameraFragment extends Fragment implements OnTouchListener, CameraTouchHandlerListener, ClientListener {
+public class CameraFragment extends Fragment implements OnTouchListener, CameraTouchHandlerListener,
+		ConnectionManagerListener {
 	private CameraTouchHandler touchHandler;
-	private Client client;
+	private ConnectionManager connectionManager = new ConnectionManager();
 	private InstructionQueue camera = null;
+	Server server;
+	
+	public CameraFragment() {
+		connectionManager.addListener(this);
+	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+		int port = Integer.parseInt(prefs.getString("edittext_port_preference", "42511"));
+		String address = prefs.getString("edittext_address_preference", "0.0.0.0");
+
+		server = new Server(0, "Derp", address, port);
 		return inflater.inflate(R.layout.camera_fragment, container, false);
 	}
 
@@ -80,22 +86,15 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 
 	@Override
 	public void onPause() {
-		client.dispose();
+		connectionManager.stop();
 		super.onPause();
 	}
 
 	@Override
 	public void onResume() {
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-		InetAddress address = null;
-		int port = Integer.parseInt(prefs.getString("edittext_port_preference", "42511"));
-		try {
-			address = InetAddress.getByName(prefs.getString("edittext_address_preference", "0.0.0.0"));
-		} catch (UnknownHostException e) {
-			Log.e(getClass().getName(), e.toString());
-		}
+		connectionManager.start();
+		connectionManager.addServer(server);
 
-		client = new Client(address, port, this, getActivity());
 		super.onResume();
 	}
 
@@ -112,13 +111,7 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 		}
 		CameraInstruction instruction = CameraInstruction.move(0, 0, forward * 16);
 		camera.add(instruction);
-		try {
-			client.board(camera);
-		} catch (InvalidClientException e) {
-			Log.e(getClass().getName(), "Invalid client exception catched");
-		} catch (IncompatibleClientException e) {
-			Log.e(getClass().getName(), "Incompatible client exception catched");
-		}
+		connectionManager.getClient(server).board(camera);
 	}
 
 	@Override
@@ -129,13 +122,7 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 		}
 		CameraInstruction instruction = CameraInstruction.move((right * time) / 128., (-up * time) / 128., 0);
 		camera.add(instruction);
-		try {
-			client.board(camera);
-		} catch (InvalidClientException e) {
-			Log.e(getClass().getName(), "Invalid client exception catched");
-		} catch (IncompatibleClientException e) {
-			Log.e(getClass().getName(), "Incompatible client exception catched");
-		}
+		connectionManager.getClient(server).board(camera);
 	}
 
 	@Override
@@ -148,23 +135,12 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 		camera.add(instruction);
 		instruction = CameraInstruction.pitch(pitch * Math.PI);
 		camera.add(instruction);
-		try {
-			client.board(camera);
-		} catch (InvalidClientException e) {
-			Log.e(getClass().getName(), "Invalid client exception catched");
-		} catch (IncompatibleClientException e) {
-			Log.e(getClass().getName(), "Incompatible client exception catched");
-		}
+		connectionManager.getClient(server).board(camera);
 	}
 
 	@Override
 	public void onStateChange() {
-		camera = (InstructionQueue) client.getReceivedObjects().get(0);
-	}
-
-	@Override
-	public void onReception(RemoteObject data) {
-		// TODO Auto-generated method stub
-		
+		Log.d(getClass().getName(), "Onstatechange");
+		camera = (InstructionQueue) connectionManager.getClient(server).getInitialData().valueAt(0);
 	}
 }
