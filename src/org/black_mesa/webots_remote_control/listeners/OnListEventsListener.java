@@ -19,4 +19,10 @@ public interface OnListEventsListener {
 	 * @param position is the index of the item which was long clicked in the listView
 	 */
 	public void onItemLongClicked(int position);
+	
+	/**
+	 * Is called when the launch/stop button is clicked
+	 * @param position is the index of the item which was launched/stopped in the listView
+	 */
+	public void onItemLaunchListener(int position);
 }

@@ -14,6 +14,7 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -47,7 +48,15 @@ public class ServerListAdapter extends ArrayAdapter<Server>{
 		TextView adressText = (TextView) rowView.findViewById(R.id.server_adress);
 		nameText.setText(server.getName());
 		adressText.setText(server.getAdress()+":"+server.getPort());
-		
+		Button button = (Button)rowView.findViewById(R.id.server_state_button);
+		button.setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_send, 0);
+		button.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				eventsListener.onItemLaunchListener(rows.indexOf(v.getParent()));
+			}
+		});
 		CheckBox checkBox = (CheckBox)rowView.findViewById(R.id.server_select);
 		boxes.add(checkBox);
 		checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {

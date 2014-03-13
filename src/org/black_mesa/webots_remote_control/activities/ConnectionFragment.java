@@ -20,7 +20,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 
-public class ConnexionFragment extends ListFragment implements OnListEventsListener{
+public class ConnectionFragment extends ListFragment implements OnListEventsListener{
 	private DataSource mDatasource;
 	private ArrayAdapter<Server> mAdapter;
 	private List<Server> mServers;
@@ -116,6 +116,11 @@ public class ConnexionFragment extends ListFragment implements OnListEventsListe
 	public void onItemLongClicked(int position) {
 		getListView().getChildAt(position).findViewById(R.id.server_select);
 		updateMenu(true);
+	}
+	
+	@Override
+	public void onItemLaunchListener(int position) {
+		((MainActivity)getActivity()).connect(mServers.get(position));
 	}
 	
 	

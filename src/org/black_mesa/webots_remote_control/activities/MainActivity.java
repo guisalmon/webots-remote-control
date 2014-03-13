@@ -1,6 +1,9 @@
 package org.black_mesa.webots_remote_control.activities;
 
 import org.black_mesa.webots_remote_control.R;
+import org.black_mesa.webots_remote_control.classes.Server;
+import org.black_mesa.webots_remote_control.client.ConnectionManager;
+import org.black_mesa.webots_remote_control.listeners.ConnectionManagerListener;
 import org.black_mesa.webots_remote_control.preferences.PreferencesFragment;
 
 import android.app.Activity;
@@ -18,13 +21,16 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements ConnectionManagerListener{
 	
 	private String[] mDrawerListItems;
     private ListView mDrawerList;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private boolean mClosed;
+    
+    private ConnectionManager mConnectionManager = new ConnectionManager();
+    private Server mServer;
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +39,8 @@ public class MainActivity extends Activity {
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, 
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		
-		
+		//Set this as the connection manager listener 
+		mConnectionManager.addListener(this);
 		
 		//Create and populate the left drawer
 		setContentView(R.layout.activity_main);
@@ -109,6 +116,30 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 	
+	@Override
+	protected void onPause() {
+		mConnectionManager.stop();
+		super.onPause();
+	}
+
+	@Override
+	protected void onResume() {
+		mConnectionManager.start();
+		if(mServer != null){
+			mConnectionManager.addServer(mServer);
+		}
+		super.onResume();
+	}
+	
+	
+	public void connect(Server s){
+		if(mServer != null){
+			mConnectionManager.removeServer(mServer);
+		}
+		mServer = s;
+		mConnectionManager.addServer(mServer);
+	}
+
 	private class DrawerItemClickListener implements ListView.OnItemClickListener {
 	    @Override
 	    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -122,7 +153,7 @@ public class MainActivity extends Activity {
 		switch (position){
 		case 0:
 			//invalidateOptionsMenu();
-			Fragment connexionFragment = new ConnexionFragment();
+			Fragment connexionFragment = new ConnectionFragment();
 			fragmentManager = getFragmentManager();
 		    fragmentManager.beginTransaction()
 		                   .replace(R.id.content_frame, connexionFragment)
@@ -172,6 +203,12 @@ public class MainActivity extends Activity {
 	@Override
 	public void setTitle(CharSequence title) {
 	    getActionBar().setTitle(title);
+	}
+
+	@Override
+	public void onStateChange() {
+		// TODO Auto-generated method stub
+		
 	}
 
 
