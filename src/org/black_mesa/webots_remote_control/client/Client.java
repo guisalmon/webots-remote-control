@@ -189,6 +189,7 @@ public class Client {
 
 			synchronized (boarding) {
 				data = boarding.clone();
+				boarding.clear();
 			}
 
 			for (int i = 0; i < data.size(); i++) {
