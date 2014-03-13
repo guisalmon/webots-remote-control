@@ -1,5 +1,8 @@
 package org.black_mesa.webots_remote_control.activities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.client.ConnectionManager;
@@ -21,16 +24,19 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 public class MainActivity extends Activity implements ConnectionManagerListener{
+	
+	public static final ConnectionManager CONNECTION_MANAGER = new ConnectionManager();
+	
+	public List<Server> mConnectedServers;
 	
 	private String[] mDrawerListItems;
     private ListView mDrawerList;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private boolean mClosed;
-    
-    private ConnectionManager mConnectionManager = new ConnectionManager();
     private Server mServer;
     
 	@Override
@@ -41,7 +47,8 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		
 		//Set this as the connection manager listener 
-		mConnectionManager.addListener(this);
+		CONNECTION_MANAGER.addListener(this);
+		mConnectedServers = new ArrayList<Server>();
 		
 		//Create and populate the left drawer
 		setContentView(R.layout.activity_main);
@@ -119,26 +126,33 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	
 	@Override
 	protected void onPause() {
-		mConnectionManager.stop();
+		CONNECTION_MANAGER.stop();
 		super.onPause();
 	}
 
 	@Override
 	protected void onResume() {
-		mConnectionManager.start();
+		CONNECTION_MANAGER.start();
 		if(mServer != null){
-			mConnectionManager.addServer(mServer);
+			CONNECTION_MANAGER.addServer(mServer);
 		}
 		super.onResume();
 	}
 	
+	public void disconnect(Server s){
+
+		CONNECTION_MANAGER.removeServer(s);
+		mConnectedServers.remove(s);
+
+		mServer = null;
+	}
 	
 	public void connect(Server s){
 		if(mServer != null){
-			mConnectionManager.removeServer(mServer);
+			CONNECTION_MANAGER.removeServer(mServer);
 		}
 		mServer = s;
-		mConnectionManager.addServer(mServer);
+		CONNECTION_MANAGER.addServer(mServer);
 	}
 
 	private class DrawerItemClickListener implements ListView.OnItemClickListener {
@@ -209,8 +223,24 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 
 	@Override
 	public void onStateChange(Server server, ConnectionState state) {
-		// TODO Auto-generated method stub
-		
+		switch (state) {
+		case CONNECTED:
+			if (!mConnectedServers.contains(server)){
+				mConnectedServers.add(server);
+			}
+			Toast.makeText(this, "Connected ! ", Toast.LENGTH_SHORT).show();
+			break;
+		case COMMUNICATION_ERROR:
+		case CONNECTION_ERROR:
+			if (mConnectedServers.contains(server)){
+				mConnectedServers.remove(server);
+			}
+			Toast.makeText(this, "Disconnected ! ", Toast.LENGTH_SHORT).show();
+			break;
+
+		default:
+			break;
+		}
 	}
 
 
