@@ -12,7 +12,7 @@ import java.util.Queue;
  */
 public class InstructionQueue extends RemoteObject {
 	private static final long serialVersionUID = 228351533118850327L;
-	private Queue<Instruction> queue = new LinkedList<Instruction>();
+	private Queue<Instruction> queue;
 
 	/**
 	 * Instantiates an InstructionQueue.
@@ -22,6 +22,16 @@ public class InstructionQueue extends RemoteObject {
 	 */
 	public InstructionQueue(int id) {
 		super(id);
+		queue = new LinkedList<Instruction>();
+	}
+
+	private InstructionQueue(int id, InstructionQueue queue) {
+		super(id);
+		if (queue == null) {
+			this.queue = new LinkedList<Instruction>();
+		} else {
+			this.queue = new LinkedList<Instruction>(queue.queue);
+		}
 	}
 
 	/**
@@ -34,21 +44,18 @@ public class InstructionQueue extends RemoteObject {
 		queue.add(i);
 	}
 
-	private void move(InstructionQueue queue) {
-		while (!queue.queue.isEmpty()) {
-			this.queue.add(queue.queue.poll());
-		}
-	}
-
 	/**
 	 * Moves the instructions in the queue to the one in the boarding table.
 	 */
 	@Override
 	public RemoteObject board(RemoteObject previous) {
-		if (previous == null) {
-			previous = new InstructionQueue(getId());
+		InstructionQueue castedPrevious = (InstructionQueue) previous;
+		InstructionQueue newQueue = new InstructionQueue(getId(), castedPrevious);
+
+		while (!queue.isEmpty()) {
+			newQueue.queue.add(queue.poll());
 		}
-		((InstructionQueue) previous).move(this);
-		return previous;
+
+		return newQueue;
 	}
 }

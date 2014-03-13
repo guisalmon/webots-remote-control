@@ -24,6 +24,7 @@ public class MainActivity extends Activity {
     private ListView mDrawerList;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
+    private boolean mClosed;
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -49,29 +50,31 @@ public class MainActivity extends Activity {
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                mClosed = true;
+                //invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
 
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
                 getActionBar().setTitle(R.string.app_name);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                mClosed = false;
+                //invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
-        
-        //Set drawer open, display application name and select preferences
-        selectItem(3);
-        getActionBar().setTitle(R.string.app_name);
-        mDrawerLayout.openDrawer(mDrawerList);
+        selectItem(0);
+        mClosed = true;
+
 	}
 
 	@Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        // If the nav drawer is open, hide action items related to the content view
+		if (!mClosed){
+			menu.clear();
+		}
         return super.onPrepareOptionsMenu(menu);
     }
 	
@@ -118,6 +121,7 @@ public class MainActivity extends Activity {
 		FragmentManager fragmentManager;
 		switch (position){
 		case 0:
+			//invalidateOptionsMenu();
 			Fragment connexionFragment = new ConnexionFragment();
 			fragmentManager = getFragmentManager();
 		    fragmentManager.beginTransaction()

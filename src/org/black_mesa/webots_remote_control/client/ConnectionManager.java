@@ -1,0 +1,118 @@
+package org.black_mesa.webots_remote_control.client;
+
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+
+import org.black_mesa.webots_remote_control.classes.Server;
+import org.black_mesa.webots_remote_control.listeners.ClientListener;
+import org.black_mesa.webots_remote_control.listeners.ConnectionManagerListener;
+import org.black_mesa.webots_remote_control.remote_object.RemoteObject;
+
+import android.util.Log;
+
+/**
+ * Manages a collection of connections.
+ * 
+ * @author Ilja Kroonen
+ * 
+ */
+public class ConnectionManager implements ClientListener {
+	private List<ConnectionManagerListener> listeners = new ArrayList<ConnectionManagerListener>();
+	private Map<Server, Client> connections = new Hashtable<Server, Client>();
+
+	/**
+	 * Adds a listener to this ConnectionManager. It will be notified on any
+	 * state change in the connections.
+	 * 
+	 * @param listener
+	 *            Listener that will be added.
+	 */
+	public void addListener(ConnectionManagerListener listener) {
+		listeners.add(listener);
+	}
+
+	/**
+	 * Removes a listener.
+	 * 
+	 * @param listener
+	 *            Listener that will be removed.
+	 */
+	public void removeListener(ConnectionManagerListener listener) {
+		listeners.remove(listener);
+	}
+
+	/**
+	 * Stops the ConnectionManager. This call closes all connections.
+	 */
+	public void stop() {
+		Log.d(getClass().getName(), "Stop");
+		for (Client c : connections.values()) {
+			c.dispose();
+		}
+		connections.clear();
+	}
+
+	/**
+	 * Starts the ConnectionManager.
+	 */
+	public void start() {
+		Log.d(getClass().getName(), "Start");
+	}
+
+	/**
+	 * Connects to a server.
+	 * 
+	 * @param server
+	 *            Server to connect.
+	 */
+	public void addServer(Server server) {
+		Log.d(getClass().getName(), "Adding server");
+		if (connections.containsKey(server)) {
+			throw new IllegalArgumentException(server + " was already present in the manager");
+		}
+		connections.put(server, new Client(server, this));
+	}
+
+	/**
+	 * Removes a server from the ConnectionManager and disconnects its client.
+	 * 
+	 * @param server
+	 *            Server
+	 */
+	public void removeServer(Server server) {
+		connections.get(server).dispose();
+		connections.remove(server);
+	}
+
+	/**
+	 * Returns the client corresponding to a server.
+	 * 
+	 * @param server
+	 *            Server corresponding to the client we need.
+	 * @return Client corresponding to the server.
+	 */
+	public Client getClient(Server server) {
+		return connections.get(server);
+	}
+
+	/**
+	 * Called by a client when its state changes.
+	 */
+	@Override
+	public void onStateChange(Server server, Client.State state) {
+		Client source = connections.get(server);
+		if (source == null) {
+			return;
+		}
+		for (ConnectionManagerListener l : listeners) {
+			l.onStateChange();
+		}
+		Log.d(getClass().getName(), state.toString());
+	}
+
+	@Override
+	public void onReception(Server server, RemoteObject data) {
+	}
+}
