@@ -19,8 +19,8 @@ import android.util.Log;
  * 
  */
 public class ConnectionManager {
-	private final List<ConnectionManagerListener> listeners = new ArrayList<ConnectionManagerListener>();
-	private final Map<Server, Client> connections = new Hashtable<Server, Client>();
+	private final List<ConnectionManagerListener> mListeners = new ArrayList<ConnectionManagerListener>();
+	private final Map<Server, Client> mConnections = new Hashtable<Server, Client>();
 	private final ClientListener clientListener;
 
 	/**
@@ -31,11 +31,11 @@ public class ConnectionManager {
 
 			@Override
 			public void onStateChange(Server server, ConnectionState state) {
-				Client source = connections.get(server);
+				Client source = mConnections.get(server);
 				if (source == null) {
 					return;
 				}
-				for (ConnectionManagerListener l : listeners) {
+				for (ConnectionManagerListener l : mListeners) {
 					l.onStateChange(server, state);
 				}
 				Log.d(getClass().getName(), state.toString());
@@ -56,7 +56,7 @@ public class ConnectionManager {
 	 *            Listener that will be added.
 	 */
 	public void addListener(ConnectionManagerListener listener) {
-		listeners.add(listener);
+		mListeners.add(listener);
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class ConnectionManager {
 	 *            Listener that will be removed.
 	 */
 	public void removeListener(ConnectionManagerListener listener) {
-		listeners.remove(listener);
+		mListeners.remove(listener);
 	}
 
 	/**
@@ -74,10 +74,10 @@ public class ConnectionManager {
 	 */
 	public void stop() {
 		Log.d(getClass().getName(), "Stop");
-		for (Client c : connections.values()) {
+		for (Client c : mConnections.values()) {
 			c.dispose();
 		}
-		connections.clear();
+		mConnections.clear();
 	}
 
 	/**
@@ -95,10 +95,10 @@ public class ConnectionManager {
 	 */
 	public void addServer(Server server) {
 		Log.d(getClass().getName(), "Adding server");
-		if (connections.containsKey(server)) {
+		if (mConnections.containsKey(server)) {
 			throw new IllegalArgumentException(server + " was already present in the manager");
 		}
-		connections.put(server, new Client(server, clientListener));
+		mConnections.put(server, new Client(server, clientListener));
 	}
 
 	/**
@@ -108,8 +108,8 @@ public class ConnectionManager {
 	 *            Server
 	 */
 	public void removeServer(Server server) {
-		connections.get(server).dispose();
-		connections.remove(server);
+		mConnections.get(server).dispose();
+		mConnections.remove(server);
 	}
 
 	/**
@@ -120,6 +120,6 @@ public class ConnectionManager {
 	 * @return Client corresponding to the server.
 	 */
 	public Client getClient(Server server) {
-		return connections.get(server);
+		return mConnections.get(server);
 	}
 }

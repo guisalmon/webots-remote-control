@@ -29,22 +29,22 @@ public class Client {
 	private static final int SENDING_INTERVAL = 32;
 	private static final int SOCKET_TIMEOUT = 1000;
 	
-	private final Server server;
+	private final Server mServer;
 
-	private ConnectionState s = ConnectionState.INIT;
+	private ConnectionState mState = ConnectionState.INIT;
 
-	private final ClientListener listener;
+	private final ClientListener mListener;
 
-	private final Socket socket = new Socket();
+	private final Socket mSocket = new Socket();
 
-	private boolean dispose = false;
+	private boolean mDispose = false;
 
-	private final Thread receivingThread;
-	private final Thread sendingThread;
+	private final Thread mReceivingThread;
+	private final Thread mSendingThread;
 
-	private final SparseArray<RemoteObject> boarding = new SparseArray<RemoteObject>();
-	private SparseArray<RemoteObject> initialData;
-	private final SparseArray<List<RemoteObject>> additionalData = new SparseArray<List<RemoteObject>>();
+	private final SparseArray<RemoteObject> mBoarding = new SparseArray<RemoteObject>();
+	private SparseArray<RemoteObject> mInitialData;
+	private final SparseArray<List<RemoteObject>> mAdditionalData = new SparseArray<List<RemoteObject>>();
 
 	/**
 	 * Instantiates a Client and connects it to the server. This allocates
@@ -57,28 +57,28 @@ public class Client {
 	 *            receptions.
 	 */
 	public Client(Server server, ClientListener listener) {
-		this.listener = listener;
-		this.server = server;
+		this.mListener = listener;
+		this.mServer = server;
 
-		receivingThread = new Thread(new Runnable() {
+		mReceivingThread = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
 				try {
-					InetSocketAddress address = new InetSocketAddress(Client.this.server.getAdress(), Client.this.server.getPort());
-					socket.connect(address, SOCKET_TIMEOUT);
-					socket.setSoTimeout(SOCKET_TIMEOUT);
+					InetSocketAddress address = new InetSocketAddress(Client.this.mServer.getAdress(), Client.this.mServer.getPort());
+					mSocket.connect(address, SOCKET_TIMEOUT);
+					mSocket.setSoTimeout(SOCKET_TIMEOUT);
 				} catch (IOException e) {
 					Log.d(getClass().getName(), e.getLocalizedMessage());
 					changeState(ConnectionState.CONNECTION_ERROR);
 					return;
 				}
-				sendingThread.start();
+				mSendingThread.start();
 				receivingRoutine();
 			}
 		});
 
-		sendingThread = new Thread(new Runnable() {
+		mSendingThread = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
@@ -86,7 +86,7 @@ public class Client {
 			}
 		});
 
-		receivingThread.start();
+		mReceivingThread.start();
 	}
 
 	/**
@@ -97,8 +97,8 @@ public class Client {
 	 */
 	public void board(RemoteObject data) {
 		int id = data.getId();
-		synchronized (boarding) {
-			boarding.put(id, data.board(boarding.get(id)));
+		synchronized (mBoarding) {
+			mBoarding.put(id, data.board(mBoarding.get(id)));
 		}
 	}
 
@@ -108,7 +108,7 @@ public class Client {
 	 */
 	public void dispose() {
 		Log.d(getClass().getName(), "Dispose");
-		dispose = true;
+		mDispose = true;
 	}
 
 	/**
@@ -117,7 +117,7 @@ public class Client {
 	 * @return Current state of the client.
 	 */
 	public ConnectionState getState() {
-		return s;
+		return mState;
 	}
 
 	/**
@@ -130,7 +130,7 @@ public class Client {
 	public SparseArray<RemoteObject> getInitialData() {
 		// This array will never be modified by the Client, we don't need to
 		// copy it
-		return initialData;
+		return mInitialData;
 	}
 
 	/**
@@ -143,8 +143,8 @@ public class Client {
 		// We need to make a copy of the data, because the reception of a new
 		// object would trigger a modification of the array
 		SparseArray<List<RemoteObject>> ret;
-		synchronized (additionalData) {
-			ret = additionalData.clone();
+		synchronized (mAdditionalData) {
+			ret = mAdditionalData.clone();
 		}
 		return ret;
 	}
@@ -152,7 +152,7 @@ public class Client {
 	private void receivingRoutine() {
 		ObjectInputStream in;
 		try {
-			in = new ObjectInputStream(socket.getInputStream());
+			in = new ObjectInputStream(mSocket.getInputStream());
 		} catch (IOException e) {
 			changeState(ConnectionState.CONNECTION_ERROR);
 			return;
@@ -197,21 +197,21 @@ public class Client {
 
 		Log.d(getClass().getName(), "Received the fucking array");
 
-		this.initialData = initialData;
+		this.mInitialData = initialData;
 
 		while (true) {
-			if (dispose) {
+			if (mDispose) {
 				// The sendingRoutine will handle this
 				return;
 			}
 			RemoteObject o;
 			try {
 				o = (RemoteObject) in.readObject();
-				synchronized (additionalData) {
-					List<RemoteObject> l = additionalData.get(o.getId());
+				synchronized (mAdditionalData) {
+					List<RemoteObject> l = mAdditionalData.get(o.getId());
 					if (l == null) {
 						l = new ArrayList<RemoteObject>();
-						additionalData.put(o.getId(), l);
+						mAdditionalData.put(o.getId(), l);
 					}
 					l.add(o);
 				}
@@ -234,18 +234,18 @@ public class Client {
 		Log.d(getClass().getName(), "Sending routine started");
 		ObjectOutputStream out;
 		try {
-			out = new ObjectOutputStream(socket.getOutputStream());
+			out = new ObjectOutputStream(mSocket.getOutputStream());
 		} catch (IOException e) {
 			changeState(ConnectionState.CONNECTION_ERROR);
 			return;
 		}
 
 		while (true) {
-			if (dispose) {
+			if (mDispose) {
 				Log.d(getClass().getName(), "Disposed, closing socket");
 				changeState(ConnectionState.DISPOSED);
 				try {
-					socket.close();
+					mSocket.close();
 				} catch (IOException e) {
 				}
 				return;
@@ -253,23 +253,23 @@ public class Client {
 
 			SparseArray<RemoteObject> data;
 
-			synchronized (boarding) {
-				data = boarding.clone();
-				boarding.clear();
+			synchronized (mBoarding) {
+				data = mBoarding.clone();
+				mBoarding.clear();
 			}
 
 			for (int i = 0; i < data.size(); i++) {
 				try {
 					out.writeObject(data.valueAt(i));
 				} catch (IOException e) {
-					dispose = true;
+					mDispose = true;
 					changeState(ConnectionState.CONNECTION_ERROR);
 				}
 			}
 
-			synchronized (sendingThread) {
+			synchronized (mSendingThread) {
 				try {
-					sendingThread.wait(SENDING_INTERVAL);
+					mSendingThread.wait(SENDING_INTERVAL);
 				} catch (InterruptedException e) {
 				}
 			}
@@ -278,13 +278,13 @@ public class Client {
 
 	private void changeState(final ConnectionState s) {
 		if (s == ConnectionState.COMMUNICATION_ERROR || s == ConnectionState.CONNECTION_ERROR) {
-			dispose = true;
+			mDispose = true;
 		}
-		this.s = s;
+		this.mState = s;
 		Runnable notification = new Runnable() {
 			@Override
 			public void run() {
-				Client.this.listener.onStateChange(server, s);
+				Client.this.mListener.onStateChange(mServer, s);
 			}
 		};
 		new Handler(Looper.getMainLooper()).post(notification);
@@ -294,7 +294,7 @@ public class Client {
 		Runnable notification = new Runnable() {
 			@Override
 			public void run() {
-				Client.this.listener.onReception(server, data);
+				Client.this.mListener.onReception(mServer, data);
 			}
 		};
 		new Handler(Looper.getMainLooper()).post(notification);
