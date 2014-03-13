@@ -32,12 +32,9 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 	private InstructionQueue camera = null;
 	Server server;
 
-	public CameraFragment() {
-		connectionManager.addListener(this);
-	}
-
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		connectionManager.addListener(this);
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
 		int port = Integer.parseInt(prefs.getString("edittext_port_preference", "42511"));
 		String address = prefs.getString("edittext_address_preference", "0.0.0.0");
