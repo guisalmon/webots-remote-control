@@ -34,7 +34,7 @@ public abstract class RemoteObject implements Serializable {
 	 * 
 	 * @param previous
 	 *            Previous RemoteObject version for the same id in the boarding
-	 *            table of the client.
+	 *            table of the client. This object must not me modified.
 	 * @return Reference to a new version that will replace the old one. The
 	 *         object referenced should never be modified afterwards.
 	 */

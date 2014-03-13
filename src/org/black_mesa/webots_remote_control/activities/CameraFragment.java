@@ -2,6 +2,7 @@ package org.black_mesa.webots_remote_control.activities;
 
 import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.classes.Server;
+import org.black_mesa.webots_remote_control.client.Client;
 import org.black_mesa.webots_remote_control.client.ConnectionManager;
 import org.black_mesa.webots_remote_control.listeners.CameraTouchHandlerListener;
 import org.black_mesa.webots_remote_control.listeners.ConnectionManagerListener;
@@ -30,7 +31,7 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 	private ConnectionManager connectionManager = new ConnectionManager();
 	private InstructionQueue camera = null;
 	Server server;
-	
+
 	public CameraFragment() {
 		connectionManager.addListener(this);
 	}
@@ -141,6 +142,11 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 	@Override
 	public void onStateChange() {
 		Log.d(getClass().getName(), "Onstatechange");
-		camera = (InstructionQueue) connectionManager.getClient(server).getInitialData().valueAt(0);
+		Client client = connectionManager.getClient(server);
+		if (client == null) {
+			Log.e(getClass().getName(), "null client!");
+		} else {
+			camera = (InstructionQueue) client.getInitialData().valueAt(0);
+		}
 	}
 }

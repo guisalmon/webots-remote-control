@@ -85,7 +85,7 @@ public class Client {
 	}
 
 	public enum State {
-		INIT, CONNECTED, COMMUNICATION_ERROR, CONNECTION_ERROR
+		INIT, CONNECTED, COMMUNICATION_ERROR, CONNECTION_ERROR, DISPOSED
 	}
 
 	private void receivingRoutine() {
@@ -93,7 +93,6 @@ public class Client {
 		try {
 			in = new ObjectInputStream(socket.getInputStream());
 		} catch (IOException e) {
-			dispose = true;
 			changeState(State.CONNECTION_ERROR);
 			return;
 		}
@@ -132,13 +131,13 @@ public class Client {
 				return;
 			}
 		}
-		
+
 		changeState(State.CONNECTED);
-		
+
 		Log.d(getClass().getName(), "Received the fucking array");
 
 		this.initialData = initialData;
-		
+
 		sendingThread.start();
 
 		while (true) {
@@ -170,13 +169,13 @@ public class Client {
 		try {
 			out = new ObjectOutputStream(socket.getOutputStream());
 		} catch (IOException e) {
-			dispose = true;
 			changeState(State.CONNECTION_ERROR);
 			return;
 		}
 
 		while (true) {
 			if (dispose) {
+				changeState(State.DISPOSED);
 				try {
 					socket.close();
 				} catch (IOException e) {
