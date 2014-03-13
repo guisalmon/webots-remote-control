@@ -21,13 +21,13 @@ import android.util.Log;
 public class ConnectionManager {
 	private final List<ConnectionManagerListener> mListeners = new ArrayList<ConnectionManagerListener>();
 	private final Map<Server, Client> mConnections = new Hashtable<Server, Client>();
-	private final ClientListener clientListener;
+	private final ClientListener mClientListener;
 
 	/**
 	 * Instantiates the ConnectionManager.
 	 */
 	public ConnectionManager() {
-		clientListener = new ClientListener() {
+		mClientListener = new ClientListener() {
 
 			@Override
 			public void onStateChange(Server server, ConnectionState state) {
@@ -98,7 +98,7 @@ public class ConnectionManager {
 		if (mConnections.containsKey(server)) {
 			throw new IllegalArgumentException(server + " was already present in the manager");
 		}
-		mConnections.put(server, new Client(server, clientListener));
+		mConnections.put(server, new Client(server, mClientListener));
 	}
 
 	/**
