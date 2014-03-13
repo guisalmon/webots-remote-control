@@ -26,8 +26,8 @@ import android.util.SparseArray;
  */
 
 public class Client {
-	private static int SENDING_INTERVAL = 32;
-	private static int SOCKET_TIMEOUT = 1000;
+	private static final int SENDING_INTERVAL = 32;
+	private static final int SOCKET_TIMEOUT = 1000;
 	
 	private final Server server;
 
