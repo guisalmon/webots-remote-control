@@ -13,14 +13,40 @@ import org.black_mesa.webots_remote_control.remote_object.RemoteObject;
 import android.util.Log;
 
 /**
- * Manages a collection of connections.
+ * Manages a collection of clients.
  * 
  * @author Ilja Kroonen
  * 
  */
-public class ConnectionManager implements ClientListener {
-	private List<ConnectionManagerListener> listeners = new ArrayList<ConnectionManagerListener>();
-	private Map<Server, Client> connections = new Hashtable<Server, Client>();
+public class ConnectionManager {
+	private final List<ConnectionManagerListener> listeners = new ArrayList<ConnectionManagerListener>();
+	private final Map<Server, Client> connections = new Hashtable<Server, Client>();
+	private final ClientListener clientListener;
+
+	/**
+	 * Instantiates the ConnectionManager.
+	 */
+	public ConnectionManager() {
+		clientListener = new ClientListener() {
+
+			@Override
+			public void onStateChange(Server server, ConnectionState state) {
+				Client source = connections.get(server);
+				if (source == null) {
+					return;
+				}
+				for (ConnectionManagerListener l : listeners) {
+					l.onStateChange(server, state);
+				}
+				Log.d(getClass().getName(), state.toString());
+			}
+
+			@Override
+			public void onReception(Server server, RemoteObject data) {
+				// This will be needed to implement further features
+			}
+		};
+	}
 
 	/**
 	 * Adds a listener to this ConnectionManager. It will be notified on any
@@ -72,7 +98,7 @@ public class ConnectionManager implements ClientListener {
 		if (connections.containsKey(server)) {
 			throw new IllegalArgumentException(server + " was already present in the manager");
 		}
-		connections.put(server, new Client(server, this));
+		connections.put(server, new Client(server, clientListener));
 	}
 
 	/**
@@ -95,24 +121,5 @@ public class ConnectionManager implements ClientListener {
 	 */
 	public Client getClient(Server server) {
 		return connections.get(server);
-	}
-
-	/**
-	 * Called by a client when its state changes.
-	 */
-	@Override
-	public void onStateChange(Server server, ConnectionState state) {
-		Client source = connections.get(server);
-		if (source == null) {
-			return;
-		}
-		for (ConnectionManagerListener l : listeners) {
-			l.onStateChange(server, state);
-		}
-		Log.d(getClass().getName(), state.toString());
-	}
-
-	@Override
-	public void onReception(Server server, RemoteObject data) {
 	}
 }
