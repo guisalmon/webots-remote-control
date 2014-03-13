@@ -4,8 +4,10 @@ import java.util.List;
 
 import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.classes.Server;
+import org.black_mesa.webots_remote_control.client.ConnectionState;
 import org.black_mesa.webots_remote_control.database.DataSource;
 import org.black_mesa.webots_remote_control.database.ServerListAdapter;
+import org.black_mesa.webots_remote_control.listeners.ConnectionManagerListener;
 import org.black_mesa.webots_remote_control.listeners.OnListEventsListener;
 
 import android.app.ListFragment;
@@ -18,12 +20,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 
-public class ConnectionFragment extends ListFragment implements OnListEventsListener{
+public class ConnectionFragment extends ListFragment implements OnListEventsListener, ConnectionManagerListener{
 	private DataSource mDatasource;
 	private ArrayAdapter<Server> mAdapter;
 	private List<Server> mServers;
+	private List<Server> mConnectedServers;
 	private Menu mMenu;
 	
 	
@@ -51,6 +55,9 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 				
 		mServers = mDatasource.getAllServers();
 		updateView();
+		
+		MainActivity.CONNECTION_MANAGER.addListener(this);
+		mConnectedServers = ((MainActivity)getActivity()).mConnectedServers;
 	}
 	
 	@Override
@@ -114,13 +121,46 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 
 	@Override
 	public void onItemLongClicked(int position) {
-		getListView().getChildAt(position).findViewById(R.id.server_select);
 		updateMenu(true);
 	}
 	
 	@Override
 	public void onItemLaunchListener(int position) {
-		((MainActivity)getActivity()).connect(mServers.get(position));
+		
+		if(mConnectedServers.contains(mServers.get(position))){
+			((Button)getListView().getChildAt(position).findViewById(R.id.server_state_button)).setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_send, 0);
+			((MainActivity)getActivity()).disconnect(mServers.get(position));
+		}else{
+			getListView().getChildAt(position).findViewById(R.id.server_state_button).setVisibility(View.GONE);
+			getListView().getChildAt(position).findViewById(R.id.server_connecting).setVisibility(View.VISIBLE);
+			((MainActivity)getActivity()).connect(mServers.get(position));
+		}
+	}
+	
+	
+	
+	//ConnectionManagerListener
+	
+	
+	@Override
+	public void onStateChange(Server server, ConnectionState state) {
+		int i = mServers.indexOf(server);
+		switch (state) {
+		case CONNECTED:
+			((Button)getListView().getChildAt(i).findViewById(R.id.server_state_button)).setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_close_clear_cancel, 0);
+			getListView().getChildAt(i).findViewById(R.id.server_state_button).setVisibility(View.VISIBLE);
+			getListView().getChildAt(i).findViewById(R.id.server_connecting).setVisibility(View.GONE);
+			break;
+		case COMMUNICATION_ERROR:
+		case CONNECTION_ERROR:
+			((Button)getListView().getChildAt(i).findViewById(R.id.server_state_button)).setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_send, 0);
+			getListView().getChildAt(i).findViewById(R.id.server_state_button).setVisibility(View.VISIBLE);
+			getListView().getChildAt(i).findViewById(R.id.server_connecting).setVisibility(View.GONE);
+		default:
+			break;
+		}
+		
+		
 	}
 	
 	
