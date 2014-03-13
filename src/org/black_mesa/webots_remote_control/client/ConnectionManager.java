@@ -107,7 +107,7 @@ public class ConnectionManager implements ClientListener {
 			return;
 		}
 		for (ConnectionManagerListener l : listeners) {
-			l.onStateChange();
+			l.onStateChange(server, state);
 		}
 		Log.d(getClass().getName(), state.toString());
 	}

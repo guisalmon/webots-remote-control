@@ -4,6 +4,7 @@ import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.client.Client;
 import org.black_mesa.webots_remote_control.client.ConnectionManager;
+import org.black_mesa.webots_remote_control.client.ConnectionState;
 import org.black_mesa.webots_remote_control.listeners.CameraTouchHandlerListener;
 import org.black_mesa.webots_remote_control.listeners.ConnectionManagerListener;
 import org.black_mesa.webots_remote_control.remote_object.CameraInstruction;
@@ -142,7 +143,7 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 	}
 
 	@Override
-	public void onStateChange() {
+	public void onStateChange(Server server, ConnectionState state) {
 		Log.d(getClass().getName(), "Onstatechange");
 		Client client = connectionManager.getClient(server);
 		if (client == null) {
