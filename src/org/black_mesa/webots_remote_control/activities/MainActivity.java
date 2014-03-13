@@ -3,6 +3,7 @@ package org.black_mesa.webots_remote_control.activities;
 import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.client.ConnectionManager;
+import org.black_mesa.webots_remote_control.client.ConnectionState;
 import org.black_mesa.webots_remote_control.listeners.ConnectionManagerListener;
 import org.black_mesa.webots_remote_control.preferences.PreferencesFragment;
 
@@ -205,8 +206,9 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	    getActionBar().setTitle(title);
 	}
 
+
 	@Override
-	public void onStateChange() {
+	public void onStateChange(Server server, ConnectionState state) {
 		// TODO Auto-generated method stub
 		
 	}
