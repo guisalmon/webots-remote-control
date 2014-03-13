@@ -366,6 +366,8 @@ public class CameraTouchHandler {
 	}
 
 	private boolean isCenter(float x, float y) {
+		// We have to detect if the zone that has been touched is the "center".
+		// Here, we defined the center as an oval covering 2/3 of the view.
 		float u = (xMax - xMin) / 2;
 		float v = (yMax - yMin) / 2;
 		float a = (xMax - xMin) / 3;
