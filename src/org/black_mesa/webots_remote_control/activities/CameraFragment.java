@@ -104,7 +104,8 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
-		return touchHandler.onTouch(event);
+		touchHandler.onTouch(event);
+		return true;
 	}
 
 	@Override
