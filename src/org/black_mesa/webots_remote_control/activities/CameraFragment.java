@@ -15,7 +15,6 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -25,7 +24,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.webkit.WebView.FindListener;
 
 public class CameraFragment extends Fragment implements OnTouchListener, CameraTouchHandlerListener,
 		ConnectionManagerListener {
