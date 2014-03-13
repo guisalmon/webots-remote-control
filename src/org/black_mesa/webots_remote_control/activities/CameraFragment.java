@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 import java.util.List;
 
 import org.black_mesa.webots_remote_control.R;
+import org.black_mesa.webots_remote_control.classes.CameraModel;
 import org.black_mesa.webots_remote_control.client.Client;
 import org.black_mesa.webots_remote_control.exceptions.IncompatibleClientException;
 import org.black_mesa.webots_remote_control.exceptions.InvalidClientException;
@@ -20,6 +21,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -29,6 +31,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
+import android.webkit.WebView.FindListener;
 
 public class CameraFragment extends Fragment implements OnTouchListener, CameraTouchHandlerListener, ClientListener {
 	private CameraTouchHandler touchHandler;
@@ -73,9 +76,12 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 			yMin = (float) actionBarSize;
 			yMax = size.y;
 		}
-
+		CameraModel cameraModel = CameraModel.getInstance();
+		cameraModel.setxMax(xMax);
+		cameraModel.setxMin(xMin);
+		cameraModel.setyMax(yMax);
+		cameraModel.setyMin(yMin);
 		touchHandler = new CameraTouchHandler(xMin, yMin, xMax, yMax, this);
-
 		super.onActivityCreated(savedInstanceState);
 	}
 
@@ -108,7 +114,7 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 	@Override
 	public void moveForward(float forward) {
 		if (camera == null) {
-			Log.d(getClass().getName(), "turnPitch event before camera was initialized");
+			Log.d(getClass().getName(), "moveForward event before camera was initialized");
 			return;
 		}
 		CameraInstruction instruction = CameraInstruction.move(0, 0, forward * 16);
@@ -125,7 +131,7 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 	@Override
 	public void moveSide(float right, float up, long time) {
 		if (camera == null) {
-			Log.d(getClass().getName(), "turnPitch event before camera was initialized");
+			Log.d(getClass().getName(), "moveSide event before camera was initialized");
 			return;
 		}
 		CameraInstruction instruction = CameraInstruction.move((right * time) / 128., (-up * time) / 128., 0);
