@@ -101,7 +101,7 @@ public class ConnectionManager implements ClientListener {
 	 * Called by a client when its state changes.
 	 */
 	@Override
-	public void onStateChange(Server server, Client.State state) {
+	public void onStateChange(Server server, ConnectionState state) {
 		Client source = connections.get(server);
 		if (source == null) {
 			return;

@@ -31,7 +31,7 @@ public class Client {
 	
 	private final Server server;
 
-	private State s = State.INIT;
+	private ConnectionState s = ConnectionState.INIT;
 
 	private final ClientListener listener;
 
@@ -60,18 +60,17 @@ public class Client {
 		this.listener = listener;
 		this.server = server;
 
-		final InetSocketAddress address = new InetSocketAddress(server.getAdress(), server.getPort());
-
 		receivingThread = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
 				try {
+					InetSocketAddress address = new InetSocketAddress(Client.this.server.getAdress(), Client.this.server.getPort());
 					socket.connect(address, SOCKET_TIMEOUT);
 					socket.setSoTimeout(SOCKET_TIMEOUT);
 				} catch (IOException e) {
 					Log.d(getClass().getName(), e.getLocalizedMessage());
-					changeState(State.CONNECTION_ERROR);
+					changeState(ConnectionState.CONNECTION_ERROR);
 					return;
 				}
 				sendingThread.start();
@@ -117,7 +116,7 @@ public class Client {
 	 * 
 	 * @return Current state of the client.
 	 */
-	public State getState() {
+	public ConnectionState getState() {
 		return s;
 	}
 
@@ -150,22 +149,12 @@ public class Client {
 		return ret;
 	}
 
-	/**
-	 * Enumeration of the possible states of a client.
-	 * 
-	 * @author Ilja Kroonen
-	 * 
-	 */
-	public enum State {
-		INIT, CONNECTED, COMMUNICATION_ERROR, CONNECTION_ERROR, DISPOSED
-	}
-
 	private void receivingRoutine() {
 		ObjectInputStream in;
 		try {
 			in = new ObjectInputStream(socket.getInputStream());
 		} catch (IOException e) {
-			changeState(State.CONNECTION_ERROR);
+			changeState(ConnectionState.CONNECTION_ERROR);
 			return;
 		}
 
@@ -174,13 +163,13 @@ public class Client {
 		try {
 			n = (Integer) in.readObject();
 		} catch (ClassNotFoundException e) {
-			changeState(State.COMMUNICATION_ERROR);
+			changeState(ConnectionState.COMMUNICATION_ERROR);
 			return;
 		} catch (IOException e) {
-			changeState(State.CONNECTION_ERROR);
+			changeState(ConnectionState.CONNECTION_ERROR);
 			return;
 		} catch (ClassCastException e) {
-			changeState(State.COMMUNICATION_ERROR);
+			changeState(ConnectionState.COMMUNICATION_ERROR);
 			return;
 		}
 
@@ -193,18 +182,18 @@ public class Client {
 				RemoteObject r = (RemoteObject) in.readObject();
 				initialData.put(r.getId(), r);
 			} catch (ClassNotFoundException e) {
-				changeState(State.COMMUNICATION_ERROR);
+				changeState(ConnectionState.COMMUNICATION_ERROR);
 				return;
 			} catch (IOException e) {
-				changeState(State.CONNECTION_ERROR);
+				changeState(ConnectionState.CONNECTION_ERROR);
 				return;
 			} catch (ClassCastException e) {
-				changeState(State.COMMUNICATION_ERROR);
+				changeState(ConnectionState.COMMUNICATION_ERROR);
 				return;
 			}
 		}
 
-		changeState(State.CONNECTED);
+		changeState(ConnectionState.CONNECTED);
 
 		Log.d(getClass().getName(), "Received the fucking array");
 
@@ -229,13 +218,13 @@ public class Client {
 				notifyReception(o);
 			} catch (SocketTimeoutException e) {
 			} catch (ClassNotFoundException e) {
-				changeState(State.COMMUNICATION_ERROR);
+				changeState(ConnectionState.COMMUNICATION_ERROR);
 				return;
 			} catch (IOException e) {
-				changeState(State.CONNECTION_ERROR);
+				changeState(ConnectionState.CONNECTION_ERROR);
 				return;
 			} catch (ClassCastException e) {
-				changeState(State.COMMUNICATION_ERROR);
+				changeState(ConnectionState.COMMUNICATION_ERROR);
 				return;
 			}
 		}
@@ -247,14 +236,14 @@ public class Client {
 		try {
 			out = new ObjectOutputStream(socket.getOutputStream());
 		} catch (IOException e) {
-			changeState(State.CONNECTION_ERROR);
+			changeState(ConnectionState.CONNECTION_ERROR);
 			return;
 		}
 
 		while (true) {
 			if (dispose) {
 				Log.d(getClass().getName(), "Disposed, closing socket");
-				changeState(State.DISPOSED);
+				changeState(ConnectionState.DISPOSED);
 				try {
 					socket.close();
 				} catch (IOException e) {
@@ -274,7 +263,7 @@ public class Client {
 					out.writeObject(data.valueAt(i));
 				} catch (IOException e) {
 					dispose = true;
-					changeState(State.CONNECTION_ERROR);
+					changeState(ConnectionState.CONNECTION_ERROR);
 				}
 			}
 
@@ -287,8 +276,8 @@ public class Client {
 		}
 	}
 
-	private void changeState(final State s) {
-		if (s == State.COMMUNICATION_ERROR || s == State.CONNECTION_ERROR) {
+	private void changeState(final ConnectionState s) {
+		if (s == ConnectionState.COMMUNICATION_ERROR || s == ConnectionState.CONNECTION_ERROR) {
 			dispose = true;
 		}
 		this.s = s;
