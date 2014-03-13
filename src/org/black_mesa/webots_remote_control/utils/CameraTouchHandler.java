@@ -6,6 +6,7 @@ import java.util.TimerTask;
 import org.black_mesa.webots_remote_control.listeners.CameraTouchHandlerListener;
 
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.MotionEvent;
 
 public class CameraTouchHandler {
@@ -84,6 +85,7 @@ public class CameraTouchHandler {
 			break;
 		}
 		update(event);
+		Log.d(getClass().getName(), s.toString());
 		return true;
 	}
 
@@ -105,6 +107,14 @@ public class CameraTouchHandler {
 			l.turnPitch(dX, dY);
 			break;
 		case SINGLE_SIDE:
+			break;
+		case DOUBLE_SIDE:
+			prevDistance = distance(x1, y1, x2, y2);
+			newDistance = distance(event.getX(event.findPointerIndex(p1)),
+					event.getY(event.findPointerIndex(p1)), event.getX(event.findPointerIndex(p2)),
+					event.getY(event.findPointerIndex(p2)));
+			res = (newDistance - prevDistance) / distance(xMin, yMin, xMax, yMax);
+			l.moveForward(res);
 			break;
 		}
 	}
@@ -147,17 +157,46 @@ public class CameraTouchHandler {
 		case SINGLE_CENTRAL:
 			throw new RuntimeException();
 		case SINGLE_SIDE:
+			throw new RuntimeException();
+		case DOUBLE_SIDE:
 			id = event.getPointerId(event.getActionIndex());
-			if (id == p1) {
-				for (int i = 0; i < event.getPointerCount(); i++) {
-					int candidate = event.getPointerId(i);
-					if (candidate != id) {
-						p1 = candidate;
-						break;
+			count = event.getPointerCount();
+			if (count == 2) {
+				if (id == p1) {
+					p1 = p2;
+				}
+				timer = new Timer();
+				TimerTask task = new TimerTask() {
+
+					@Override
+					public void run() {
+						timerHandler();
+					}
+				};
+				timer.schedule(task, 0, TIMER_TICK);
+				s = State.SINGLE_SIDE;
+			} else if (count > 2) {
+				if (id == p1) {
+					for (int i = 0; i < count; i++) {
+						int candidate = event.getPointerId(i);
+						if (candidate != id && candidate != p2) {
+							p1 = candidate;
+							break;
+						}
+					}
+				} else if (id == p2) {
+					for (int i = 0; i < count; i++) {
+						int candidate = event.getPointerId(i);
+						if (candidate != id && candidate != p1) {
+							p2 = candidate;
+							break;
+						}
 					}
 				}
+				s = State.DOUBLE_SIDE;
+			} else {
+				throw new RuntimeException();
 			}
-			s = State.SINGLE_SIDE;
 			break;
 		}
 	}
@@ -174,7 +213,12 @@ public class CameraTouchHandler {
 			s = State.DOUBLE_CENTRAL;
 			break;
 		case SINGLE_SIDE:
-			s = State.SINGLE_SIDE;
+			timer.cancel();
+			p2 = event.getPointerId(event.getActionIndex());
+			s = State.DOUBLE_SIDE;
+			break;
+		case DOUBLE_SIDE:
+			s = State.DOUBLE_SIDE;
 			break;
 		}
 	}
@@ -192,6 +236,8 @@ public class CameraTouchHandler {
 			timer.cancel();
 			s = State.INIT;
 			break;
+		case DOUBLE_SIDE:
+			throw new RuntimeException();
 		}
 	}
 
@@ -207,6 +253,9 @@ public class CameraTouchHandler {
 			break;
 		case SINGLE_SIDE:
 			timer.cancel();
+			s = State.INIT;
+			break;
+		case DOUBLE_SIDE:
 			s = State.INIT;
 			break;
 		}
@@ -237,6 +286,8 @@ public class CameraTouchHandler {
 			throw new RuntimeException();
 		case SINGLE_SIDE:
 			throw new RuntimeException();
+		case DOUBLE_SIDE:
+			throw new RuntimeException();
 		}
 	}
 
@@ -256,6 +307,8 @@ public class CameraTouchHandler {
 			l.moveSide(resX, resY, time);
 			t = now;
 			break;
+		case DOUBLE_SIDE:
+			throw new RuntimeException();
 		}
 	}
 
@@ -278,6 +331,12 @@ public class CameraTouchHandler {
 			y1 = event.getY(event.findPointerIndex(p1));
 			t = event.getEventTime();
 			break;
+		case DOUBLE_SIDE:
+			x1 = event.getX(event.findPointerIndex(p1));
+			y1 = event.getY(event.findPointerIndex(p1));
+			x2 = event.getX(event.findPointerIndex(p2));
+			y2 = event.getY(event.findPointerIndex(p2));
+			break;
 		}
 	}
 
@@ -295,6 +354,6 @@ public class CameraTouchHandler {
 	}
 
 	private enum State {
-		DOUBLE_CENTRAL, INIT, SINGLE_CENTRAL, SINGLE_SIDE
+		DOUBLE_CENTRAL, DOUBLE_SIDE, INIT, SINGLE_CENTRAL, SINGLE_SIDE
 	}
 }
