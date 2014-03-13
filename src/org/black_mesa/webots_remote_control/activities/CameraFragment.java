@@ -4,10 +4,12 @@ import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.client.Client;
 import org.black_mesa.webots_remote_control.client.ConnectionManager;
+import org.black_mesa.webots_remote_control.client.ConnectionState;
 import org.black_mesa.webots_remote_control.listeners.CameraTouchHandlerListener;
 import org.black_mesa.webots_remote_control.listeners.ConnectionManagerListener;
 import org.black_mesa.webots_remote_control.remote_object.CameraInstruction;
 import org.black_mesa.webots_remote_control.remote_object.InstructionQueue;
+import org.black_mesa.webots_remote_control.remote_object.RemoteObject;
 import org.black_mesa.webots_remote_control.utils.CameraTouchHandler;
 
 import android.app.Fragment;
@@ -18,6 +20,7 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -137,13 +140,16 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 	}
 
 	@Override
-	public void onStateChange() {
+	public void onStateChange(Server server, ConnectionState state) {
 		Log.d(getClass().getName(), "Onstatechange");
 		Client client = connectionManager.getClient(server);
 		if (client == null) {
 			Log.e(getClass().getName(), "null client!");
 		} else {
-			camera = (InstructionQueue) client.getInitialData().valueAt(0);
+			SparseArray<RemoteObject> array = client.getInitialData();
+			if(array != null) {
+				camera = (InstructionQueue) client.getInitialData().valueAt(0);
+			}
 		}
 	}
 }

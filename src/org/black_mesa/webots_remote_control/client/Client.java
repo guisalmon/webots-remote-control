@@ -18,11 +18,20 @@ import android.os.Looper;
 import android.util.Log;
 import android.util.SparseArray;
 
+/**
+ * This class controls communications between the application and a server.
+ * 
+ * @author Ilja Kroonen
+ * 
+ */
+
 public class Client {
 	private static int SENDING_INTERVAL = 32;
 	private static int SOCKET_TIMEOUT = 1000;
+	
+	private final Server server;
 
-	private State s = State.INIT;
+	private ConnectionState s = ConnectionState.INIT;
 
 	private final ClientListener listener;
 
@@ -37,21 +46,31 @@ public class Client {
 	private SparseArray<RemoteObject> initialData;
 	private final SparseArray<List<RemoteObject>> additionalData = new SparseArray<List<RemoteObject>>();
 
+	/**
+	 * Instantiates a Client and connects it to the server. This allocates
+	 * resources that you must not forget to free later by calling dispose().
+	 * 
+	 * @param server
+	 *            Server this client will connect to.
+	 * @param listener
+	 *            Listener to be notified of state changes and object
+	 *            receptions.
+	 */
 	public Client(Server server, ClientListener listener) {
 		this.listener = listener;
-
-		final InetSocketAddress address = new InetSocketAddress(server.getAdress(), server.getPort());
+		this.server = server;
 
 		receivingThread = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
 				try {
+					InetSocketAddress address = new InetSocketAddress(Client.this.server.getAdress(), Client.this.server.getPort());
 					socket.connect(address, SOCKET_TIMEOUT);
 					socket.setSoTimeout(SOCKET_TIMEOUT);
 				} catch (IOException e) {
 					Log.d(getClass().getName(), e.getLocalizedMessage());
-					changeState(State.CONNECTION_ERROR);
+					changeState(ConnectionState.CONNECTION_ERROR);
 					return;
 				}
 				sendingThread.start();
@@ -70,6 +89,12 @@ public class Client {
 		receivingThread.start();
 	}
 
+	/**
+	 * Boards data into the client. It will be sent as soon as possible.
+	 * 
+	 * @param data
+	 *            Data that must be sent to the server.
+	 */
 	public void board(RemoteObject data) {
 		int id = data.getId();
 		synchronized (boarding) {
@@ -77,20 +102,46 @@ public class Client {
 		}
 	}
 
+	/**
+	 * Liberates the resources allocated to this client (terminates threads and
+	 * closes socket).
+	 */
 	public void dispose() {
 		Log.d(getClass().getName(), "Dispose");
 		dispose = true;
 	}
 
-	public State getState() {
+	/**
+	 * Getter for the client state.
+	 * 
+	 * @return Current state of the client.
+	 */
+	public ConnectionState getState() {
 		return s;
 	}
 
+	/**
+	 * When the connection is established, the server sends initial data to the
+	 * client. The data is available after OnStateChange has been called with
+	 * CONNECTED as the new state.
+	 * 
+	 * @return Initial data received by the client.
+	 */
 	public SparseArray<RemoteObject> getInitialData() {
+		// This array will never be modified by the Client, we don't need to
+		// copy it
 		return initialData;
 	}
 
+	/**
+	 * Use this function to retrieve additional objects sent by the server.
+	 * Availability of objects is notified by an OnReception call.
+	 * 
+	 * @return Array containing the data.
+	 */
 	public SparseArray<List<RemoteObject>> getAdditionalData() {
+		// We need to make a copy of the data, because the reception of a new
+		// object would trigger a modification of the array
 		SparseArray<List<RemoteObject>> ret;
 		synchronized (additionalData) {
 			ret = additionalData.clone();
@@ -98,16 +149,12 @@ public class Client {
 		return ret;
 	}
 
-	public enum State {
-		INIT, CONNECTED, COMMUNICATION_ERROR, CONNECTION_ERROR, DISPOSED
-	}
-
 	private void receivingRoutine() {
 		ObjectInputStream in;
 		try {
 			in = new ObjectInputStream(socket.getInputStream());
 		} catch (IOException e) {
-			changeState(State.CONNECTION_ERROR);
+			changeState(ConnectionState.CONNECTION_ERROR);
 			return;
 		}
 
@@ -116,13 +163,13 @@ public class Client {
 		try {
 			n = (Integer) in.readObject();
 		} catch (ClassNotFoundException e) {
-			changeState(State.COMMUNICATION_ERROR);
+			changeState(ConnectionState.COMMUNICATION_ERROR);
 			return;
 		} catch (IOException e) {
-			changeState(State.CONNECTION_ERROR);
+			changeState(ConnectionState.CONNECTION_ERROR);
 			return;
 		} catch (ClassCastException e) {
-			changeState(State.COMMUNICATION_ERROR);
+			changeState(ConnectionState.COMMUNICATION_ERROR);
 			return;
 		}
 
@@ -135,18 +182,18 @@ public class Client {
 				RemoteObject r = (RemoteObject) in.readObject();
 				initialData.put(r.getId(), r);
 			} catch (ClassNotFoundException e) {
-				changeState(State.COMMUNICATION_ERROR);
+				changeState(ConnectionState.COMMUNICATION_ERROR);
 				return;
 			} catch (IOException e) {
-				changeState(State.CONNECTION_ERROR);
+				changeState(ConnectionState.CONNECTION_ERROR);
 				return;
 			} catch (ClassCastException e) {
-				changeState(State.COMMUNICATION_ERROR);
+				changeState(ConnectionState.COMMUNICATION_ERROR);
 				return;
 			}
 		}
 
-		changeState(State.CONNECTED);
+		changeState(ConnectionState.CONNECTED);
 
 		Log.d(getClass().getName(), "Received the fucking array");
 
@@ -171,13 +218,13 @@ public class Client {
 				notifyReception(o);
 			} catch (SocketTimeoutException e) {
 			} catch (ClassNotFoundException e) {
-				changeState(State.COMMUNICATION_ERROR);
+				changeState(ConnectionState.COMMUNICATION_ERROR);
 				return;
 			} catch (IOException e) {
-				changeState(State.CONNECTION_ERROR);
+				changeState(ConnectionState.CONNECTION_ERROR);
 				return;
 			} catch (ClassCastException e) {
-				changeState(State.COMMUNICATION_ERROR);
+				changeState(ConnectionState.COMMUNICATION_ERROR);
 				return;
 			}
 		}
@@ -189,14 +236,14 @@ public class Client {
 		try {
 			out = new ObjectOutputStream(socket.getOutputStream());
 		} catch (IOException e) {
-			changeState(State.CONNECTION_ERROR);
+			changeState(ConnectionState.CONNECTION_ERROR);
 			return;
 		}
 
 		while (true) {
 			if (dispose) {
 				Log.d(getClass().getName(), "Disposed, closing socket");
-				changeState(State.DISPOSED);
+				changeState(ConnectionState.DISPOSED);
 				try {
 					socket.close();
 				} catch (IOException e) {
@@ -216,7 +263,7 @@ public class Client {
 					out.writeObject(data.valueAt(i));
 				} catch (IOException e) {
 					dispose = true;
-					changeState(State.CONNECTION_ERROR);
+					changeState(ConnectionState.CONNECTION_ERROR);
 				}
 			}
 
@@ -229,15 +276,15 @@ public class Client {
 		}
 	}
 
-	private void changeState(final State s) {
-		if (s == State.COMMUNICATION_ERROR || s == State.CONNECTION_ERROR) {
+	private void changeState(final ConnectionState s) {
+		if (s == ConnectionState.COMMUNICATION_ERROR || s == ConnectionState.CONNECTION_ERROR) {
 			dispose = true;
 		}
 		this.s = s;
 		Runnable notification = new Runnable() {
 			@Override
 			public void run() {
-				Client.this.listener.onStateChange(s);
+				Client.this.listener.onStateChange(server, s);
 			}
 		};
 		new Handler(Looper.getMainLooper()).post(notification);
@@ -247,7 +294,7 @@ public class Client {
 		Runnable notification = new Runnable() {
 			@Override
 			public void run() {
-				Client.this.listener.onReception(data);
+				Client.this.listener.onReception(server, data);
 			}
 		};
 		new Handler(Looper.getMainLooper()).post(notification);
