@@ -1,6 +1,7 @@
 package org.black_mesa.webots_remote_control.activities;
 
 import org.black_mesa.webots_remote_control.R;
+import org.black_mesa.webots_remote_control.classes.CameraModel;
 import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.client.Client;
 import org.black_mesa.webots_remote_control.client.ConnectionManager;
@@ -11,7 +12,6 @@ import org.black_mesa.webots_remote_control.remote_object.CameraInstruction;
 import org.black_mesa.webots_remote_control.remote_object.InstructionQueue;
 import org.black_mesa.webots_remote_control.remote_object.RemoteObject;
 import org.black_mesa.webots_remote_control.utils.CameraTouchHandler;
-
 import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -79,9 +79,12 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 			yMin = (float) actionBarSize;
 			yMax = size.y;
 		}
-
+		CameraModel cameraModel = CameraModel.getInstance();
+		cameraModel.setxMax(xMax);
+		cameraModel.setxMin(xMin);
+		cameraModel.setyMax(yMax);
+		cameraModel.setyMin(yMin);
 		touchHandler = new CameraTouchHandler(xMin, yMin, xMax, yMax, this);
-
 		super.onActivityCreated(savedInstanceState);
 	}
 
