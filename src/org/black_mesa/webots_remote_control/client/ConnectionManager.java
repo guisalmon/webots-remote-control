@@ -25,6 +25,7 @@ public class ConnectionManager implements ClientListener {
 	}
 
 	public void stop() {
+		Log.d(getClass().getName(), "Stop");
 		for (Client c : connections.values()) {
 			c.dispose();
 		}
@@ -32,9 +33,11 @@ public class ConnectionManager implements ClientListener {
 	}
 
 	public void start() {
+		Log.d(getClass().getName(), "Start");
 	}
 
 	public void addServer(Server server) {
+		Log.d(getClass().getName(), "Adding server");
 		if (connections.containsKey(server)) {
 			throw new IllegalArgumentException(server + " was already present in the manager");
 		}

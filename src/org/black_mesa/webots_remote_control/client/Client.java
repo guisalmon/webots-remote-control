@@ -18,7 +18,7 @@ import android.util.SparseArray;
 
 public class Client {
 	private static int SENDING_INTERVAL = 32;
-	private static int SOCKET_TIMEOUT = 5000;
+	private static int SOCKET_TIMEOUT = 1000;
 
 	private State s = State.INIT;
 
@@ -46,11 +46,13 @@ public class Client {
 				try {
 					socket.connect(address, SOCKET_TIMEOUT);
 					socket.setSoTimeout(SOCKET_TIMEOUT);
-					receivingRoutine();
 				} catch (IOException e) {
 					Log.d(getClass().getName(), e.getLocalizedMessage());
 					changeState(State.CONNECTION_ERROR);
+					return;
 				}
+				sendingThread.start();
+				receivingRoutine();
 			}
 		});
 
@@ -73,6 +75,7 @@ public class Client {
 	}
 
 	public void dispose() {
+		Log.d(getClass().getName(), "Dispose");
 		dispose = true;
 	}
 
@@ -138,8 +141,6 @@ public class Client {
 
 		this.initialData = initialData;
 
-		sendingThread.start();
-
 		while (true) {
 			if (dispose) {
 				// The sendingRoutine will handle this
@@ -175,6 +176,7 @@ public class Client {
 
 		while (true) {
 			if (dispose) {
+				Log.d(getClass().getName(), "Disposed, closing socket");
 				changeState(State.DISPOSED);
 				try {
 					socket.close();
