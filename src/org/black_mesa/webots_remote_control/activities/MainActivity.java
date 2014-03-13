@@ -37,7 +37,6 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private boolean mClosed;
-    private Server mServer;
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -133,8 +132,8 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	@Override
 	protected void onResume() {
 		CONNECTION_MANAGER.start();
-		if(mServer != null){
-			CONNECTION_MANAGER.addServer(mServer);
+		for (Server s : mConnectedServers){
+			CONNECTION_MANAGER.addServer(s);
 		}
 		super.onResume();
 	}
@@ -143,16 +142,12 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 
 		CONNECTION_MANAGER.removeServer(s);
 		mConnectedServers.remove(s);
-
-		mServer = null;
 	}
 	
 	public void connect(Server s){
-		if(mServer != null){
-			CONNECTION_MANAGER.removeServer(mServer);
+		if(!mConnectedServers.contains(s)){
+			CONNECTION_MANAGER.addServer(s);
 		}
-		mServer = s;
-		CONNECTION_MANAGER.addServer(mServer);
 	}
 
 	private class DrawerItemClickListener implements ListView.OnItemClickListener {
@@ -176,19 +171,22 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 			break;
 		case 1:
 			Fragment cameraFragment = new CameraFragment();
+			Bundle b = new Bundle();
+			b.putLong("ServerId", 0);
+			cameraFragment.setArguments(b);
 			fragmentManager = getFragmentManager();
 		    fragmentManager.beginTransaction()
 		                   .replace(R.id.content_frame, cameraFragment)
 		                   .commit();
 			break;
 		case 2:
-			break;
-		case 3:
 			Fragment preferencesFragment = new PreferencesFragment();
 			fragmentManager = getFragmentManager();
 		    fragmentManager.beginTransaction()
 		                   .replace(R.id.content_frame, preferencesFragment)
 		                   .commit();
+			break;
+		case 3:
 			break;
 		case 4:
 			break;
