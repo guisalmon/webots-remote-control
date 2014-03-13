@@ -45,5 +45,15 @@ public class Server {
 	public void setPort(int port) {
 		this.port = port;
 	}
-
+	
+	public int hashCode() {
+		return (int) (id % (1 << 32));
+	}
+	
+	public boolean equals(Object o) {
+		if(o.getClass() != getClass()) {
+			return false;
+		}
+		return ((Server) o).getId() == getId();
+	}
 }

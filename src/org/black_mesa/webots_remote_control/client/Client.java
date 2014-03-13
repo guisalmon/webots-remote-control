@@ -6,6 +6,8 @@ import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.listeners.ClientListener;
@@ -32,7 +34,8 @@ public class Client {
 	private final Thread sendingThread;
 
 	private final SparseArray<RemoteObject> boarding = new SparseArray<RemoteObject>();
-	private SparseArray<RemoteObject> initialData = new SparseArray<RemoteObject>();
+	private SparseArray<RemoteObject> initialData;
+	private final SparseArray<List<RemoteObject>> additionalData = new SparseArray<List<RemoteObject>>();
 
 	public Client(Server server, ClientListener listener) {
 		this.listener = listener;
@@ -85,6 +88,14 @@ public class Client {
 
 	public SparseArray<RemoteObject> getInitialData() {
 		return initialData;
+	}
+
+	public SparseArray<List<RemoteObject>> getAdditionalData() {
+		SparseArray<List<RemoteObject>> ret;
+		synchronized (additionalData) {
+			ret = additionalData.clone();
+		}
+		return ret;
 	}
 
 	public enum State {
@@ -149,6 +160,14 @@ public class Client {
 			RemoteObject o;
 			try {
 				o = (RemoteObject) in.readObject();
+				synchronized (additionalData) {
+					List<RemoteObject> l = additionalData.get(o.getId());
+					if (l == null) {
+						l = new ArrayList<RemoteObject>();
+						additionalData.put(o.getId(), l);
+					}
+					l.add(o);
+				}
 				notifyReception(o);
 			} catch (SocketTimeoutException e) {
 			} catch (ClassNotFoundException e) {
