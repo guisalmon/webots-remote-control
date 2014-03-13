@@ -35,6 +35,21 @@ public class ConnectionManager {
 				if (source == null) {
 					return;
 				}
+				switch(state) {
+				case COMMUNICATION_ERROR:
+					mConnections.remove(server);
+					break;
+				case CONNECTED:
+					break;
+				case CONNECTION_ERROR:
+					mConnections.remove(server);
+					break;
+				case DISPOSED:
+					mConnections.remove(server);
+					break;
+				case INIT:
+					break;
+				}
 				for (ConnectionManagerListener l : mListeners) {
 					l.onStateChange(server, state);
 				}
