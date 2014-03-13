@@ -46,10 +46,12 @@ public class Server {
 		this.port = port;
 	}
 	
+	@Override
 	public int hashCode() {
 		return (int) (id % (1 << 32));
 	}
 	
+	@Override
 	public boolean equals(Object o) {
 		if(o.getClass() != getClass()) {
 			return false;
