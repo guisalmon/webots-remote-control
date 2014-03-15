@@ -26,7 +26,8 @@ import android.view.ViewGroup;
 public class CameraFragment extends Fragment implements OnTouchListener, ConnectionManagerListener {
 	private CameraTouchHandler touchHandler;
 	private ConnectionManager connectionManager = new ConnectionManager();
-	Server server;
+	private CamerasManager camerasManager = new CamerasManager(connectionManager);
+	private Server server;
 	private float xMin;
 	private float xMax;
 	private float yMin;
@@ -95,7 +96,7 @@ public class CameraFragment extends Fragment implements OnTouchListener, Connect
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
-		if(touchHandler != null) {
+		if (touchHandler != null) {
 			touchHandler.onTouch(event);
 		}
 		return true;
@@ -104,8 +105,7 @@ public class CameraFragment extends Fragment implements OnTouchListener, Connect
 	@Override
 	public void onStateChange(Server server, ConnectionState state) {
 		if (state == ConnectionState.CONNECTED) {
-			touchHandler = new CameraTouchHandler(xMin, yMin, xMax, yMax, CamerasManager.makeListener(
-					connectionManager, server, 0));
+			touchHandler = new CameraTouchHandler(xMin, yMin, xMax, yMax, camerasManager.makeListener(server, 0));
 		}
 	}
 }

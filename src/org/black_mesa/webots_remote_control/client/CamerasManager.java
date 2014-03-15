@@ -14,20 +14,30 @@ import org.black_mesa.webots_remote_control.remote_object.InstructionQueue;
  * 
  */
 public class CamerasManager {
+	private final ConnectionManager connectionManager;
+
+	/**
+	 * Instantiates the CamerasManager.
+	 * 
+	 * @param connectionManager
+	 *            ConnectionManager that will be used to retrieve Client
+	 *            instances.
+	 */
+	public CamerasManager(ConnectionManager connectionManager) {
+		this.connectionManager = connectionManager;
+	}
+
 	/**
 	 * Instantiates a CameraTouchHandlerListener linked to a specific remote
 	 * camera.
 	 * 
-	 * @param connectionManager
-	 *            TODO Remove this parameter as it can be statically retrieved.
 	 * @param server
 	 *            Server of the remote camera.
 	 * @param cameraId
 	 *            Id of the remote camera on the server.
 	 * @return The listener.
 	 */
-	public static CameraTouchHandlerListener makeListener(final ConnectionManager connectionManager,
-			final Server server, final int cameraId) {
+	public CameraTouchHandlerListener makeListener(final Server server, final int cameraId) {
 		return new CameraTouchHandlerListener() {
 			private Client client = connectionManager.getClient(server);
 			private InstructionQueue camera = (InstructionQueue) client.getInitialData().get(cameraId);
@@ -54,7 +64,6 @@ public class CamerasManager {
 				camera.add(instruction);
 				client.board(camera);
 			}
-
 		};
 	}
 }
