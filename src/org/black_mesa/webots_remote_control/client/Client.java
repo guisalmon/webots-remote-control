@@ -15,7 +15,6 @@ import org.black_mesa.webots_remote_control.remote_object.RemoteObject;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.util.SparseArray;
 
 /**
@@ -28,7 +27,7 @@ import android.util.SparseArray;
 public class Client {
 	private static final int SENDING_INTERVAL = 32;
 	private static final int SOCKET_TIMEOUT = 1000;
-	
+
 	private final Server mServer;
 
 	private ConnectionState mState = ConnectionState.INIT;
@@ -57,32 +56,20 @@ public class Client {
 	 *            receptions.
 	 */
 	public Client(Server server, ClientListener listener) {
-		this.mListener = listener;
-		this.mServer = server;
+		mListener = listener;
+		mServer = server;
 
 		mReceivingThread = new Thread(new Runnable() {
-
 			@Override
 			public void run() {
-				try {
-					InetSocketAddress address = new InetSocketAddress(Client.this.mServer.getAdress(), Client.this.mServer.getPort());
-					mSocket.connect(address, SOCKET_TIMEOUT);
-					mSocket.setSoTimeout(SOCKET_TIMEOUT);
-				} catch (IOException e) {
-					Log.d(getClass().getName(), e.getLocalizedMessage());
-					changeState(ConnectionState.CONNECTION_ERROR);
-					return;
-				}
-				mSendingThread.start();
-				receivingRoutine();
+				initTask();
 			}
 		});
 
 		mSendingThread = new Thread(new Runnable() {
-
 			@Override
 			public void run() {
-				sendingRoutine();
+				sendingTask();
 			}
 		});
 
@@ -107,7 +94,6 @@ public class Client {
 	 * closes socket).
 	 */
 	public void dispose() {
-		Log.d(getClass().getName(), "Dispose");
 		mDispose = true;
 	}
 
@@ -149,7 +135,36 @@ public class Client {
 		return ret;
 	}
 
-	private void receivingRoutine() {
+	private void initTask() {
+		try {
+			InetSocketAddress address = new InetSocketAddress(mServer.getAdress(), mServer.getPort());
+			mSocket.connect(address, SOCKET_TIMEOUT);
+			mSocket.setSoTimeout(SOCKET_TIMEOUT);
+		} catch (IOException e) {
+			changeState(ConnectionState.CONNECTION_ERROR);
+			return;
+		}
+		mSendingThread.start();
+		receivingTask();
+		try {
+			mSocket.close();
+		} catch (IOException e) {
+		}
+	}
+
+	private void sendingTask() {
+		try {
+			ObjectOutputStream out = new ObjectOutputStream(mSocket.getOutputStream());
+
+			while (!mDispose) {
+				sendingRoutine(out);
+			}
+		} catch (IOException e) {
+			changeState(ConnectionState.CONNECTION_ERROR);
+		}
+	}
+
+	private void receivingTask() {
 		ObjectInputStream in;
 		try {
 			in = new ObjectInputStream(mSocket.getInputStream());
@@ -162,129 +177,75 @@ public class Client {
 
 		try {
 			n = (Integer) in.readObject();
-		} catch (ClassNotFoundException e) {
-			changeState(ConnectionState.COMMUNICATION_ERROR);
-			return;
-		} catch (IOException e) {
-			changeState(ConnectionState.CONNECTION_ERROR);
-			return;
-		} catch (ClassCastException e) {
-			changeState(ConnectionState.COMMUNICATION_ERROR);
-			return;
-		}
 
-		Log.d(getClass().getName(), "Received the fucking integer: " + n);
+			SparseArray<RemoteObject> initialData = new SparseArray<RemoteObject>();
 
-		SparseArray<RemoteObject> initialData = new SparseArray<RemoteObject>();
-
-		for (int i = 0; i < n; i++) {
-			try {
+			for (int i = 0; i < n; i++) {
 				RemoteObject r = (RemoteObject) in.readObject();
 				initialData.put(r.getId(), r);
-			} catch (ClassNotFoundException e) {
-				changeState(ConnectionState.COMMUNICATION_ERROR);
-				return;
-			} catch (IOException e) {
-				changeState(ConnectionState.CONNECTION_ERROR);
-				return;
-			} catch (ClassCastException e) {
-				changeState(ConnectionState.COMMUNICATION_ERROR);
-				return;
 			}
+			mInitialData = initialData;
+
+			changeState(ConnectionState.CONNECTED);
+
+			while (!mDispose) {
+				receivingRoutine(in);
+			}
+		} catch (ClassNotFoundException e) {
+			changeState(ConnectionState.COMMUNICATION_ERROR);
+		} catch (IOException e) {
+			changeState(ConnectionState.CONNECTION_ERROR);
+		} catch (ClassCastException e) {
+			changeState(ConnectionState.COMMUNICATION_ERROR);
+		}
+	}
+
+	private void sendingRoutine(ObjectOutputStream out) throws IOException {
+		SparseArray<RemoteObject> data;
+
+		synchronized (mBoarding) {
+			data = mBoarding.clone();
+			mBoarding.clear();
 		}
 
-		changeState(ConnectionState.CONNECTED);
+		for (int i = 0; i < data.size(); i++) {
+			out.writeObject(data.valueAt(i));
+		}
 
-		Log.d(getClass().getName(), "Received the fucking array");
-
-		this.mInitialData = initialData;
-
-		while (true) {
-			if (mDispose) {
-				// The sendingRoutine will handle this
-				return;
-			}
-			RemoteObject o;
+		synchronized (mSendingThread) {
 			try {
-				o = (RemoteObject) in.readObject();
-				synchronized (mAdditionalData) {
-					List<RemoteObject> l = mAdditionalData.get(o.getId());
-					if (l == null) {
-						l = new ArrayList<RemoteObject>();
-						mAdditionalData.put(o.getId(), l);
-					}
-					l.add(o);
-				}
-				notifyReception(o);
-			} catch (SocketTimeoutException e) {
-			} catch (ClassNotFoundException e) {
-				changeState(ConnectionState.COMMUNICATION_ERROR);
-				return;
-			} catch (IOException e) {
-				changeState(ConnectionState.CONNECTION_ERROR);
-				return;
-			} catch (ClassCastException e) {
-				changeState(ConnectionState.COMMUNICATION_ERROR);
-				return;
+				mSendingThread.wait(SENDING_INTERVAL);
+			} catch (InterruptedException e) {
 			}
 		}
 	}
 
-	private void sendingRoutine() {
-		Log.d(getClass().getName(), "Sending routine started");
-		ObjectOutputStream out;
+	private void receivingRoutine(ObjectInputStream in) throws ClassNotFoundException, IOException {
+		RemoteObject o;
 		try {
-			out = new ObjectOutputStream(mSocket.getOutputStream());
-		} catch (IOException e) {
-			changeState(ConnectionState.CONNECTION_ERROR);
-			return;
-		}
-
-		while (true) {
-			if (mDispose) {
-				Log.d(getClass().getName(), "Disposed, closing socket");
-				changeState(ConnectionState.DISPOSED);
-				try {
-					mSocket.close();
-				} catch (IOException e) {
+			o = (RemoteObject) in.readObject();
+			synchronized (mAdditionalData) {
+				List<RemoteObject> l = mAdditionalData.get(o.getId());
+				if (l == null) {
+					l = new ArrayList<RemoteObject>();
+					mAdditionalData.put(o.getId(), l);
 				}
-				return;
+				l.add(o);
 			}
-
-			SparseArray<RemoteObject> data;
-
-			synchronized (mBoarding) {
-				data = mBoarding.clone();
-				mBoarding.clear();
-			}
-
-			for (int i = 0; i < data.size(); i++) {
-				try {
-					out.writeObject(data.valueAt(i));
-				} catch (IOException e) {
-					mDispose = true;
-					changeState(ConnectionState.CONNECTION_ERROR);
-				}
-			}
-
-			synchronized (mSendingThread) {
-				try {
-					mSendingThread.wait(SENDING_INTERVAL);
-				} catch (InterruptedException e) {
-				}
-			}
+			notifyReception(o);
+		} catch (SocketTimeoutException e) {
 		}
 	}
 
 	private void changeState(final ConnectionState s) {
-		if (s == ConnectionState.COMMUNICATION_ERROR || s == ConnectionState.CONNECTION_ERROR) {
+		if (s != ConnectionState.CONNECTED) {
 			mDispose = true;
 		}
-		this.mState = s;
+		mState = s;
 		Runnable notification = new Runnable() {
 			@Override
 			public void run() {
-				Client.this.mListener.onStateChange(mServer, s);
+				mListener.onStateChange(mServer, s);
 			}
 		};
 		new Handler(Looper.getMainLooper()).post(notification);
@@ -294,7 +255,7 @@ public class Client {
 		Runnable notification = new Runnable() {
 			@Override
 			public void run() {
-				Client.this.mListener.onReception(mServer, data);
+				mListener.onReception(mServer, data);
 			}
 		};
 		new Handler(Looper.getMainLooper()).post(notification);
