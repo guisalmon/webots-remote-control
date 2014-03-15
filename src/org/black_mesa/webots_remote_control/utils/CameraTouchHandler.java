@@ -6,7 +6,6 @@ import java.util.TimerTask;
 import org.black_mesa.webots_remote_control.listeners.CameraTouchHandlerListener;
 
 import android.os.SystemClock;
-import android.util.Log;
 import android.view.MotionEvent;
 
 /**
@@ -112,7 +111,6 @@ public class CameraTouchHandler {
 			break;
 		}
 		update(event);
-		Log.d(getClass().getName(), mState.toString());
 	}
 
 	private void moveHandler(MotionEvent event) {
