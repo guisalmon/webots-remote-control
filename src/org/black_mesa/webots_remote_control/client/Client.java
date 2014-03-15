@@ -23,7 +23,6 @@ import android.util.SparseArray;
  * @author Ilja Kroonen
  * 
  */
-
 public class Client {
 	private static final int SENDING_INTERVAL = 32;
 	private static final int SOCKET_TIMEOUT = 1000;

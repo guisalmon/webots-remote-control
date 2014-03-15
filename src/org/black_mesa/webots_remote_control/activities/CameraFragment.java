@@ -3,15 +3,12 @@ package org.black_mesa.webots_remote_control.activities;
 import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.classes.CameraModel;
 import org.black_mesa.webots_remote_control.classes.Server;
-import org.black_mesa.webots_remote_control.client.Client;
+import org.black_mesa.webots_remote_control.client.CamerasManager;
 import org.black_mesa.webots_remote_control.client.ConnectionManager;
 import org.black_mesa.webots_remote_control.client.ConnectionState;
-import org.black_mesa.webots_remote_control.listeners.CameraTouchHandlerListener;
 import org.black_mesa.webots_remote_control.listeners.ConnectionManagerListener;
-import org.black_mesa.webots_remote_control.remote_object.CameraInstruction;
-import org.black_mesa.webots_remote_control.remote_object.InstructionQueue;
-import org.black_mesa.webots_remote_control.remote_object.RemoteObject;
 import org.black_mesa.webots_remote_control.utils.CameraTouchHandler;
+
 import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -19,8 +16,6 @@ import android.content.res.TypedArray;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
-import android.util.SparseArray;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -28,12 +23,14 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 
-public class CameraFragment extends Fragment implements OnTouchListener, CameraTouchHandlerListener,
-		ConnectionManagerListener {
+public class CameraFragment extends Fragment implements OnTouchListener, ConnectionManagerListener {
 	private CameraTouchHandler touchHandler;
 	private ConnectionManager connectionManager = new ConnectionManager();
-	private InstructionQueue camera = null;
 	Server server;
+	private float xMin;
+	private float xMax;
+	private float yMin;
+	private float yMax;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -64,10 +61,6 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 		styledAttributes.recycle();
 
 		// compute the size of the usable part of the screen
-		float xMin;
-		float xMax;
-		float yMin;
-		float yMax;
 		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
 			xMin = 0;
 			xMax = size.x;
@@ -84,7 +77,6 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 		cameraModel.setxMin(xMin);
 		cameraModel.setyMax(yMax);
 		cameraModel.setyMin(yMin);
-		touchHandler = new CameraTouchHandler(xMin, yMin, xMax, yMax, this);
 		super.onActivityCreated(savedInstanceState);
 	}
 
@@ -98,62 +90,22 @@ public class CameraFragment extends Fragment implements OnTouchListener, CameraT
 	public void onResume() {
 		connectionManager.start();
 		connectionManager.addServer(server);
-
 		super.onResume();
 	}
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
-		touchHandler.onTouch(event);
+		if(touchHandler != null) {
+			touchHandler.onTouch(event);
+		}
 		return true;
 	}
 
 	@Override
-	public void moveForward(float forward) {
-		if (camera == null) {
-			Log.d(getClass().getName(), "moveForward event before camera was initialized");
-			return;
-		}
-		CameraInstruction instruction = CameraInstruction.move(0, 0, forward * 16);
-		camera.add(instruction);
-		connectionManager.getClient(server).board(camera);
-	}
-
-	@Override
-	public void moveSide(float right, float up, long time) {
-		if (camera == null) {
-			Log.d(getClass().getName(), "moveSide event before camera was initialized");
-			return;
-		}
-		CameraInstruction instruction = CameraInstruction.move((right * time) / 128., (-up * time) / 128., 0);
-		camera.add(instruction);
-		connectionManager.getClient(server).board(camera);
-	}
-
-	@Override
-	public void turnPitch(float turn, float pitch) {
-		if (camera == null) {
-			Log.d(getClass().getName(), "turnPitch event before camera was initialized");
-			return;
-		}
-		CameraInstruction instruction = CameraInstruction.turn(turn * Math.PI);
-		camera.add(instruction);
-		instruction = CameraInstruction.pitch(pitch * Math.PI);
-		camera.add(instruction);
-		connectionManager.getClient(server).board(camera);
-	}
-
-	@Override
 	public void onStateChange(Server server, ConnectionState state) {
-		Log.d(getClass().getName(), "Onstatechange");
-		Client client = connectionManager.getClient(server);
-		if (client == null) {
-			Log.e(getClass().getName(), "null client!");
-		} else {
-			SparseArray<RemoteObject> array = client.getInitialData();
-			if(array != null) {
-				camera = (InstructionQueue) client.getInitialData().valueAt(0);
-			}
+		if (state == ConnectionState.CONNECTED) {
+			touchHandler = new CameraTouchHandler(xMin, yMin, xMax, yMax, CamerasManager.makeListener(
+					connectionManager, server, 0));
 		}
 	}
 }
