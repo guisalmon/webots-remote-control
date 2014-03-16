@@ -1,4 +1,6 @@
-package org.black_mesa.webots_remote_control.remote_object;
+package org.black_mesa.webots_remote_control.communication_structures;
+
+import java.io.Serializable;
 
 /**
  * Specific Instruction class for a Webots camera.
@@ -6,7 +8,7 @@ package org.black_mesa.webots_remote_control.remote_object;
  * @author Ilja Kroonen
  * 
  */
-public final class CameraInstruction implements Instruction {
+public final class CameraInstruction implements Serializable {
 	private static final long serialVersionUID = -1401919642170517372L;
 	private final Type mType;
 	private final double[] mArgs;

@@ -6,8 +6,7 @@
 -->
 <!--
     Checkstyle-Configuration: CSProfile
-    Description: 
-Slightly modified version of Sun Checks that better matches the default code formatter setting of Eclipse.
+    Description: none
 -->
 <module name="Checker">
   <property name="severity" value="warning"/>

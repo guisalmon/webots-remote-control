@@ -2,7 +2,7 @@ package org.black_mesa.webots_remote_control.listeners;
 
 import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.client.ConnectionState;
-import org.black_mesa.webots_remote_control.remote_object.RemoteObject;
+import org.black_mesa.webots_remote_control.communication_structures.CommunicationStructure;
 
 /**
  * Interface for the listeners of a Client.
@@ -30,5 +30,5 @@ public interface ClientListener {
 	 * @param data
 	 *            Object received.
 	 */
-	void onReception(final Server server, final RemoteObject data);
+	void onReception(final Server server, final CommunicationStructure data);
 }

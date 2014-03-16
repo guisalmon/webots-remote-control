@@ -1,9 +1,9 @@
 package org.black_mesa.webots_remote_control.client;
 
 import org.black_mesa.webots_remote_control.classes.Server;
+import org.black_mesa.webots_remote_control.communication_structures.CameraInstruction;
+import org.black_mesa.webots_remote_control.communication_structures.CameraInstructionQueue;
 import org.black_mesa.webots_remote_control.listeners.CameraTouchHandlerListener;
-import org.black_mesa.webots_remote_control.remote_object.CameraInstruction;
-import org.black_mesa.webots_remote_control.remote_object.InstructionQueue;
 
 /**
  * Factory for CameraTouchHandlerListener instances. When instanciating a touch
@@ -43,7 +43,7 @@ public class CamerasManager {
 	public final CameraTouchHandlerListener makeListener(final Server server, final int cameraId) {
 		return new CameraTouchHandlerListener() {
 			private Client client = mConnectionManager.getClient(server);
-			private InstructionQueue camera = (InstructionQueue) client.getInitialData().get(cameraId);
+			private CameraInstructionQueue camera = (CameraInstructionQueue) client.getInitialData().get(cameraId);
 
 			@Override
 			public void moveForward(final float forward) {
@@ -54,8 +54,8 @@ public class CamerasManager {
 
 			@Override
 			public void moveSide(final float right, final float up, final long time) {
-				CameraInstruction instruction = CameraInstruction.move((right * time) / SCALE_MOVE_SIDE, (-up * time)
-						/ SCALE_MOVE_SIDE, 0);
+				CameraInstruction instruction =
+						CameraInstruction.move((right * time) * SCALE_MOVE_SIDE, (-up * time) * SCALE_MOVE_SIDE, 0);
 				camera.add(instruction);
 				client.board(camera);
 			}

@@ -10,11 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.black_mesa.webots_remote_control.classes.Server;
+import org.black_mesa.webots_remote_control.communication_structures.CommunicationStructure;
 import org.black_mesa.webots_remote_control.listeners.ClientListener;
-import org.black_mesa.webots_remote_control.remote_object.RemoteObject;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.util.SparseArray;
 
 /**
@@ -40,9 +41,10 @@ public class Client {
 	private final Thread mReceivingThread;
 	private final Thread mSendingThread;
 
-	private final SparseArray<RemoteObject> mBoarding = new SparseArray<RemoteObject>();
-	private SparseArray<RemoteObject> mInitialData;
-	private final SparseArray<List<RemoteObject>> mAdditionalData = new SparseArray<List<RemoteObject>>();
+	private final SparseArray<CommunicationStructure> mBoarding = new SparseArray<CommunicationStructure>();
+	private SparseArray<CommunicationStructure> mInitialData;
+	private final SparseArray<List<CommunicationStructure>> mAdditionalData =
+			new SparseArray<List<CommunicationStructure>>();
 
 	/**
 	 * Instantiates a Client and connects it to the server. This allocates
@@ -81,7 +83,7 @@ public class Client {
 	 * @param data
 	 *            Data that must be sent to the server.
 	 */
-	public final void board(final RemoteObject data) {
+	public final void board(final CommunicationStructure data) {
 		int id = data.getId();
 		synchronized (mBoarding) {
 			mBoarding.put(id, data.board(mBoarding.get(id)));
@@ -112,9 +114,11 @@ public class Client {
 	 * 
 	 * @return Initial data received by the client.
 	 */
-	public final SparseArray<RemoteObject> getInitialData() {
+	public final SparseArray<CommunicationStructure> getInitialData() {
 		// This array will never be modified by the Client, we don't need to
 		// copy it
+		Log.d(getClass().getName(), "Request for received data");
+		Log.d(getClass().getName(), "Returning " + mInitialData.get(0));
 		return mInitialData;
 	}
 
@@ -124,10 +128,10 @@ public class Client {
 	 * 
 	 * @return Array containing the data.
 	 */
-	public final SparseArray<List<RemoteObject>> getAdditionalData() {
+	public final SparseArray<List<CommunicationStructure>> getAdditionalData() {
 		// We need to make a copy of the data, because the reception of a new
 		// object would trigger a modification of the array
-		SparseArray<List<RemoteObject>> ret;
+		SparseArray<List<CommunicationStructure>> ret;
 		synchronized (mAdditionalData) {
 			ret = mAdditionalData.clone();
 		}
@@ -177,11 +181,16 @@ public class Client {
 		try {
 			n = (Integer) in.readObject();
 
-			SparseArray<RemoteObject> initialData = new SparseArray<RemoteObject>();
+			SparseArray<CommunicationStructure> initialData = new SparseArray<CommunicationStructure>();
 
 			for (int i = 0; i < n; i++) {
-				RemoteObject r = (RemoteObject) in.readObject();
+				CommunicationStructure r = (CommunicationStructure) in.readObject();
+				if (!r.checkIntegrity()) {
+					changeState(ConnectionState.COMMUNICATION_ERROR);
+					return;
+				}
 				initialData.put(r.getId(), r);
+				Log.d(getClass().getName(), "Received object of id " + r.getId());
 			}
 			mInitialData = initialData;
 
@@ -200,7 +209,7 @@ public class Client {
 	}
 
 	private void sendingRoutine(final ObjectOutputStream out) throws IOException {
-		SparseArray<RemoteObject> data;
+		SparseArray<CommunicationStructure> data;
 
 		synchronized (mBoarding) {
 			data = mBoarding.clone();
@@ -220,13 +229,13 @@ public class Client {
 	}
 
 	private void receivingRoutine(final ObjectInputStream in) throws ClassNotFoundException, IOException {
-		RemoteObject o;
+		CommunicationStructure o;
 		try {
-			o = (RemoteObject) in.readObject();
+			o = (CommunicationStructure) in.readObject();
 			synchronized (mAdditionalData) {
-				List<RemoteObject> l = mAdditionalData.get(o.getId());
+				List<CommunicationStructure> l = mAdditionalData.get(o.getId());
 				if (l == null) {
-					l = new ArrayList<RemoteObject>();
+					l = new ArrayList<CommunicationStructure>();
 					mAdditionalData.put(o.getId(), l);
 				}
 				l.add(o);
@@ -250,7 +259,7 @@ public class Client {
 		new Handler(Looper.getMainLooper()).post(notification);
 	}
 
-	private void notifyReception(final RemoteObject data) {
+	private void notifyReception(final CommunicationStructure data) {
 		Runnable notification = new Runnable() {
 			@Override
 			public void run() {

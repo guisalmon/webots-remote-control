@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.black_mesa.webots_remote_control.classes.Server;
+import org.black_mesa.webots_remote_control.communication_structures.CommunicationStructure;
 import org.black_mesa.webots_remote_control.listeners.ClientListener;
 import org.black_mesa.webots_remote_control.listeners.ConnectionManagerListener;
-import org.black_mesa.webots_remote_control.remote_object.RemoteObject;
 
 import android.util.Log;
 
@@ -57,7 +57,7 @@ public class ConnectionManager {
 			}
 
 			@Override
-			public void onReception(final Server server, final RemoteObject data) {
+			public void onReception(final Server server, final CommunicationStructure data) {
 				// This will be needed to implement further features
 			}
 		};
