@@ -12,7 +12,7 @@ import java.util.Queue;
  */
 public class InstructionQueue extends RemoteObject {
 	private static final long serialVersionUID = 228351533118850327L;
-	private Queue<Instruction> queue;
+	private Queue<Instruction> mQueue;
 
 	/**
 	 * Instantiates an InstructionQueue.
@@ -20,17 +20,17 @@ public class InstructionQueue extends RemoteObject {
 	 * @param id
 	 *            Unique identifier for this RemoteObject.
 	 */
-	public InstructionQueue(int id) {
+	public InstructionQueue(final int id) {
 		super(id);
-		queue = new LinkedList<Instruction>();
+		mQueue = new LinkedList<Instruction>();
 	}
 
-	private InstructionQueue(int id, InstructionQueue queue) {
+	private InstructionQueue(final int id, final InstructionQueue queue) {
 		super(id);
 		if (queue == null) {
-			this.queue = new LinkedList<Instruction>();
+			this.mQueue = new LinkedList<Instruction>();
 		} else {
-			this.queue = new LinkedList<Instruction>(queue.queue);
+			this.mQueue = new LinkedList<Instruction>(queue.mQueue);
 		}
 	}
 
@@ -40,20 +40,20 @@ public class InstructionQueue extends RemoteObject {
 	 * @param i
 	 *            Instruction that will be added.
 	 */
-	public void add(Instruction i) {
-		queue.add(i);
+	public final void add(final Instruction i) {
+		mQueue.add(i);
 	}
 
 	/**
-	 * Moves the instructions in the queue to the one in the boarding table.
+	 * {@inheritDoc}
 	 */
 	@Override
-	public RemoteObject board(RemoteObject previous) {
+	public final RemoteObject board(final RemoteObject previous) {
 		InstructionQueue castedPrevious = (InstructionQueue) previous;
 		InstructionQueue newQueue = new InstructionQueue(getId(), castedPrevious);
 
-		while (!queue.isEmpty()) {
-			newQueue.queue.add(queue.poll());
+		while (!mQueue.isEmpty()) {
+			newQueue.mQueue.add(mQueue.poll());
 		}
 
 		return newQueue;

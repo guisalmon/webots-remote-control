@@ -30,12 +30,12 @@ public class ConnectionManager {
 		mClientListener = new ClientListener() {
 
 			@Override
-			public void onStateChange(Server server, ConnectionState state) {
+			public void onStateChange(final Server server, final ConnectionState state) {
 				Client source = mConnections.get(server);
 				if (source == null) {
 					return;
 				}
-				switch(state) {
+				switch (state) {
 				case COMMUNICATION_ERROR:
 					mConnections.remove(server);
 					break;
@@ -57,7 +57,7 @@ public class ConnectionManager {
 			}
 
 			@Override
-			public void onReception(Server server, RemoteObject data) {
+			public void onReception(final Server server, final RemoteObject data) {
 				// This will be needed to implement further features
 			}
 		};
@@ -70,7 +70,7 @@ public class ConnectionManager {
 	 * @param listener
 	 *            Listener that will be added.
 	 */
-	public void addListener(ConnectionManagerListener listener) {
+	public final void addListener(final ConnectionManagerListener listener) {
 		mListeners.add(listener);
 	}
 
@@ -80,14 +80,14 @@ public class ConnectionManager {
 	 * @param listener
 	 *            Listener that will be removed.
 	 */
-	public void removeListener(ConnectionManagerListener listener) {
+	public final void removeListener(final ConnectionManagerListener listener) {
 		mListeners.remove(listener);
 	}
 
 	/**
 	 * Stops the ConnectionManager. This call closes all connections.
 	 */
-	public void stop() {
+	public final void stop() {
 		Log.d(getClass().getName(), "Stop");
 		for (Client c : mConnections.values()) {
 			c.dispose();
@@ -98,7 +98,7 @@ public class ConnectionManager {
 	/**
 	 * Starts the ConnectionManager.
 	 */
-	public void start() {
+	public final void start() {
 		Log.d(getClass().getName(), "Start");
 	}
 
@@ -108,7 +108,7 @@ public class ConnectionManager {
 	 * @param server
 	 *            Server to connect.
 	 */
-	public void addServer(Server server) {
+	public final void addServer(final Server server) {
 		Log.d(getClass().getName(), "Adding server");
 		if (mConnections.containsKey(server)) {
 			throw new IllegalArgumentException(server + " was already present in the manager");
@@ -122,7 +122,7 @@ public class ConnectionManager {
 	 * @param server
 	 *            Server
 	 */
-	public void removeServer(Server server) {
+	public final void removeServer(final Server server) {
 		mConnections.get(server).dispose();
 		mConnections.remove(server);
 	}
@@ -134,7 +134,7 @@ public class ConnectionManager {
 	 *            Server corresponding to the client we need.
 	 * @return Client corresponding to the server.
 	 */
-	public Client getClient(Server server) {
+	public final Client getClient(final Server server) {
 		return mConnections.get(server);
 	}
 }

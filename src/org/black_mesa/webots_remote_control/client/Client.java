@@ -54,7 +54,7 @@ public class Client {
 	 *            Listener to be notified of state changes and object
 	 *            receptions.
 	 */
-	public Client(Server server, ClientListener listener) {
+	public Client(final Server server, final ClientListener listener) {
 		mListener = listener;
 		mServer = server;
 
@@ -81,7 +81,7 @@ public class Client {
 	 * @param data
 	 *            Data that must be sent to the server.
 	 */
-	public void board(RemoteObject data) {
+	public final void board(final RemoteObject data) {
 		int id = data.getId();
 		synchronized (mBoarding) {
 			mBoarding.put(id, data.board(mBoarding.get(id)));
@@ -92,7 +92,7 @@ public class Client {
 	 * Liberates the resources allocated to this client (terminates threads and
 	 * closes socket).
 	 */
-	public void dispose() {
+	public final void dispose() {
 		mDispose = true;
 	}
 
@@ -101,7 +101,7 @@ public class Client {
 	 * 
 	 * @return Current state of the client.
 	 */
-	public ConnectionState getState() {
+	public final ConnectionState getState() {
 		return mState;
 	}
 
@@ -112,7 +112,7 @@ public class Client {
 	 * 
 	 * @return Initial data received by the client.
 	 */
-	public SparseArray<RemoteObject> getInitialData() {
+	public final SparseArray<RemoteObject> getInitialData() {
 		// This array will never be modified by the Client, we don't need to
 		// copy it
 		return mInitialData;
@@ -124,7 +124,7 @@ public class Client {
 	 * 
 	 * @return Array containing the data.
 	 */
-	public SparseArray<List<RemoteObject>> getAdditionalData() {
+	public final SparseArray<List<RemoteObject>> getAdditionalData() {
 		// We need to make a copy of the data, because the reception of a new
 		// object would trigger a modification of the array
 		SparseArray<List<RemoteObject>> ret;
@@ -199,7 +199,7 @@ public class Client {
 		}
 	}
 
-	private void sendingRoutine(ObjectOutputStream out) throws IOException {
+	private void sendingRoutine(final ObjectOutputStream out) throws IOException {
 		SparseArray<RemoteObject> data;
 
 		synchronized (mBoarding) {
@@ -219,7 +219,7 @@ public class Client {
 		}
 	}
 
-	private void receivingRoutine(ObjectInputStream in) throws ClassNotFoundException, IOException {
+	private void receivingRoutine(final ObjectInputStream in) throws ClassNotFoundException, IOException {
 		RemoteObject o;
 		try {
 			o = (RemoteObject) in.readObject();

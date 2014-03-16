@@ -21,5 +21,5 @@ public interface ConnectionManagerListener {
 	 * @param state
 	 *            New state of that connection.
 	 */
-	public void onStateChange(Server server, ConnectionState state);
+	void onStateChange(final Server server, final ConnectionState state);
 }

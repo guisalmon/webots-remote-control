@@ -12,10 +12,17 @@ import java.io.Serializable;
  */
 public abstract class RemoteObject implements Serializable {
 	private static final long serialVersionUID = -6066263437899074202L;
-	private final int id;
+	private final int mId;
 
-	protected RemoteObject(int id) {
-		this.id = id;
+	/**
+	 * Instanciates the RemoteObject with a given identifier.
+	 * 
+	 * @param id
+	 *            The identifier of this RemoteObject. This identifier has to be
+	 *            unique for a server.
+	 */
+	protected RemoteObject(final int id) {
+		this.mId = id;
 	}
 
 	/**
@@ -24,8 +31,8 @@ public abstract class RemoteObject implements Serializable {
 	 * 
 	 * @return Id of this RemoteObject.
 	 */
-	public int getId() {
-		return id;
+	public final int getId() {
+		return mId;
 	}
 
 	/**
