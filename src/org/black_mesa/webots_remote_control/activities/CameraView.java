@@ -1,8 +1,11 @@
 package org.black_mesa.webots_remote_control.activities;
 
+import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.classes.CameraModel;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -15,28 +18,34 @@ public class CameraView extends View{
 	private CameraModel cameraModel;
 	private Paint paint;
 	private RectF rectangle;
+	private Bitmap bitmapUp;
+	private Bitmap bitmapLeft;
+	private Bitmap bitmapRight;
+	private Bitmap bitmapDown;
 	public CameraView(Context context) {
 		super(context);
-		setFocusable(true);
-		cameraModel = CameraModel.getInstance();
-		paint = new Paint();
-		rectangle = new RectF();
+		commonConstructor();
 	}
 	public CameraView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		setFocusable(true);
-		cameraModel = CameraModel.getInstance();
-		paint = new Paint();
-		rectangle = new RectF();
+		commonConstructor();
 	}
 	public CameraView(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
+		commonConstructor();
+	}
+	private void commonConstructor()
+	{
 		setFocusable(true);
 		cameraModel = CameraModel.getInstance();
 		paint = new Paint();
 		rectangle = new RectF();
+		bitmapUp = BitmapFactory.decodeResource(getResources(),R.drawable.ic_action_up);
+		bitmapLeft = BitmapFactory.decodeResource(getResources(),R.drawable.ic_action_left);
+		bitmapRight = BitmapFactory.decodeResource(getResources(),R.drawable.ic_action_right);
+		bitmapDown = BitmapFactory.decodeResource(getResources(),R.drawable.ic_action_down);
+		
 	}
-
 	@Override
 	protected void onDraw(Canvas canvas) {
 		cameraModel = CameraModel.getInstance();
@@ -51,6 +60,10 @@ public class CameraView extends View{
 		paint.setStyle(Paint.Style.STROKE); 
 		paint.setStrokeWidth(4.5f);
 		canvas.drawOval(rectangle, paint);
+		canvas.drawBitmap(bitmapUp,(getWidth()-bitmapUp.getWidth())/2,0,paint);
+		canvas.drawBitmap(bitmapLeft,0,(getHeight()-bitmapLeft.getHeight())/2,paint);
+		canvas.drawBitmap(bitmapRight,getWidth()-bitmapRight.getWidth(),(getHeight()-bitmapLeft.getHeight())/2,paint);
+		canvas.drawBitmap(bitmapDown,(getWidth()-bitmapDown.getWidth())/2,getHeight()-bitmapDown.getHeight(),paint);
 	}
 
 
