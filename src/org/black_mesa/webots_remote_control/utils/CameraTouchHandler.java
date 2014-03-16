@@ -76,11 +76,11 @@ public class CameraTouchHandler {
 	 */
 	public CameraTouchHandler(final float xMin, final float yMin, final float xMax, final float yMax,
 			final CameraTouchHandlerListener l) {
-		this.mXMin = xMin;
-		this.mYMin = yMin;
-		this.mXMax = xMax;
-		this.mYMax = yMax;
-		this.mListener = l;
+		mXMin = xMin;
+		mYMin = yMin;
+		mXMax = xMax;
+		mYMax = yMax;
+		mListener = l;
 	}
 
 	/**

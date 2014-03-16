@@ -28,9 +28,9 @@ public class InstructionQueue extends RemoteObject {
 	private InstructionQueue(final int id, final InstructionQueue queue) {
 		super(id);
 		if (queue == null) {
-			this.mQueue = new LinkedList<Instruction>();
+			mQueue = new LinkedList<Instruction>();
 		} else {
-			this.mQueue = new LinkedList<Instruction>(queue.mQueue);
+			mQueue = new LinkedList<Instruction>(queue.mQueue);
 		}
 	}
 

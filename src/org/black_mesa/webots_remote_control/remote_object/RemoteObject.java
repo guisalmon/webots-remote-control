@@ -22,7 +22,7 @@ public abstract class RemoteObject implements Serializable {
 	 *            unique for a server.
 	 */
 	protected RemoteObject(final int id) {
-		this.mId = id;
+		mId = id;
 	}
 
 	/**

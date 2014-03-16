@@ -27,7 +27,7 @@ public class CamerasManager {
 	 *            instances.
 	 */
 	public CamerasManager(final ConnectionManager connectionManager) {
-		this.mConnectionManager = connectionManager;
+		mConnectionManager = connectionManager;
 	}
 
 	/**
