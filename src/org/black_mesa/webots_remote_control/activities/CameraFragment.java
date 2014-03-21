@@ -35,7 +35,7 @@ public class CameraFragment extends Fragment implements OnTouchListener, Connect
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Bundle extras = getArguments();
-		Long id = extras.getLong("ServerId");
+		long id = extras.getLong("ServerId");
 		List<Server> servers = ((MainActivity)getActivity()).mConnectedServers;
 		for(Server s : servers){
 			if(s.getId() == id){
@@ -43,6 +43,7 @@ public class CameraFragment extends Fragment implements OnTouchListener, Connect
 				break;
 			}
 		}
+		MainActivity.CONNECTION_MANAGER.addListener(this);
 		super.onCreate(savedInstanceState);
 	}
 

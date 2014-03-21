@@ -2,8 +2,9 @@ package org.black_mesa.webots_remote_control.classes;
 
 /**
  * Simple class to represent a server
+ * 
  * @author guisalmon@gmail.com
- *
+ * 
  */
 public class Server {
 	private long id;
@@ -45,15 +46,18 @@ public class Server {
 	public void setPort(int port) {
 		this.port = port;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return (int) (id % (1 << 32));
 	}
-	
+
 	@Override
 	public boolean equals(Object o) {
-		if(o.getClass() != getClass()) {
+		if (o == null) {
+			return false;
+		}
+		if (getClass() != o.getClass()) {
 			return false;
 		}
 		return ((Server) o).getId() == getId();
