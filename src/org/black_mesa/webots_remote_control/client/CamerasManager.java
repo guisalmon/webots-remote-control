@@ -42,11 +42,14 @@ public class CamerasManager {
 	 */
 	public final CameraTouchHandlerListener makeListener(final Server server, final int cameraId) {
 		return new CameraTouchHandlerListener() {
-			private Client client = mConnectionManager.getClient(server);
-			private CameraInstructionQueue camera = (CameraInstructionQueue) client.getInitialData().get(cameraId);
+			private Client client;
+			private CameraInstructionQueue camera;
 
 			@Override
 			public void moveForward(final float forward) {
+				if (!init()) {
+					return;
+				}
 				CameraInstruction instruction = CameraInstruction.move(0, 0, forward * SCALE_MOVE_FORWARD);
 				camera.add(instruction);
 				client.board(camera);
@@ -54,6 +57,9 @@ public class CamerasManager {
 
 			@Override
 			public void moveSide(final float right, final float up, final long time) {
+				if (!init()) {
+					return;
+				}
 				CameraInstruction instruction =
 						CameraInstruction.move((right * time) * SCALE_MOVE_SIDE, (-up * time) * SCALE_MOVE_SIDE, 0);
 				camera.add(instruction);
@@ -62,11 +68,24 @@ public class CamerasManager {
 
 			@Override
 			public void turnPitch(final float turn, final float pitch) {
+				if (!init()) {
+					return;
+				}
 				CameraInstruction instruction = CameraInstruction.turn(turn * SCALE_TURN_PITCH);
 				camera.add(instruction);
 				instruction = CameraInstruction.pitch(pitch * SCALE_TURN_PITCH);
 				camera.add(instruction);
 				client.board(camera);
+			}
+
+			private boolean init() {
+				if (client == null) {
+					client = mConnectionManager.getClient(server);
+				}
+				if (client != null && camera == null) {
+					camera = (CameraInstructionQueue) client.getInitialData().get(cameraId);
+				}
+				return client != null && camera != null;
 			}
 		};
 	}
