@@ -55,4 +55,9 @@ public final class CameraInstructionQueue extends CommunicationStructure {
 		}
 		return false;
 	}
+	
+	@Override
+	public String toString() {
+		return "Camera " + getId();
+	}
 }
