@@ -22,6 +22,7 @@ public class ConnectionManager {
 	private final List<ConnectionManagerListener> mListeners = new ArrayList<ConnectionManagerListener>();
 	private final Map<Server, Client> mConnections = new Hashtable<Server, Client>();
 	private final ClientListener mClientListener;
+	private List<Server> mSavedServers = new ArrayList<Server>();
 
 	/**
 	 * Instantiates the ConnectionManager.
@@ -136,5 +137,23 @@ public class ConnectionManager {
 	 */
 	public final Client getClient(final Server server) {
 		return mConnections.get(server);
+	}
+
+	/**
+	 * Saves the current servers to be restored later with the restore() method.
+	 */
+	public final void save() {
+		mSavedServers = new ArrayList<Server>(mConnections.keySet());
+	}
+
+	/**
+	 * Restores the connections previously saved with the save() method.
+	 */
+	public final void restore() {
+		stop();
+		start();
+		for (Server s : mSavedServers) {
+			addServer(s);
+		}
 	}
 }
