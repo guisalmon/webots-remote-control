@@ -23,7 +23,7 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 
-public class CameraFragment extends Fragment implements OnTouchListener, ConnectionManagerListener {
+public class CameraFragment extends Fragment implements OnTouchListener {
 	private CameraTouchHandler touchHandler;
 	private CamerasManager camerasManager = new CamerasManager(MainActivity.CONNECTION_MANAGER);
 	private Server server;
@@ -32,26 +32,22 @@ public class CameraFragment extends Fragment implements OnTouchListener, Connect
 	private float yMin;
 	private float yMax;
 
-	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Bundle extras = getArguments();
 		long id = extras.getLong("ServerId");
-		List<Server> servers = ((MainActivity)getActivity()).mConnectedServers;
-		for(Server s : servers){
-			if(s.getId() == id){
+		List<Server> servers = ((MainActivity) getActivity()).mConnectedServers;
+		for (Server s : servers) {
+			if (s.getId() == id) {
 				server = s;
 				break;
 			}
 		}
-		MainActivity.CONNECTION_MANAGER.addListener(this);
 		super.onCreate(savedInstanceState);
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		MainActivity.CONNECTION_MANAGER.addListener(this);
-		
 		return inflater.inflate(R.layout.camera_fragment, container, false);
 	}
 
@@ -67,8 +63,9 @@ public class CameraFragment extends Fragment implements OnTouchListener, Connect
 
 		// get the size of the action bar
 		int actionBarSize;
-		final TypedArray styledAttributes = getActivity().getBaseContext().getTheme()
-				.obtainStyledAttributes(new int[] { android.R.attr.actionBarSize });
+		final TypedArray styledAttributes =
+				getActivity().getBaseContext().getTheme()
+						.obtainStyledAttributes(new int[] { android.R.attr.actionBarSize });
 		actionBarSize = (int) styledAttributes.getDimension(0, 0);
 		styledAttributes.recycle();
 
@@ -90,8 +87,8 @@ public class CameraFragment extends Fragment implements OnTouchListener, Connect
 		cameraModel.setyMax(yMax);
 		cameraModel.setyMin(yMin);
 
-		//Initialize Client
-		
+		// Initialize Client
+
 		super.onActivityCreated(savedInstanceState);
 	}
 
@@ -103,6 +100,7 @@ public class CameraFragment extends Fragment implements OnTouchListener, Connect
 	@Override
 	public void onResume() {
 		super.onResume();
+		touchHandler = new CameraTouchHandler(xMin, yMin, xMax, yMax, camerasManager.makeListener(server, 0));
 	}
 
 	@Override
@@ -111,21 +109,5 @@ public class CameraFragment extends Fragment implements OnTouchListener, Connect
 			touchHandler.onTouch(event);
 		}
 		return true;
-	}
-
-	@Override
-	public void onStateChange(Server server, ConnectionState state) {
-		if (this.server.equals(server) && state == ConnectionState.CONNECTED) {
-			touchHandler = new CameraTouchHandler(xMin, yMin, xMax, yMax, camerasManager.makeListener(server, 0));
-
-		/*switch (state) {
-		case COMMUNICATION_ERROR:
-		case CONNECTION_ERROR:
-			if(server.equals(mServer)){
-				Toast.makeText(getActivity(), R.string.disconnection, Toast.LENGTH_SHORT).show();
-			}
-		default:
-			break;*/
-		}
 	}
 }
