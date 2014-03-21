@@ -172,7 +172,7 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 		case 1:
 			Fragment cameraFragment = new CameraFragment();
 			Bundle b = new Bundle();
-			b.putLong("ServerId", 0);
+			b.putLong("ServerId", mConnectedServers.get(0).getId());
 			cameraFragment.setArguments(b);
 			fragmentManager = getFragmentManager();
 		    fragmentManager.beginTransaction()
