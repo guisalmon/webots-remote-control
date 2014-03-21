@@ -143,6 +143,28 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 		}
 	}
 
+	@Override
+	public void setTitle(CharSequence title) {
+	    getActionBar().setTitle(title);
+	}
+
+
+	@Override
+	public void onStateChange(Server server, ConnectionState state) {
+		switch (state) {
+		case CONNECTED:
+			Toast.makeText(this, "Connected ! ", Toast.LENGTH_SHORT).show();
+			break;
+		case COMMUNICATION_ERROR:
+		case CONNECTION_ERROR:
+			Toast.makeText(this, "Disconnected ! ", Toast.LENGTH_SHORT).show();
+			break;
+
+		default:
+			break;
+		}
+	}
+
 	private class DrawerItemClickListener implements ListView.OnItemClickListener {
 	    @Override
 	    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -178,54 +200,14 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 			break;
 		case 2:
 			break;
-		case 3:
-			break;
-		case 4:
-			break;
 		default:
 				
 		}
-		
-	    // Create a new fragment and specify the planet to show based on position
-	    /*Fragment fragment = new PlanetFragment();
-	    Bundle args = new Bundle();
-	    args.putInt(PlanetFragment.ARG_PLANET_NUMBER, position);
-	    fragment.setArguments(args);*/
 
-	    // Insert the fragment by replacing any existing fragment
-	    /*FragmentManager fragmentManager = getFragmentManager();
-	    fragmentManager.beginTransaction()
-	                   .replace(R.id.content_frame, fragment)
-	                   .commit();*/
-
-	    // Highlight the selected item, update the title, and close the drawer
 	    mDrawerList.setItemChecked(position, true);
 	    setTitle(mDrawerListItems[position]);
 	    
 	    mDrawerLayout.closeDrawer(mDrawerList);
 	}
-
-	@Override
-	public void setTitle(CharSequence title) {
-	    getActionBar().setTitle(title);
-	}
-
-
-	@Override
-	public void onStateChange(Server server, ConnectionState state) {
-		switch (state) {
-		case CONNECTED:
-			Toast.makeText(this, "Connected ! ", Toast.LENGTH_SHORT).show();
-			break;
-		case COMMUNICATION_ERROR:
-		case CONNECTION_ERROR:
-			Toast.makeText(this, "Disconnected ! ", Toast.LENGTH_SHORT).show();
-			break;
-
-		default:
-			break;
-		}
-	}
-
 
 }
