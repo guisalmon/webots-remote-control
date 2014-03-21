@@ -17,6 +17,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,7 +38,6 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private boolean mClosed;
-    private Server mServer;
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -133,8 +133,8 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	@Override
 	protected void onResume() {
 		CONNECTION_MANAGER.start();
-		if(mServer != null){
-			CONNECTION_MANAGER.addServer(mServer);
+		for (Server s : mConnectedServers){
+			CONNECTION_MANAGER.addServer(s);
 		}
 		super.onResume();
 	}
@@ -143,16 +143,12 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 
 		CONNECTION_MANAGER.removeServer(s);
 		mConnectedServers.remove(s);
-
-		mServer = null;
 	}
 	
 	public void connect(Server s){
-		if(mServer != null){
-			CONNECTION_MANAGER.removeServer(mServer);
+		if(!mConnectedServers.contains(s)){
+			CONNECTION_MANAGER.addServer(s);
 		}
-		mServer = s;
-		CONNECTION_MANAGER.addServer(mServer);
 	}
 
 	private class DrawerItemClickListener implements ListView.OnItemClickListener {
@@ -175,20 +171,27 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 		                   .commit();
 			break;
 		case 1:
+			for(Server s : mConnectedServers){
+				Log.i(getClass().getName(), s.getId()+"\n"+s.getName()+"\n"+s.getAdress());
+			}
+			Log.i(getClass().getName(), mConnectedServers.get(0).getId()+"\n"+mConnectedServers.get(0).getName()+"\n"+mConnectedServers.get(0).getAdress());
 			Fragment cameraFragment = new CameraFragment();
+			Bundle b = new Bundle();
+			b.putLong("ServerId", mConnectedServers.get(0).getId());
+			cameraFragment.setArguments(b);
 			fragmentManager = getFragmentManager();
 		    fragmentManager.beginTransaction()
 		                   .replace(R.id.content_frame, cameraFragment)
 		                   .commit();
 			break;
 		case 2:
-			break;
-		case 3:
 			Fragment preferencesFragment = new PreferencesFragment();
 			fragmentManager = getFragmentManager();
 		    fragmentManager.beginTransaction()
 		                   .replace(R.id.content_frame, preferencesFragment)
 		                   .commit();
+			break;
+		case 3:
 			break;
 		case 4:
 			break;
