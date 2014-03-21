@@ -3,7 +3,6 @@ package org.black_mesa.webots_remote_control.activities;
 import java.util.List;
 
 import org.black_mesa.webots_remote_control.R;
-import org.black_mesa.webots_remote_control.classes.CameraModel;
 import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.client.CamerasManager;
 import org.black_mesa.webots_remote_control.utils.CameraTouchHandler;
@@ -78,11 +77,6 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 			yMin = (float) actionBarSize;
 			yMax = size.y;
 		}
-		CameraModel cameraModel = CameraModel.getInstance();
-		cameraModel.setxMax(xMax);
-		cameraModel.setxMin(xMin);
-		cameraModel.setyMax(yMax);
-		cameraModel.setyMin(yMin);
 
 		// Initialize Client
 

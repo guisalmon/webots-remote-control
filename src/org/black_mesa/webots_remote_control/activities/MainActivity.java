@@ -8,7 +8,6 @@ import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.client.ConnectionManager;
 import org.black_mesa.webots_remote_control.client.ConnectionState;
 import org.black_mesa.webots_remote_control.listeners.ConnectionManagerListener;
-import org.black_mesa.webots_remote_control.preferences.PreferencesFragment;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -185,11 +184,6 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 		                   .commit();
 			break;
 		case 2:
-			Fragment preferencesFragment = new PreferencesFragment();
-			fragmentManager = getFragmentManager();
-		    fragmentManager.beginTransaction()
-		                   .replace(R.id.content_frame, preferencesFragment)
-		                   .commit();
 			break;
 		case 3:
 			break;
