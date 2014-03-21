@@ -111,7 +111,7 @@ public class CameraTouchHandlerJoysticks {
 		case DOUBLE:
 			break;
 		case INIT:
-			break;
+			throw new RuntimeException();
 		case ONLY_LEFT:
 			break;
 		case ONLY_RIGHT:
@@ -124,7 +124,7 @@ public class CameraTouchHandlerJoysticks {
 		case DOUBLE:
 			break;
 		case INIT:
-			break;
+			throw new RuntimeException();
 		case ONLY_LEFT:
 			break;
 		case ONLY_RIGHT:
@@ -148,9 +148,9 @@ public class CameraTouchHandlerJoysticks {
 	private void upHandler(final MotionEvent event) {
 		switch (mState) {
 		case DOUBLE:
-			break;
+			throw new RuntimeException();
 		case INIT:
-			break;
+			throw new RuntimeException();
 		case ONLY_LEFT:
 			break;
 		case ONLY_RIGHT:
@@ -163,7 +163,7 @@ public class CameraTouchHandlerJoysticks {
 		case DOUBLE:
 			break;
 		case INIT:
-			break;
+			throw new RuntimeException();
 		case ONLY_LEFT:
 			break;
 		case ONLY_RIGHT:
@@ -174,13 +174,13 @@ public class CameraTouchHandlerJoysticks {
 	private void downHandler(final MotionEvent event) {
 		switch (mState) {
 		case DOUBLE:
-			break;
+			throw new RuntimeException();
 		case INIT:
 			break;
 		case ONLY_LEFT:
-			break;
+			throw new RuntimeException();
 		case ONLY_RIGHT:
-			break;
+			throw new RuntimeException();
 		}
 	}
 
@@ -208,6 +208,14 @@ public class CameraTouchHandlerJoysticks {
 		case ONLY_RIGHT:
 			break;
 		}
+	}
+	
+	private boolean isOnLeftJoystick() {
+		return false;
+	}
+	
+	private boolean isOnRightJoystick() {
+		return false;
 	}
 	
 	private enum State {
