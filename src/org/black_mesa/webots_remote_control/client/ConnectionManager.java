@@ -156,4 +156,10 @@ public class ConnectionManager {
 			addServer(s);
 		}
 	}
+	
+	public List<Server> getServerList() {
+		return new ArrayList<Server>(mConnections.keySet());
+	}
+	
+	
 }

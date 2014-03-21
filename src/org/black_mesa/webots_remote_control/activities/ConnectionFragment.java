@@ -27,7 +27,7 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	private DataSource mDatasource;
 	private ArrayAdapter<Server> mAdapter;
 	private List<Server> mServers;
-	private List<Server> mConnectedServers;
+	//private List<Server> mConnectedServers;
 	private Menu mMenu;
 	
 	
@@ -57,7 +57,6 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 		updateView();
 		
 		MainActivity.CONNECTION_MANAGER.addListener(this);
-		mConnectedServers = ((MainActivity)getActivity()).mConnectedServers;
 	}
 	
 	@Override
@@ -127,7 +126,7 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	@Override
 	public void onItemLaunchListener(int position) {
 		
-		if(mConnectedServers.contains(mServers.get(position))){
+		if(MainActivity.CONNECTION_MANAGER.getServerList().contains(mServers.get(position))){
 			((Button)getListView().getChildAt(position).findViewById(R.id.server_state_button)).setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_send, 0);
 			((MainActivity)getActivity()).disconnect(mServers.get(position));
 		}else{

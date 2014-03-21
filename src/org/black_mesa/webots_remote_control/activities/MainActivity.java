@@ -1,8 +1,5 @@
 package org.black_mesa.webots_remote_control.activities;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.client.ConnectionManager;
@@ -30,8 +27,6 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	
 	public static final ConnectionManager CONNECTION_MANAGER = new ConnectionManager();
 	
-	public List<Server> mConnectedServers;
-	
 	private String[] mDrawerListItems;
     private ListView mDrawerList;
     private DrawerLayout mDrawerLayout;
@@ -47,7 +42,6 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 		
 		//Set this as the connection manager listener 
 		CONNECTION_MANAGER.addListener(this);
-		mConnectedServers = new ArrayList<Server>();
 		
 		//Create and populate the left drawer
 		setContentView(R.layout.activity_main);
@@ -125,28 +119,27 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	
 	@Override
 	protected void onPause() {
+		CONNECTION_MANAGER.save();
 		CONNECTION_MANAGER.stop();
 		super.onPause();
 	}
 
 	@Override
 	protected void onResume() {
-		CONNECTION_MANAGER.start();
-		for (Server s : mConnectedServers){
-			CONNECTION_MANAGER.addServer(s);
-		}
+		CONNECTION_MANAGER.restore();
 		super.onResume();
 	}
 	
 	public void disconnect(Server s){
-
 		CONNECTION_MANAGER.removeServer(s);
-		mConnectedServers.remove(s);
 	}
 	
 	public void connect(Server s){
-		if(!mConnectedServers.contains(s)){
+		if(CONNECTION_MANAGER.getClient(s) == null){
+			Log.i(getClass().getName(), "Trying to connect "+s.getId()+"\n"+s.getName());
 			CONNECTION_MANAGER.addServer(s);
+		}else{
+			Log.i(getClass().getName(), "Cannot connect "+s.getId()+"\n"+s.getName());
 		}
 	}
 
@@ -170,13 +163,9 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 		                   .commit();
 			break;
 		case 1:
-			for(Server s : mConnectedServers){
-				Log.i(getClass().getName(), s.getId()+"\n"+s.getName()+"\n"+s.getAdress());
-			}
-			Log.i(getClass().getName(), mConnectedServers.get(0).getId()+"\n"+mConnectedServers.get(0).getName()+"\n"+mConnectedServers.get(0).getAdress());
 			Fragment cameraFragment = new CameraFragment();
 			Bundle b = new Bundle();
-			b.putLong("ServerId", mConnectedServers.get(0).getId());
+			b.putLong("ServerId", CONNECTION_MANAGER.getServerList().get(0).getId());
 			cameraFragment.setArguments(b);
 			fragmentManager = getFragmentManager();
 		    fragmentManager.beginTransaction()
@@ -222,16 +211,10 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	public void onStateChange(Server server, ConnectionState state) {
 		switch (state) {
 		case CONNECTED:
-			if (!mConnectedServers.contains(server)){
-				mConnectedServers.add(server);
-			}
 			Toast.makeText(this, "Connected ! ", Toast.LENGTH_SHORT).show();
 			break;
 		case COMMUNICATION_ERROR:
 		case CONNECTION_ERROR:
-			if (mConnectedServers.contains(server)){
-				mConnectedServers.remove(server);
-			}
 			Toast.makeText(this, "Disconnected ! ", Toast.LENGTH_SHORT).show();
 			break;
 
