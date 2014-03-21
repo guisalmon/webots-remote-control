@@ -1,7 +1,6 @@
 package org.black_mesa.webots_remote_control.activities;
 
 import org.black_mesa.webots_remote_control.R;
-import org.black_mesa.webots_remote_control.classes.CameraModel;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -15,7 +14,6 @@ import android.view.View;
 
 public class CameraView extends View{
 
-	private CameraModel cameraModel;
 	private Paint paint;
 	private RectF rectangle;
 	private Bitmap bitmapUp;
@@ -37,7 +35,6 @@ public class CameraView extends View{
 	private void commonConstructor()
 	{
 		setFocusable(true);
-		cameraModel = CameraModel.getInstance();
 		paint = new Paint();
 		rectangle = new RectF();
 		bitmapUp = BitmapFactory.decodeResource(getResources(),R.drawable.ic_action_up);
@@ -48,9 +45,8 @@ public class CameraView extends View{
 	}
 	@Override
 	protected void onDraw(Canvas canvas) {
-		cameraModel = CameraModel.getInstance();
-		float l = (cameraModel.getxMax() - cameraModel.getxMin()) / 6;
-		float u = (cameraModel.getyMax() - cameraModel.getyMin()) / 6;
+		float l = getWidth() / 6;
+		float u = getHeight() / 6;
 		float r = l*5;
 		float d = u*5;
 		rectangle.set(l, u, r, d);
