@@ -67,7 +67,7 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
                 super.onDrawerOpened(drawerView);
                 getActionBar().setTitle(R.string.app_name);
                 mClosed = false;
-                //invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                invalidateOptionsMenu();
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
@@ -163,14 +163,18 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 		                   .commit();
 			break;
 		case 1:
-			Fragment cameraFragment = new CameraFragment();
-			Bundle b = new Bundle();
-			b.putLong("ServerId", CONNECTION_MANAGER.getServerList().get(0).getId());
-			cameraFragment.setArguments(b);
-			fragmentManager = getFragmentManager();
-		    fragmentManager.beginTransaction()
-		                   .replace(R.id.content_frame, cameraFragment)
-		                   .commit();
+			if(CONNECTION_MANAGER.getServerList().isEmpty()){
+				Toast.makeText(this, "No server connected", Toast.LENGTH_SHORT).show();
+			}else{
+				Fragment cameraFragment = new CameraFragment();
+				Bundle b = new Bundle();
+				b.putLong("ServerId", CONNECTION_MANAGER.getServerList().get(0).getId());
+				cameraFragment.setArguments(b);
+				fragmentManager = getFragmentManager();
+			    fragmentManager.beginTransaction()
+			                   .replace(R.id.content_frame, cameraFragment)
+			                   .commit();
+			}
 			break;
 		case 2:
 			break;
