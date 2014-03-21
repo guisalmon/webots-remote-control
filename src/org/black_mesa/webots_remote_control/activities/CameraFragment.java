@@ -15,6 +15,7 @@ import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
