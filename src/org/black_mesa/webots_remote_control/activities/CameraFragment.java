@@ -6,8 +6,6 @@ import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.classes.CameraModel;
 import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.client.CamerasManager;
-import org.black_mesa.webots_remote_control.client.ConnectionState;
-import org.black_mesa.webots_remote_control.listeners.ConnectionManagerListener;
 import org.black_mesa.webots_remote_control.utils.CameraTouchHandler;
 
 import android.app.Fragment;
@@ -15,7 +13,6 @@ import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
