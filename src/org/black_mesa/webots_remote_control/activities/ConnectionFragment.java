@@ -23,18 +23,15 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 
-public class ConnectionFragment extends ListFragment implements OnListEventsListener, ConnectionManagerListener{
+public class ConnectionFragment extends ListFragment implements OnListEventsListener, ConnectionManagerListener {
 	private DataSource mDatasource;
 	private ArrayAdapter<Server> mAdapter;
 	private List<Server> mServers;
 	private List<Server> mConnectedServers;
 	private Menu mMenu;
-	
-	
-	
-	//Activity lifecycle
-	
-	
+
+	// Activity lifecycle
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		setHasOptionsMenu(true);
@@ -49,17 +46,17 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		//Initiate database
+		// Initiate database
 		mDatasource = new DataSource(getActivity());
 		mDatasource.open();
-				
+
 		mServers = mDatasource.getAllServers();
 		updateView();
-		
+
 		MainActivity.CONNECTION_MANAGER.addListener(this);
-		mConnectedServers = ((MainActivity)getActivity()).mConnectedServers;
+		mConnectedServers = ((MainActivity) getActivity()).mConnectedServers;
 	}
-	
+
 	@Override
 	public void onPause() {
 		mDatasource.close();
@@ -102,10 +99,7 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 		return super.onOptionsItemSelected(item);
 	}
 
-	
-	
-	//OnListEventsListener
-	
+	// OnListEventsListener
 
 	@Override
 	public void onCheckChanged(boolean isChecked, int position) {
@@ -116,106 +110,104 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	public void onItemClicked(int position) {
 		clearChecks();
 		updateMenu(true);
-		Log.i(getClass().getName(), position+" Click !");
+		Log.i(getClass().getName(), position + " Click !");
 	}
 
 	@Override
 	public void onItemLongClicked(int position) {
 		updateMenu(true);
 	}
-	
+
 	@Override
 	public void onItemLaunchListener(int position) {
-		
-		if(mConnectedServers.contains(mServers.get(position))){
-			((Button)getListView().getChildAt(position).findViewById(R.id.server_state_button)).setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_send, 0);
-			((MainActivity)getActivity()).disconnect(mServers.get(position));
-		}else{
+
+		if (mConnectedServers.contains(mServers.get(position))) {
+			((Button) getListView().getChildAt(position).findViewById(R.id.server_state_button))
+					.setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_send, 0);
+			((MainActivity) getActivity()).disconnect(mServers.get(position));
+		} else {
 			getListView().getChildAt(position).findViewById(R.id.server_state_button).setVisibility(View.GONE);
 			getListView().getChildAt(position).findViewById(R.id.server_connecting).setVisibility(View.VISIBLE);
-			((MainActivity)getActivity()).connect(mServers.get(position));
+			((MainActivity) getActivity()).connect(mServers.get(position));
 		}
 	}
-	
-	
-	
-	//ConnectionManagerListener
-	
-	
+
+	// ConnectionManagerListener
+
 	@Override
 	public void onStateChange(Server server, ConnectionState state) {
 		int i = mServers.indexOf(server);
 		switch (state) {
 		case CONNECTED:
-			((Button)getListView().getChildAt(i).findViewById(R.id.server_state_button)).setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_close_clear_cancel, 0);
+			((Button) getListView().getChildAt(i).findViewById(R.id.server_state_button))
+					.setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_close_clear_cancel, 0);
 			getListView().getChildAt(i).findViewById(R.id.server_state_button).setVisibility(View.VISIBLE);
 			getListView().getChildAt(i).findViewById(R.id.server_connecting).setVisibility(View.GONE);
 			break;
 		case COMMUNICATION_ERROR:
 		case CONNECTION_ERROR:
-			((Button)getListView().getChildAt(i).findViewById(R.id.server_state_button)).setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_send, 0);
+			((Button) getListView().getChildAt(i).findViewById(R.id.server_state_button))
+					.setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_send, 0);
 			getListView().getChildAt(i).findViewById(R.id.server_state_button).setVisibility(View.VISIBLE);
 			getListView().getChildAt(i).findViewById(R.id.server_connecting).setVisibility(View.GONE);
 		default:
 			break;
 		}
-		
-		
+
 	}
-	
-	
-	
-	//Private methods
-	
-	
+
+	// Private methods
+
 	private void clearChecks() {
-		for(int i = 0; i < getListView().getChildCount(); i++){
-			((CheckBox)getListView().getChildAt(i).findViewById(R.id.server_select)).setChecked(false);
+		for (int i = 0; i < getListView().getChildCount(); i++) {
+			((CheckBox) getListView().getChildAt(i).findViewById(R.id.server_select)).setChecked(false);
 		}
-		
+
 	}
-	
-	private void updateView(){
+
+	private void updateView() {
 		Log.i(getClass().getName(), "Update View");
 		mServers = mDatasource.getAllServers();
 		mAdapter = new ServerListAdapter(getActivity(), mServers, this);
 		setListAdapter(mAdapter);
 	}
-	
+
 	private void deleteSelection() {
-		for(int i = 0; i < getListView().getChildCount(); i++){
-			boolean check = ((CheckBox)getListView().getChildAt(i).findViewById(R.id.server_select)).isChecked();
-			if(check) mDatasource.deleteServer(mServers.get(i));
+		for (int i = 0; i < getListView().getChildCount(); i++) {
+			boolean check = ((CheckBox) getListView().getChildAt(i).findViewById(R.id.server_select)).isChecked();
+			if (check)
+				mDatasource.deleteServer(mServers.get(i));
 		}
 		updateView();
 		updateMenu(false);
 	}
-	
+
 	private void editServer() {
 		Bundle b = new Bundle();
 		Intent intent = new Intent(getActivity(), AddServerActivity.class);
 		Long id = (long) 0;
-		for (int i = 0; i < getListView().getChildCount(); i++){
-			if(((CheckBox)getListView().getChildAt(i).findViewById(R.id.server_select)).isChecked()){
-				id = ((Server)getListView().getItemAtPosition(i)).getId();
+		for (int i = 0; i < getListView().getChildCount(); i++) {
+			if (((CheckBox) getListView().getChildAt(i).findViewById(R.id.server_select)).isChecked()) {
+				id = ((Server) getListView().getItemAtPosition(i)).getId();
 			}
 		}
 		b.putLong("id", id);
 		intent.putExtras(b);
 		startActivity(intent);
 	}
-	
-	private int countChecks(){
+
+	private int countChecks() {
 		int i = 0;
-		for (int j = 0; j < getListView().getChildCount(); j++){
-			if(((CheckBox)getListView().getChildAt(j).findViewById(R.id.server_select)).isChecked()) i++;
+		for (int j = 0; j < getListView().getChildCount(); j++) {
+			if (((CheckBox) getListView().getChildAt(j).findViewById(R.id.server_select)).isChecked())
+				i++;
 		}
 		return i;
 	}
-	
-	private void updateMenu(boolean isSelection){
-		if(isSelection){
-			switch (countChecks()){
+
+	private void updateMenu(boolean isSelection) {
+		if (isSelection) {
+			switch (countChecks()) {
 			case 0:
 				updateMenu(false);
 				break;
@@ -229,7 +221,7 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 				mMenu.getItem(1).setVisible(true);
 				mMenu.getItem(2).setVisible(false);
 			}
-		}else{
+		} else {
 			mMenu.getItem(0).setVisible(false);
 			mMenu.getItem(1).setVisible(false);
 			mMenu.getItem(2).setVisible(true);
