@@ -42,4 +42,20 @@ public interface CameraTouchHandlerListener {
 	 *            -0.5 and 0.5).
 	 */
 	void turnPitch(final float turn, final float pitch);
+
+	/**
+	 * Indicates that the camera must move along the right and forward axis.
+	 * 
+	 * @param right
+	 *            Distance of the movement along the right axis (typically
+	 *            between -0.5 and 0.5).
+	 * @param forward
+	 *            Distance of the movement along the forward axis (typically
+	 *            between -0.5 and 0.5).
+	 * @param time
+	 *            Time, in milliseconds, spent on the event. To get the final
+	 *            distance, distances have typically to be multiplied by this
+	 *            value (typically around 32).
+	 */
+	void moveRightForward(final float right, final float forward, final float time);
 }

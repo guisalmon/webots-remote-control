@@ -42,8 +42,8 @@ public class CamerasManager {
 	 */
 	public final CameraTouchHandlerListener makeListener(final Server server, final int cameraId) {
 		return new CameraTouchHandlerListener() {
-			private Client client;
-			private CameraInstructionQueue camera;
+			private Client mClient;
+			private CameraInstructionQueue mCamera;
 
 			@Override
 			public void moveForward(final float forward) {
@@ -51,8 +51,8 @@ public class CamerasManager {
 					return;
 				}
 				CameraInstruction instruction = CameraInstruction.move(0, 0, forward * SCALE_MOVE_FORWARD);
-				camera.add(instruction);
-				client.board(camera);
+				mCamera.add(instruction);
+				mClient.board(mCamera);
 			}
 
 			@Override
@@ -62,8 +62,8 @@ public class CamerasManager {
 				}
 				CameraInstruction instruction =
 						CameraInstruction.move((right * time) * SCALE_MOVE_SIDE, (-up * time) * SCALE_MOVE_SIDE, 0);
-				camera.add(instruction);
-				client.board(camera);
+				mCamera.add(instruction);
+				mClient.board(mCamera);
 			}
 
 			@Override
@@ -72,20 +72,31 @@ public class CamerasManager {
 					return;
 				}
 				CameraInstruction instruction = CameraInstruction.turn(turn * SCALE_TURN_PITCH);
-				camera.add(instruction);
+				mCamera.add(instruction);
 				instruction = CameraInstruction.pitch(pitch * SCALE_TURN_PITCH);
-				camera.add(instruction);
-				client.board(camera);
+				mCamera.add(instruction);
+				mClient.board(mCamera);
 			}
 
 			private boolean init() {
-				if (client == null) {
-					client = mConnectionManager.getClient(server);
+				if (mClient == null) {
+					mClient = mConnectionManager.getClient(server);
 				}
-				if (client != null && camera == null) {
-					camera = (CameraInstructionQueue) client.getInitialData().get(cameraId);
+				if (mClient != null && mCamera == null) {
+					mCamera = (CameraInstructionQueue) mClient.getInitialData().get(cameraId);
 				}
-				return client != null && camera != null;
+				return mClient != null && mCamera != null;
+			}
+
+			@Override
+			public void moveRightForward(final float right, final float forward, final float time) {
+				if (!init()) {
+					return;
+				}
+				CameraInstruction instruction =
+						CameraInstruction.move((right * time) * SCALE_MOVE_SIDE, 0, (forward * time) * SCALE_MOVE_SIDE);
+				mCamera.add(instruction);
+				mClient.board(mCamera);
 			}
 		};
 	}
