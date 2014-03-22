@@ -81,14 +81,15 @@ public class CameraTouchHandlerJoysticks {
 	 */
 	public CameraTouchHandlerJoysticks(final float xMin, final float yMin, final float xMax, final float yMax,
 			final CameraTouchHandlerListener l) {
-		mXMin = xMin;
-		mYMin = yMin;
+		// TODO
+		mXMin = 0;
+		mYMin = 0;
 		mXMax = xMax;
 		mYMax = yMax;
 		mLeftCenterX = LEFT_JOYSTICK_CENTER_X * (mXMax - mXMin) + mXMin;
 		mLeftCenterY = LEFT_JOYSTICK_CENTER_Y * (mYMax - mYMin) + mYMin;
 		mLeftRadius = LEFT_JOYSTICK_RADIUS * (mXMax - mXMin) + mXMin;
-		mRightCenterX = RIGHT_JOYSTICK_CENTER_X * (mYMax - mYMin) + mYMin;
+		mRightCenterX = RIGHT_JOYSTICK_CENTER_X * (mXMax - mXMin) + mXMin;
 		mRightCenterY = RIGHT_JOYSTICK_CENTER_Y * (mYMax - mYMin) + mYMin;
 		mRightRadius = RIGHT_JOYSTICK_RADIUS * (mXMax - mXMin) + mXMin;
 		mListener = l;
@@ -162,7 +163,9 @@ public class CameraTouchHandlerJoysticks {
 	}
 
 	private void timerHandler() {
-		onPositionChange();
+		if (mRightValid) {
+			onPositionChange();
+		}
 	}
 
 	private void updateAttributes(final MotionEvent event) {
@@ -190,6 +193,7 @@ public class CameraTouchHandlerJoysticks {
 		if (!leftValid) {
 			int index = findLeftJoystickPointerIndex(event);
 			if (index != -1) {
+				mLeftPointerId = event.getPointerId(index);
 				leftValid = true;
 			}
 		}
@@ -205,6 +209,7 @@ public class CameraTouchHandlerJoysticks {
 		if (!rightValid) {
 			int index = findRightJoystickPointerIndex(event);
 			if (index != -1) {
+				mRightPointerId = event.getPointerId(index);
 				rightValid = true;
 			}
 		}
@@ -284,7 +289,9 @@ public class CameraTouchHandlerJoysticks {
 	private void onPositionChange() {
 		float x = (mRightPointerX - mRightCenterX) / (mXMax - mXMin);
 		float y = (mRightPointerY - mRightCenterY) / (mYMax - mYMin);
-		long time = SystemClock.uptimeMillis() - mRightTimeStamp;
+		long now = SystemClock.uptimeMillis();
+		long time = now - mRightTimeStamp;
+		mRightTimeStamp = now;
 		mListener.moveRightForward(x, y, time);
 	}
 }

@@ -94,7 +94,8 @@ public class CamerasManager {
 					return;
 				}
 				CameraInstruction instruction =
-						CameraInstruction.move((right * time) * SCALE_MOVE_SIDE, 0, (forward * time) * SCALE_MOVE_SIDE);
+						CameraInstruction
+								.move((right * time) * SCALE_MOVE_SIDE, 0, -(forward * time) * SCALE_MOVE_SIDE);
 				mCamera.add(instruction);
 				mClient.board(mCamera);
 			}
