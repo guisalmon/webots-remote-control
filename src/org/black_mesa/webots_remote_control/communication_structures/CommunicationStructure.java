@@ -41,7 +41,7 @@ public abstract class CommunicationStructure implements Serializable {
 	 * 
 	 * @param previous
 	 *            Previous CommunicationStructure version for the same id in the
-	 *            boarding table of the client. This object must not me
+	 *            boarding table of the client. This object must not be
 	 *            modified.
 	 * @return Reference to a new version that will replace the old one. The
 	 *         object referenced should never be modified afterwards.
@@ -56,7 +56,8 @@ public abstract class CommunicationStructure implements Serializable {
 	public abstract boolean checkIntegrity();
 
 	/**
-	 * The toString method must be redefined.
+	 * The toString method must be redefined. It will be used as a user-friendly
+	 * identifier.
 	 * 
 	 * @return The string.
 	 */

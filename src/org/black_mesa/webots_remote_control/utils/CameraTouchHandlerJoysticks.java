@@ -1,9 +1,11 @@
 package org.black_mesa.webots_remote_control.utils;
 
 import java.util.Timer;
+import java.util.TimerTask;
 
 import org.black_mesa.webots_remote_control.listeners.CameraTouchHandlerListener;
 
+import android.os.SystemClock;
 import android.view.MotionEvent;
 
 /**
@@ -11,41 +13,51 @@ import android.view.MotionEvent;
  * 
  * @author Ilja Kroonen
  */
-@SuppressWarnings("unused")
 public class CameraTouchHandlerJoysticks {
-
 	private static final int TIMER_TICK = 32;
-	/*
-	 * Current state of the handler.
-	 */
-	private State mState = State.INIT;
+	private static final float LEFT_JOYSTICK_CENTER_X = .25f;
+	private static final float LEFT_JOYSTICK_CENTER_Y = .5f;
+	private static final float LEFT_JOYSTICK_RADIUS = .2f;
+	private static final float RIGHT_JOYSTICK_CENTER_X = .75f;
+	private static final float RIGHT_JOYSTICK_CENTER_Y = .5f;
+	private static final float RIGHT_JOYSTICK_RADIUS = .2f;
 
 	/*
-	 * Left joystick pointer id and coordinates. Valid in state DOUBLE.
+	 * Right joystick pointer id, coordinates and last timestamp. Valid if
+	 * mRightValid is true.
 	 */
+	private boolean mRightValid = false;
 	private int mRightPointerId;
 	private float mRightPointerX;
 	private float mRightPointerY;
+	private long mRightTimeStamp;
 
 	/*
-	 * Right joystick pointer id and coordinates. Valid in state DOUBLE.
+	 * Left joystick pointer id, coordinates. Valid if mLeftValid is true.
 	 */
+	private boolean mLeftValid = false;
 	private int mLeftPointerId;
 	private float mLeftPointerX;
 	private float mLeftPointerY;
 
 	/*
-	 * Timer used in state DOUBLE.
+	 * Timer used in state DOUBLE and ONLY_RIGHT.
 	 */
-	private Timer mTimer;
+	private Timer mTimer = new Timer();
 
 	/*
 	 * Information about the touching surface.
 	 */
-	private float mXMin;
-	private float mYMin;
-	private float mXMax;
-	private float mYMax;
+	private final float mXMin;
+	private final float mYMin;
+	private final float mXMax;
+	private final float mYMax;
+	private final float mLeftCenterX;
+	private final float mLeftCenterY;
+	private final float mLeftRadius;
+	private final float mRightCenterX;
+	private final float mRightCenterY;
+	private final float mRightRadius;
 
 	/*
 	 * Listener for the generated events
@@ -69,10 +81,17 @@ public class CameraTouchHandlerJoysticks {
 	 */
 	public CameraTouchHandlerJoysticks(final float xMin, final float yMin, final float xMax, final float yMax,
 			final CameraTouchHandlerListener l) {
-		mXMin = xMin;
-		mYMin = yMin;
+		// TODO
+		mXMin = 0;
+		mYMin = 0;
 		mXMax = xMax;
 		mYMax = yMax;
+		mLeftCenterX = LEFT_JOYSTICK_CENTER_X * (mXMax - mXMin) + mXMin;
+		mLeftCenterY = LEFT_JOYSTICK_CENTER_Y * (mYMax - mYMin) + mYMin;
+		mLeftRadius = LEFT_JOYSTICK_RADIUS * (mXMax - mXMin) + mXMin;
+		mRightCenterX = RIGHT_JOYSTICK_CENTER_X * (mXMax - mXMin) + mXMin;
+		mRightCenterY = RIGHT_JOYSTICK_CENTER_Y * (mYMax - mYMin) + mYMin;
+		mRightRadius = RIGHT_JOYSTICK_RADIUS * (mXMax - mXMin) + mXMin;
 		mListener = l;
 	}
 
@@ -103,114 +122,176 @@ public class CameraTouchHandlerJoysticks {
 			moveHandler(event);
 			break;
 		}
-		update(event);
 	}
 
 	private void moveHandler(final MotionEvent event) {
-		switch (mState) {
-		case DOUBLE:
-			break;
-		case INIT:
-			break;
-		case ONLY_LEFT:
-			break;
-		case ONLY_RIGHT:
-			break;
+		updateState(event);
+		if (mLeftValid) {
+			onOrientationChange(event);
 		}
+		updateAttributes(event);
 	}
 
 	private void pointerUpHandler(final MotionEvent event) {
-		switch (mState) {
-		case DOUBLE:
-			break;
-		case INIT:
-			break;
-		case ONLY_LEFT:
-			break;
-		case ONLY_RIGHT:
-			break;
+		int id = event.getPointerId(event.getActionIndex());
+		if (id == mRightPointerId) {
+			changeRightState(false);
+		}
+		if (id == mLeftPointerId) {
+			changeLeftState(false);
 		}
 	}
 
 	private void pointerDownHandler(final MotionEvent event) {
-		switch (mState) {
-		case DOUBLE:
-			break;
-		case INIT:
-			break;
-		case ONLY_LEFT:
-			break;
-		case ONLY_RIGHT:
-			break;
-		}
+		updateState(event);
+		updateAttributes(event);
 	}
 
 	private void upHandler(final MotionEvent event) {
-		switch (mState) {
-		case DOUBLE:
-			break;
-		case INIT:
-			break;
-		case ONLY_LEFT:
-			break;
-		case ONLY_RIGHT:
-			break;
-		}
+		changeLeftState(false);
+		changeRightState(false);
 	}
 
 	private void cancelHandler(final MotionEvent event) {
-		switch (mState) {
-		case DOUBLE:
-			break;
-		case INIT:
-			break;
-		case ONLY_LEFT:
-			break;
-		case ONLY_RIGHT:
-			break;
-		}
+		changeLeftState(false);
+		changeRightState(false);
 	}
 
 	private void downHandler(final MotionEvent event) {
-		switch (mState) {
-		case DOUBLE:
-			break;
-		case INIT:
-			break;
-		case ONLY_LEFT:
-			break;
-		case ONLY_RIGHT:
-			break;
-		}
+		updateState(event);
+		updateAttributes(event);
 	}
 
 	private void timerHandler() {
-		switch (mState) {
-		case DOUBLE:
-			break;
-		case INIT:
-			break;
-		case ONLY_LEFT:
-			break;
-		case ONLY_RIGHT:
-			break;
+		if (mRightValid) {
+			onPositionChange();
 		}
 	}
 
-	private void update(final MotionEvent event) {
-		switch (mState) {
-		case DOUBLE:
-			break;
-		case INIT:
-			break;
-		case ONLY_LEFT:
-			break;
-		case ONLY_RIGHT:
-			break;
+	private void updateAttributes(final MotionEvent event) {
+		if (mRightValid) {
+			int i = event.findPointerIndex(mRightPointerId);
+			mRightPointerX = event.getX(i);
+			mRightPointerY = event.getY(i);
+			mRightTimeStamp = event.getEventTime();
+		}
+		if (mLeftValid) {
+			int i = event.findPointerIndex(mLeftPointerId);
+			mLeftPointerX = event.getX(i);
+			mLeftPointerY = event.getY(i);
 		}
 	}
 
-	private enum State {
-		DOUBLE, INIT, ONLY_LEFT, ONLY_RIGHT
+	private void updateState(final MotionEvent event) {
+		boolean leftValid = mLeftValid;
+		if (leftValid) {
+			int index = event.findPointerIndex(mLeftPointerId);
+			if (!isOnLeftJoystick(event, index)) {
+				leftValid = false;
+			}
+		}
+		if (!leftValid) {
+			int index = findLeftJoystickPointerIndex(event);
+			if (index != -1) {
+				mLeftPointerId = event.getPointerId(index);
+				leftValid = true;
+			}
+		}
+		changeLeftState(leftValid);
+
+		boolean rightValid = mRightValid;
+		if (rightValid) {
+			int index = event.findPointerIndex(mRightPointerId);
+			if (!isOnRightJoystick(event, index)) {
+				rightValid = false;
+			}
+		}
+		if (!rightValid) {
+			int index = findRightJoystickPointerIndex(event);
+			if (index != -1) {
+				mRightPointerId = event.getPointerId(index);
+				rightValid = true;
+			}
+		}
+		changeRightState(rightValid);
+	}
+
+	private void changeLeftState(final boolean newState) {
+		mLeftValid = newState;
+	}
+
+	private void changeRightState(final boolean newState) {
+		if (newState == mRightValid) {
+			return;
+		}
+		if (!newState) {
+			mTimer.cancel();
+		}
+		if (newState) {
+			mTimer = new Timer();
+			mTimer.schedule(makeTask(), 0, TIMER_TICK);
+		}
+		mRightValid = newState;
+	}
+
+	private boolean isOnLeftJoystick(final MotionEvent event, final int pointerIndex) {
+		float x = event.getX(pointerIndex);
+		float y = event.getY(pointerIndex);
+		float d = distance(x, y, mLeftCenterX, mLeftCenterY);
+		return d < mLeftRadius;
+	}
+
+	private boolean isOnRightJoystick(final MotionEvent event, final int pointerIndex) {
+		float x = event.getX(pointerIndex);
+		float y = event.getY(pointerIndex);
+		float d = distance(x, y, mRightCenterX, mRightCenterY);
+		return d < mRightRadius;
+	}
+
+	private float distance(final float x1, final float y1, final float x2, final float y2) {
+		return (float) Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+	}
+
+	private int findLeftJoystickPointerIndex(final MotionEvent event) {
+		for (int i = 0; i < event.getPointerCount(); i++) {
+			if (isOnLeftJoystick(event, i)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	private int findRightJoystickPointerIndex(final MotionEvent event) {
+		for (int i = 0; i < event.getPointerCount(); i++) {
+			if (isOnRightJoystick(event, i)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	private TimerTask makeTask() {
+		return new TimerTask() {
+			@Override
+			public void run() {
+				timerHandler();
+			}
+		};
+	}
+
+	private void onOrientationChange(final MotionEvent event) {
+		int index = event.findPointerIndex(mLeftPointerId);
+		float dx = (event.getX(index) - mLeftPointerX) / (mXMax - mXMin);
+		float dy = (event.getY(index) - mLeftPointerY) / (mYMax - mYMin);
+		mListener.turnPitch(dx, dy);
+	}
+
+	private void onPositionChange() {
+		float x = (mRightPointerX - mRightCenterX) / (mXMax - mXMin);
+		float y = (mRightPointerY - mRightCenterY) / (mYMax - mYMin);
+		long now = SystemClock.uptimeMillis();
+		long time = now - mRightTimeStamp;
+		mRightTimeStamp = now;
+		mListener.moveRightForward(x, y, time);
 	}
 }

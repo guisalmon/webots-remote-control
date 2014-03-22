@@ -19,7 +19,7 @@ public interface ClientListener {
 	 * @param state
 	 *            New state of the Client.
 	 */
-	void onStateChange(final Server server, final ConnectionState state);
+	void onStateChange(Server server, ConnectionState state);
 
 	/**
 	 * Notifies the listener of the reception of an additional object by the
@@ -30,5 +30,5 @@ public interface ClientListener {
 	 * @param data
 	 *            Object received.
 	 */
-	void onReception(final Server server, final CommunicationStructure data);
+	void onReception(Server server, CommunicationStructure data);
 }
