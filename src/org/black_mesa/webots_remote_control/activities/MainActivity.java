@@ -177,7 +177,7 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 		FragmentManager fragmentManager;
 		switch (position){
 		case 0:
-			//invalidateOptionsMenu();
+			mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 			Fragment connexionFragment = new ConnectionFragment();
 			fragmentManager = getFragmentManager();
 		    fragmentManager.beginTransaction()
@@ -188,6 +188,7 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 			if(CONNECTION_MANAGER.getServerList().isEmpty()){
 				Toast.makeText(this, "No server connected", Toast.LENGTH_SHORT).show();
 			}else{
+				mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 				Fragment cameraFragment = new CameraFragment();
 				Bundle b = new Bundle();
 				b.putLong("ServerId", CONNECTION_MANAGER.getServerList().get(0).getId());
@@ -199,6 +200,7 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 			}
 			break;
 		case 2:
+			//mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 			break;
 		default:
 				
