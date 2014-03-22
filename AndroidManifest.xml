@@ -17,7 +17,9 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="org.black_mesa.webots_remote_control.activities.MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name" 
+            android:screenOrientation="landscape"
+			android:configChanges="keyboardHidden|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,7 +29,9 @@
         <activity
             android:name="org.black_mesa.webots_remote_control.activities.AddServerActivity"
             android:label="@string/title_activity_add_server"
-            android:parentActivityName="org.black_mesa.webots_remote_control.activities.MainActivity" >
+            android:parentActivityName="org.black_mesa.webots_remote_control.activities.MainActivity" 
+            android:screenOrientation="landscape"
+			android:configChanges="keyboardHidden|orientation|screenSize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.black_mesa.webots_remote_control.activities.MainActivity" />

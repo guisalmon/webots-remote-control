@@ -24,14 +24,16 @@ public class ServerListAdapter extends ArrayAdapter<Server>{
 
 	private final Context context;
 	private final List<Server> servers;
+	private final List<Server> onlineServers;
 	private List<CheckBox> boxes;
 	private List<View> rows;
 	private OnListEventsListener eventsListener;
 
-	public ServerListAdapter(Context context,  List<Server> servers, OnListEventsListener eventsListener) {
+	public ServerListAdapter(Context context,  List<Server> servers, List<Server> onlineServers, OnListEventsListener eventsListener) {
 		super(context,  R.layout.server_list_item, servers);
 		this.context = context;
 		this.servers = servers;
+		this.onlineServers = onlineServers;
 		this.eventsListener = eventsListener;
 		boxes = new ArrayList<CheckBox>();
 		rows = new ArrayList<View>();
@@ -49,7 +51,11 @@ public class ServerListAdapter extends ArrayAdapter<Server>{
 		nameText.setText(server.getName());
 		adressText.setText(server.getAdress()+":"+server.getPort());
 		Button button = (Button)rowView.findViewById(R.id.server_state_button);
-		button.setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_send, 0);
+		if(onlineServers.contains(server)){
+			button.setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_close_clear_cancel, 0);
+		}else{
+			button.setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_send, 0);
+		}
 		button.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -84,5 +90,9 @@ public class ServerListAdapter extends ArrayAdapter<Server>{
 		rows.add(rowView);
 		rowView.setClickable(true);
 		return rowView;
+	}
+
+	public List<View> getRows() {
+		return rows;
 	}
 }

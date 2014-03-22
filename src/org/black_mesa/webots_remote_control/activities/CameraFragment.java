@@ -1,7 +1,5 @@
 package org.black_mesa.webots_remote_control.activities;
 
-import java.util.List;
-
 import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.client.CamerasManager;
@@ -14,6 +12,7 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.view.Display;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -32,8 +31,7 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 	public void onCreate(Bundle savedInstanceState) {
 		Bundle extras = getArguments();
 		long id = extras.getLong("ServerId");
-		List<Server> servers = ((MainActivity) getActivity()).mConnectedServers;
-		for (Server s : servers) {
+		for (Server s : MainActivity.CONNECTION_MANAGER.getServerList()) {
 			if (s.getId() == id) {
 				server = s;
 				break;
@@ -101,4 +99,11 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 		}
 		return true;
 	}
+
+	@Override
+	public void onPrepareOptionsMenu(Menu menu) {
+		super.onPrepareOptionsMenu(menu);
+	}
+	
+	
 }
