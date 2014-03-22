@@ -56,7 +56,8 @@ public abstract class CommunicationStructure implements Serializable {
 	public abstract boolean checkIntegrity();
 
 	/**
-	 * The toString method must be redefined.
+	 * The toString method must be redefined. It will be used as a user-friendly
+	 * identifier.
 	 * 
 	 * @return The string.
 	 */
