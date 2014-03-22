@@ -143,8 +143,6 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
         if (mDrawerToggle.onOptionsItemSelected(item)) {
           return true;
         }
-        // Handle your other action bar items...
-
         return super.onOptionsItemSelected(item);
     }
 	

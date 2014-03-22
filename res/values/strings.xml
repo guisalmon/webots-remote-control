@@ -20,8 +20,11 @@
     <string name="connexion_add">Add server</string>
     <string name="title_activity_add_server">Add Server</string>
     <string name="add_server_name">Server name</string>
-    <string name="add_server_adress">Server address</string>
+    <string name="add_server_adress">Server adress</string>
     <string name="add_server_port">Port</string>
     <string name="disconnection">Server disconnected</string>
+    <string name="new_server_name">Server</string>
+    <string name="new_server_adress">0.0.0.0</string>
+    <string name="new_server_port">42511</string>
 
 </resources>
