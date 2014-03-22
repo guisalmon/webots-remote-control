@@ -32,23 +32,15 @@ public class ConnectionManager {
 			public void onStateChange(final Server server, final ConnectionState state) {
 				Client source = mConnections.get(server);
 				if (source == null) {
+					// The client could have queued a stateChange event in the
+					// UI thread queue between the call to dispose and the
+					// actual disposing. We just ignore the event.
 					return;
 				}
-				switch (state) {
-				case COMMUNICATION_ERROR:
+				if (state != ConnectionState.CONNECTED) {
 					mConnections.remove(server);
-					break;
-				case CONNECTED:
-					break;
-				case CONNECTION_ERROR:
-					mConnections.remove(server);
-					break;
-				case DISPOSED:
-					mConnections.remove(server);
-					break;
-				case INIT:
-					break;
 				}
+
 				for (ConnectionManagerListener l : mListeners) {
 					l.onStateChange(server, state);
 				}
