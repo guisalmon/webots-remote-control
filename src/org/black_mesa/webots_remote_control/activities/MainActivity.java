@@ -38,6 +38,10 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
     private Menu mMenu;
     private String mCurTitle;
     
+    
+    
+    //Activity Lifecycle
+    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -85,6 +89,31 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
         mClosed = true;
 
 	}
+	
+	@Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        mDrawerToggle.syncState();
+    }
+	
+	@Override
+	protected void onPause() {
+		CONNECTION_MANAGER.save();
+		CONNECTION_MANAGER.stop();
+		super.onPause();
+	}
+
+	@Override
+	protected void onResume() {
+		CONNECTION_MANAGER.restore();
+		super.onResume();
+	}
+	
+	@Override
+	public void setTitle(CharSequence title) {
+	    getActionBar().setTitle(title);
+	}
 
 	@Override
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -100,13 +129,6 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 		// Inflate the menu; this adds items to the action bar if it is present.
 		return true;
 	}
-	
-	@Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        // Sync the toggle state after onRestoreInstanceState has occurred.
-        mDrawerToggle.syncState();
-    }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -126,35 +148,9 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
         return super.onOptionsItemSelected(item);
     }
 	
-	@Override
-	protected void onPause() {
-		CONNECTION_MANAGER.save();
-		CONNECTION_MANAGER.stop();
-		super.onPause();
-	}
 
-	@Override
-	protected void onResume() {
-		CONNECTION_MANAGER.restore();
-		super.onResume();
-	}
-	
-	public void disconnect(Server s){
-		CONNECTION_MANAGER.removeServer(s);
-		updateDrawer();
-		mDrawerAdapter.notifyDataSetChanged();
-	}
-	
-	public void connect(Server s){
-		if(CONNECTION_MANAGER.getClient(s) == null){
-			CONNECTION_MANAGER.addServer(s);
-		}
-	}
 
-	@Override
-	public void setTitle(CharSequence title) {
-	    getActionBar().setTitle(title);
-	}
+    //ConnectionManagerListener
 
 
 	@Override
@@ -174,6 +170,35 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 		mDrawerAdapter.notifyDataSetChanged();
 	}
 
+	
+	
+	//Public methods
+	
+	/**
+	 * Disconnects the application from the server s and prevents drawer from showing it as connected
+	 * @param s Server to disconnect
+	 */
+	public void disconnect(Server s){
+		CONNECTION_MANAGER.removeServer(s);
+		updateDrawer();
+		mDrawerAdapter.notifyDataSetChanged();
+	}
+	
+	/**
+	 * Connects the application to the server s
+	 * @param s Server to connect
+	 */
+	public void connect(Server s){
+		if(CONNECTION_MANAGER.getClient(s) == null){
+			CONNECTION_MANAGER.addServer(s);
+		}
+	}
+	
+	
+	
+	//private methods and class
+	
+	
 	private void updateDrawer() {
 		mDrawerListItems.clear();
 		List<Server> connectedServers = CONNECTION_MANAGER.getServerList();
@@ -184,13 +209,6 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 		for(int i=0; i<connectedServers.size(); i++){
 			mDrawerListItems.add(i+1, connectedServers.get(i).getName());
 		}
-	}
-
-	private class DrawerItemClickListener implements ListView.OnItemClickListener {
-	    @Override
-	    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-	        selectItem(position);
-	    }
 	}
 
 	/** Swaps fragments in the main content view */
@@ -231,6 +249,13 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	    setTitle(mDrawerListItems.get(position));
 	    
 	    mDrawerLayout.closeDrawer(mDrawerList);
+	}
+	
+	private class DrawerItemClickListener implements ListView.OnItemClickListener {
+	    @Override
+	    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+	        selectItem(position);
+	    }
 	}
 
 }
