@@ -31,7 +31,6 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	private Menu mMenu;
 	
 	
-	
 	//Activity lifecycle
 	
 	

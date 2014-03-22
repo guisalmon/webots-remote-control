@@ -32,6 +32,8 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private boolean mClosed;
+    private Menu mMenu;
+    private String mCurTitle;
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +61,8 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
                 mClosed = true;
-                //invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                getActionBar().setTitle(mCurTitle);
+                invalidateOptionsMenu();
             }
 
             /** Called when a drawer has settled in a completely open state. */
@@ -67,7 +70,7 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
                 super.onDrawerOpened(drawerView);
                 getActionBar().setTitle(R.string.app_name);
                 mClosed = false;
-                invalidateOptionsMenu();
+                mMenu.clear();
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
@@ -83,6 +86,7 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 		if (!mClosed){
 			menu.clear();
 		}
+		mMenu = menu;
         return super.onPrepareOptionsMenu(menu);
     }
 	
@@ -175,6 +179,7 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	/** Swaps fragments in the main content view */
 	private void selectItem(int position) {
 		FragmentManager fragmentManager;
+		mCurTitle = mDrawerListItems[position];
 		switch (position){
 		case 0:
 			mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
