@@ -13,7 +13,7 @@ public interface CameraTouchHandlerListener {
 	 * @param forward
 	 *            Distance of the movement (typically between -0.5 and 0.5).
 	 */
-	void moveForward(final float forward);
+	void moveForward(float forward);
 
 	/**
 	 * Indicates that the camera must move sideways.
@@ -29,7 +29,7 @@ public interface CameraTouchHandlerListener {
 	 *            distance, distances have typically to be multiplied by this
 	 *            value (typically around 32).
 	 */
-	void moveSide(final float right, final float up, final long time);
+	void moveSide(float right, float up, long time);
 
 	/**
 	 * Indicates that the camera must change its orientation.
@@ -41,7 +41,7 @@ public interface CameraTouchHandlerListener {
 	 *            Amplitude of the pitch orientation change (typically between
 	 *            -0.5 and 0.5).
 	 */
-	void turnPitch(final float turn, final float pitch);
+	void turnPitch(float turn, float pitch);
 
 	/**
 	 * Indicates that the camera must move along the right and forward axis.
@@ -57,5 +57,5 @@ public interface CameraTouchHandlerListener {
 	 *            distance, distances have typically to be multiplied by this
 	 *            value (typically around 32).
 	 */
-	void moveRightForward(final float right, final float forward, final float time);
+	void moveRightForward(float right, float forward, float time);
 }
