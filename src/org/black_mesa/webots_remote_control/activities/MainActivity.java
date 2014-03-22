@@ -1,5 +1,8 @@
 package org.black_mesa.webots_remote_control.activities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.client.ConnectionManager;
@@ -13,7 +16,6 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,10 +29,11 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	
 	public static final ConnectionManager CONNECTION_MANAGER = new ConnectionManager();
 	
-	private String[] mDrawerListItems;
+	private List<String> mDrawerListItems;
     private ListView mDrawerList;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
+    private ArrayAdapter<String> mDrawerAdapter;
     private boolean mClosed;
     private Menu mMenu;
     private String mCurTitle;
@@ -47,11 +50,13 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 		
 		//Create and populate the left drawer
 		setContentView(R.layout.activity_main);
-        mDrawerListItems = getResources().getStringArray(R.array.drawer_list_array);
+		mDrawerListItems = new ArrayList<String>();
+        updateDrawer();
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
-                R.layout.drawer_list_item, mDrawerListItems));
+        mDrawerAdapter = new ArrayAdapter<String>(this,
+                R.layout.drawer_list_item, mDrawerListItems);
+        mDrawerList.setAdapter(mDrawerAdapter);
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
         
         //Enable toggling the drawer by the application bar
@@ -136,14 +141,13 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	
 	public void disconnect(Server s){
 		CONNECTION_MANAGER.removeServer(s);
+		updateDrawer();
+		mDrawerAdapter.notifyDataSetChanged();
 	}
 	
 	public void connect(Server s){
 		if(CONNECTION_MANAGER.getClient(s) == null){
-			Log.i(getClass().getName(), "Trying to connect "+s.getId()+"\n"+s.getName());
 			CONNECTION_MANAGER.addServer(s);
-		}else{
-			Log.i(getClass().getName(), "Cannot connect "+s.getId()+"\n"+s.getName());
 		}
 	}
 
@@ -163,9 +167,22 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 		case CONNECTION_ERROR:
 			Toast.makeText(this, "Disconnected ! ", Toast.LENGTH_SHORT).show();
 			break;
-
 		default:
 			break;
+		}
+		updateDrawer();
+		mDrawerAdapter.notifyDataSetChanged();
+	}
+
+	private void updateDrawer() {
+		mDrawerListItems.clear();
+		List<Server> connectedServers = CONNECTION_MANAGER.getServerList();
+		String resTitles[] = getResources().getStringArray(R.array.drawer_list_array);
+		for(int i = 0; i<resTitles.length; i++){
+        	mDrawerListItems.add(resTitles[i]);
+        }
+		for(int i=0; i<connectedServers.size(); i++){
+			mDrawerListItems.add(i+1, connectedServers.get(i).getName());
 		}
 	}
 
@@ -179,7 +196,7 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	/** Swaps fragments in the main content view */
 	private void selectItem(int position) {
 		FragmentManager fragmentManager;
-		mCurTitle = mDrawerListItems[position];
+		mCurTitle = mDrawerListItems.get(position);
 		switch (position){
 		case 0:
 			mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
@@ -189,30 +206,29 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 		                   .replace(R.id.content_frame, connexionFragment)
 		                   .commit();
 			break;
-		case 1:
-			if(CONNECTION_MANAGER.getServerList().isEmpty()){
-				Toast.makeText(this, "No server connected", Toast.LENGTH_SHORT).show();
-			}else{
-				mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-				Fragment cameraFragment = new CameraFragment();
-				Bundle b = new Bundle();
-				b.putLong("ServerId", CONNECTION_MANAGER.getServerList().get(0).getId());
-				cameraFragment.setArguments(b);
-				fragmentManager = getFragmentManager();
-			    fragmentManager.beginTransaction()
-			                   .replace(R.id.content_frame, cameraFragment)
-			                   .commit();
-			}
-			break;
-		case 2:
-			//mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-			break;
 		default:
-				
+			if(position == mDrawerListItems.size()-1){
+				//TODO
+				//Instantiate the About fragment here
+			}else{
+				if(CONNECTION_MANAGER.getServerList().isEmpty()){
+					Toast.makeText(this, "No server connected", Toast.LENGTH_SHORT).show();
+				}else{
+					mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+					Fragment cameraFragment = new CameraFragment();
+					Bundle b = new Bundle();
+					b.putLong("ServerId", CONNECTION_MANAGER.getServerList().get(position-1).getId());
+					cameraFragment.setArguments(b);
+					fragmentManager = getFragmentManager();
+				    fragmentManager.beginTransaction()
+				                   .replace(R.id.content_frame, cameraFragment)
+				                   .commit();
+				}
+			}
 		}
 
 	    mDrawerList.setItemChecked(position, true);
-	    setTitle(mDrawerListItems[position]);
+	    setTitle(mDrawerListItems.get(position));
 	    
 	    mDrawerLayout.closeDrawer(mDrawerList);
 	}

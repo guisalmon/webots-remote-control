@@ -2,7 +2,6 @@
 <resources>
     <string-array name="drawer_list_array">
         <item>"Connexion"</item>
-        <item>"Vues"</item>
         <item>"A propos"</item>
     </string-array>
 </resources>
