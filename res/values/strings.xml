@@ -22,5 +22,6 @@
     <string name="add_server_name">Server name</string>
     <string name="add_server_adress">Server address</string>
     <string name="add_server_port">Port</string>
+    <string name="disconnection">Server disconnected</string>
 
 </resources>

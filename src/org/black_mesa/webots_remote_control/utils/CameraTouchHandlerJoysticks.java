@@ -1,11 +1,9 @@
 package org.black_mesa.webots_remote_control.utils;
 
 import java.util.Timer;
-import java.util.TimerTask;
 
 import org.black_mesa.webots_remote_control.listeners.CameraTouchHandlerListener;
 
-import android.os.SystemClock;
 import android.view.MotionEvent;
 
 /**
@@ -13,13 +11,15 @@ import android.view.MotionEvent;
  * 
  * @author Ilja Kroonen
  */
+@SuppressWarnings("unused")
 public class CameraTouchHandlerJoysticks {
+
 	private static final int TIMER_TICK = 32;
 	/*
 	 * Current state of the handler.
 	 */
 	private State mState = State.INIT;
-	
+
 	/*
 	 * Left joystick pointer id and coordinates. Valid in state DOUBLE.
 	 */
@@ -217,7 +217,7 @@ public class CameraTouchHandlerJoysticks {
 	private boolean isOnRightJoystick() {
 		return false;
 	}
-	
+
 	private enum State {
 		DOUBLE, INIT, ONLY_LEFT, ONLY_RIGHT
 	}

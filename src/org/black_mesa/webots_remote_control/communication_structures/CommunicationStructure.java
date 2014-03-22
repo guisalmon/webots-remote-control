@@ -47,11 +47,19 @@ public abstract class CommunicationStructure implements Serializable {
 	 *         object referenced should never be modified afterwards.
 	 */
 	public abstract CommunicationStructure board(CommunicationStructure previous);
-	
+
 	/**
 	 * Tests if the structure contains valid data.
 	 * 
 	 * @return True if the structure is valid, false if not.
 	 */
 	public abstract boolean checkIntegrity();
+
+	/**
+	 * The toString method must be redefined.
+	 * 
+	 * @return The string.
+	 */
+	@Override
+	public abstract String toString();
 }
