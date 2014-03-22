@@ -27,7 +27,7 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	private DataSource mDatasource;
 	private ArrayAdapter<Server> mAdapter;
 	private List<Server> mServers;
-	//private List<Server> mConnectedServers;
+	private List<View> mRows;
 	private Menu mMenu;
 	
 	
@@ -68,8 +68,8 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	@Override
 	public void onResume() {
 		mDatasource.open();
-		updateView();
 		getActivity().invalidateOptionsMenu();
+		updateView();
 		super.onResume();
 	}
 
@@ -127,11 +127,11 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	public void onItemLaunchListener(int position) {
 		
 		if(MainActivity.CONNECTION_MANAGER.getServerList().contains(mServers.get(position))){
-			((Button)getListView().getChildAt(position).findViewById(R.id.server_state_button)).setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_send, 0);
+			((Button)mRows.get(position).findViewById(R.id.server_state_button)).setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_send, 0);
 			((MainActivity)getActivity()).disconnect(mServers.get(position));
 		}else{
-			getListView().getChildAt(position).findViewById(R.id.server_state_button).setVisibility(View.GONE);
-			getListView().getChildAt(position).findViewById(R.id.server_connecting).setVisibility(View.VISIBLE);
+			mRows.get(position).findViewById(R.id.server_state_button).setVisibility(View.GONE);
+			mRows.get(position).findViewById(R.id.server_connecting).setVisibility(View.VISIBLE);
 			((MainActivity)getActivity()).connect(mServers.get(position));
 		}
 	}
@@ -144,17 +144,19 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	@Override
 	public void onStateChange(Server server, ConnectionState state) {
 		int i = mServers.indexOf(server);
+		Log.i(getClass().getName(), "State Change");
 		switch (state) {
 		case CONNECTED:
-			((Button)getListView().getChildAt(i).findViewById(R.id.server_state_button)).setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_close_clear_cancel, 0);
-			getListView().getChildAt(i).findViewById(R.id.server_state_button).setVisibility(View.VISIBLE);
-			getListView().getChildAt(i).findViewById(R.id.server_connecting).setVisibility(View.GONE);
+			Log.i(getClass().getName(), "Connected");
+			((Button)mRows.get(i).findViewById(R.id.server_state_button)).setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_close_clear_cancel, 0);
+			mRows.get(i).findViewById(R.id.server_state_button).setVisibility(View.VISIBLE);
+			mRows.get(i).findViewById(R.id.server_connecting).setVisibility(View.GONE);
 			break;
 		case COMMUNICATION_ERROR:
 		case CONNECTION_ERROR:
-			((Button)getListView().getChildAt(i).findViewById(R.id.server_state_button)).setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_send, 0);
-			getListView().getChildAt(i).findViewById(R.id.server_state_button).setVisibility(View.VISIBLE);
-			getListView().getChildAt(i).findViewById(R.id.server_connecting).setVisibility(View.GONE);
+			((Button)mRows.get(i).findViewById(R.id.server_state_button)).setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_send, 0);
+			mRows.get(i).findViewById(R.id.server_state_button).setVisibility(View.VISIBLE);
+			mRows.get(i).findViewById(R.id.server_connecting).setVisibility(View.GONE);
 		default:
 			break;
 		}
@@ -177,13 +179,14 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	private void updateView(){
 		Log.i(getClass().getName(), "Update View");
 		mServers = mDatasource.getAllServers();
-		mAdapter = new ServerListAdapter(getActivity(), mServers, this);
+		mAdapter = new ServerListAdapter(getActivity(), mServers, MainActivity.CONNECTION_MANAGER.getServerList(), this);
 		setListAdapter(mAdapter);
+		mRows = ((ServerListAdapter)mAdapter).getRows();
 	}
 	
 	private void deleteSelection() {
 		for(int i = 0; i < getListView().getChildCount(); i++){
-			boolean check = ((CheckBox)getListView().getChildAt(i).findViewById(R.id.server_select)).isChecked();
+			boolean check = ((CheckBox)mRows.get(i).findViewById(R.id.server_select)).isChecked();
 			if(check) mDatasource.deleteServer(mServers.get(i));
 		}
 		updateView();
@@ -194,9 +197,9 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 		Bundle b = new Bundle();
 		Intent intent = new Intent(getActivity(), AddServerActivity.class);
 		Long id = (long) 0;
-		for (int i = 0; i < getListView().getChildCount(); i++){
-			if(((CheckBox)getListView().getChildAt(i).findViewById(R.id.server_select)).isChecked()){
-				id = ((Server)getListView().getItemAtPosition(i)).getId();
+		for (int i = 0; i < mRows.size(); i++){
+			if(((CheckBox)mRows.get(i).findViewById(R.id.server_select)).isChecked()){
+				id = mServers.get(i).getId();
 			}
 		}
 		b.putLong("id", id);
