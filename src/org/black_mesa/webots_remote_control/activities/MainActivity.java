@@ -208,8 +208,11 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 			break;
 		default:
 			if(position == mDrawerListItems.size()-1){
-				//TODO
-				//Instantiate the About fragment here
+				Fragment aboutFragment = new AboutFragment();
+				fragmentManager = getFragmentManager();
+			    fragmentManager.beginTransaction()
+			                   .replace(R.id.content_frame, aboutFragment)
+			                   .commit();
 			}else{
 				if(CONNECTION_MANAGER.getServerList().isEmpty()){
 					Toast.makeText(this, "No server connected", Toast.LENGTH_SHORT).show();

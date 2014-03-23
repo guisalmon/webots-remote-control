@@ -4,24 +4,27 @@
     <string name="app_name">Webots-remote-control</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
-    <string name="server_based_preferences">Server settings</string>
-    <string name="title_address_edittext_preference">address</string>
-    <string name="summary_address_edittext_preference">Insert current value here</string>
-    <string name="dialog_title_address_edittext_preference">Server address</string>
-    <string name="address_hint">0.0.0.0</string>
-    <string name="port_hint">0000</string>
-    <string name="title_port_edittext_preference">Port</string>
-    <string name="summary_port_edittext_preference">Insert current value here</string>
-    <string name="dialog_title_port_edittext_preference">Port used by the server</string>
     <string name="server_preference"></string>
     <string name="server_incompatible_with_client"></string>
     <string name="invalid_client">The client is invalid ; it has been disposed, or connection has failed</string>
     <string name="drawer_open"></string>
-    <string name="connexion_add">Add server</string>
+    <!-- Connection_fragment -->
+    <string name="connexion_add">Add a new server</string>
+    <string name="connexion_edit">Edit the server</string>
+    <string name="connexion_delete">Delete selected servers</string>
+    <!-- Add_server_activity -->
     <string name="title_activity_add_server">Add Server</string>
     <string name="add_server_name">Server name</string>
     <string name="add_server_adress">Server address</string>
     <string name="add_server_port">Port</string>
     <string name="disconnection">Server disconnected</string>
-
+    <string name="server_cancel">Cancel</string>
+    <string name="server_validate">Save the server</string>
+    <!-- about_fragment -->
+	<string name="about_app_category">3D Remote</string>
+	<string name="author_title" >Authors</string>
+	<string name="author_content">Cassim Ketfi, Ilja Kroonen, and Guillaume Salmon</string>
+	<string name="about_version_title">Version</string>
+	<string name="about_licence_category">Licenses</string>
+	<string name="about_open_source_licenses" >LGPL</string>
 </resources>
