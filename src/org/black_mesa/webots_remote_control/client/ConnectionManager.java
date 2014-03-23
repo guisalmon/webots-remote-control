@@ -10,10 +10,8 @@ import org.black_mesa.webots_remote_control.communication_structures.Communicati
 import org.black_mesa.webots_remote_control.listeners.ClientListener;
 import org.black_mesa.webots_remote_control.listeners.ConnectionManagerListener;
 
-import android.util.Log;
-
 /**
- * Manages a collection of clients.
+ * Manages a collection of connections represented by Client objects.
  * 
  * @author Ilja Kroonen
  * 
@@ -34,27 +32,18 @@ public class ConnectionManager {
 			public void onStateChange(final Server server, final ConnectionState state) {
 				Client source = mConnections.get(server);
 				if (source == null) {
+					// The client could have queued a stateChange event in the
+					// UI thread queue between the call to dispose and the
+					// actual disposing. We just ignore the event.
 					return;
 				}
-				switch (state) {
-				case COMMUNICATION_ERROR:
+				if (state != ConnectionState.CONNECTED) {
 					mConnections.remove(server);
-					break;
-				case CONNECTED:
-					break;
-				case CONNECTION_ERROR:
-					mConnections.remove(server);
-					break;
-				case DISPOSED:
-					mConnections.remove(server);
-					break;
-				case INIT:
-					break;
 				}
+
 				for (ConnectionManagerListener l : mListeners) {
 					l.onStateChange(server, state);
 				}
-				Log.d(getClass().getName(), state.toString());
 			}
 
 			@Override
@@ -86,31 +75,12 @@ public class ConnectionManager {
 	}
 
 	/**
-	 * Stops the ConnectionManager. This call closes all connections.
-	 */
-	public final void stop() {
-		Log.d(getClass().getName(), "Stop");
-		for (Client c : mConnections.values()) {
-			c.dispose();
-		}
-		mConnections.clear();
-	}
-
-	/**
-	 * Starts the ConnectionManager.
-	 */
-	public final void start() {
-		Log.d(getClass().getName(), "Start");
-	}
-
-	/**
 	 * Connects to a server.
 	 * 
 	 * @param server
 	 *            Server to connect.
 	 */
 	public final void addServer(final Server server) {
-		Log.d(getClass().getName(), "Adding server");
 		if (mConnections.containsKey(server)) {
 			throw new IllegalArgumentException(server + " was already present in the manager");
 		}
@@ -140,15 +110,42 @@ public class ConnectionManager {
 	}
 
 	/**
-	 * Saves the current servers to be restored later with the restore() method.
+	 * Closes all connections.
 	 */
+	public final void dispose() {
+		for (Client c : mConnections.values()) {
+			c.dispose();
+		}
+		mConnections.clear();
+	}
+
+	/**
+	 * Getter for the server list.
+	 * 
+	 * @return List of connected servers.
+	 * @deprecated Server list should be held somewhere else.
+	 */
+	@Deprecated
+	public final List<Server> getServerList() {
+		return new ArrayList<Server>(mConnections.keySet());
+	}
+
+	/**
+	 * Saves the current servers to be restored later with the restore() method.
+	 * 
+	 * @deprecated Server list should be held somewhere else.
+	 */
+	@Deprecated
 	public final void save() {
 		mSavedServers = new ArrayList<Server>(mConnections.keySet());
 	}
 
 	/**
 	 * Restores the connections previously saved with the save() method.
+	 * 
+	 * @deprecated Server list should be held somewhere else.
 	 */
+	@Deprecated
 	public final void restore() {
 		stop();
 		start();
@@ -156,10 +153,23 @@ public class ConnectionManager {
 			addServer(s);
 		}
 	}
-	
-	public List<Server> getServerList() {
-		return new ArrayList<Server>(mConnections.keySet());
+
+	/**
+	 * Stops the ConnectionManager. This call closes all connections.
+	 * 
+	 * @deprecated Use dispose() instead.
+	 */
+	@Deprecated
+	public final void stop() {
+		dispose();
 	}
-	
-	
+
+	/**
+	 * Starts the ConnectionManager.
+	 * 
+	 * @deprecated Calling this method is useless.
+	 */
+	@Deprecated
+	public final void start() {
+	}
 }
