@@ -16,6 +16,18 @@ public interface CameraTouchHandlerListener {
 	void moveForward(float forward);
 
 	/**
+	 * Indicates that the camera must move forward.
+	 * 
+	 * @param forward
+	 *            Distance of the movement (typically between -0.5 and 0.5).
+	 * @param time
+	 *            Time, in milliseconds, spent on the event. To get the final
+	 *            distance, distances have typically to be multiplied by this
+	 *            value (typically around 32).
+	 */
+	void moveForward(float forward, long time);
+
+	/**
 	 * Indicates that the camera must move sideways.
 	 * 
 	 * @param right
