@@ -21,6 +21,6 @@
 	<string name="about_author_title" >Auteurs</string>
 	<string name="about_author_content">Cassim Ketfi, Ilja Kroonen et Guillaume Salmon</string>
 	<string name="about_version_title">Version</string>
-	<string name="about_licence_category">Licences</string>
+	<string name="about_license_category">Licences</string>
 	<string name="about_open_source_licenses" >LGPL</string>
 </resources>
