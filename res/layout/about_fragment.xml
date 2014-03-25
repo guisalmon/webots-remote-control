@@ -8,8 +8,9 @@
             android:key="about_version"
             android:title="@string/about_version_title" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/about_licence_category" >
+    <PreferenceCategory android:title="@string/about_license_category" >
         <Preference
+            android:key="about_license"
             android:title="@string/about_open_source_licenses"/>
     </PreferenceCategory>
 </PreferenceScreen>
