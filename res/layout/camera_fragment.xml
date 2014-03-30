@@ -4,7 +4,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
 >
-<org.black_mesa.webots_remote_control.activities.CameraView
+<org.black_mesa.webots_remote_control.activities.CameraViewJoysticks
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/camera_fragment"

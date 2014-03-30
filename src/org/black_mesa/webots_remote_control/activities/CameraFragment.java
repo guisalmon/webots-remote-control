@@ -3,7 +3,6 @@ package org.black_mesa.webots_remote_control.activities;
 import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.client.CamerasManager;
-import org.black_mesa.webots_remote_control.utils.CameraTouchHandler;
 import org.black_mesa.webots_remote_control.utils.CameraTouchHandlerJoysticks;
 
 import android.app.Fragment;
