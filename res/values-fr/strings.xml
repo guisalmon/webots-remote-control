@@ -10,6 +10,7 @@
     <string name="connexion_delete">Supprimer les serveurs séléctionnés</string>
     <!-- Add_server_activity -->
     <string name="title_activity_add_server">Ajouter un serveur</string>
+    <string name="title_activity_edit_server">Editer un server</string>
     <string name="add_server_name">Nom du serveur</string>
     <string name="add_server_adress">Adresse du serveur</string>
     <string name="add_server_port">Port</string>

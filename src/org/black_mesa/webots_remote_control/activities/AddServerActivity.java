@@ -40,6 +40,7 @@ public class AddServerActivity extends Activity {
 			((EditText)findViewById(R.id.serverName)).setText(server.getName());
 			((EditText)findViewById(R.id.serverAdress)).setText(server.getAdress());
 			((EditText)findViewById(R.id.serverPort)).setText(String.valueOf(server.getPort()));
+			setTitle(R.string.title_activity_edit_server);
 		}
 	}
 
