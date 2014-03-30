@@ -17,6 +17,7 @@ public class CamerasManager {
 	private static final double SCALE_MOVE_FORWARD = 16;
 	private static final double SCALE_MOVE_SIDE = .005;
 	private static final double SCALE_TURN_PITCH = Math.PI;
+	private static final double SCALE_TIMED_MOVE_FORWARD = .00005;
 	private final ConnectionManager mConnectionManager;
 
 	/**
@@ -56,6 +57,17 @@ public class CamerasManager {
 			}
 
 			@Override
+			public void moveForward(final float forward, final long time) {
+				if (!init()) {
+					return;
+				}
+				CameraInstruction instruction =
+						CameraInstruction.move(0, 0, forward * SCALE_TIMED_MOVE_FORWARD * time);
+				mCamera.add(instruction);
+				mClient.board(mCamera);
+			}
+
+			@Override
 			public void moveSide(final float right, final float up, final long time) {
 				if (!init()) {
 					return;
@@ -78,16 +90,6 @@ public class CamerasManager {
 				mClient.board(mCamera);
 			}
 
-			private boolean init() {
-				if (mClient == null) {
-					mClient = mConnectionManager.getClient(server);
-				}
-				if (mClient != null && mCamera == null) {
-					mCamera = (CameraInstructionQueue) mClient.getInitialData().get(cameraId);
-				}
-				return mClient != null && mCamera != null;
-			}
-
 			@Override
 			public void moveRightForward(final float right, final float forward, final float time) {
 				if (!init()) {
@@ -98,6 +100,16 @@ public class CamerasManager {
 								.move((right * time) * SCALE_MOVE_SIDE, 0, -(forward * time) * SCALE_MOVE_SIDE);
 				mCamera.add(instruction);
 				mClient.board(mCamera);
+			}
+
+			private boolean init() {
+				if (mClient == null) {
+					mClient = mConnectionManager.getClient(server);
+				}
+				if (mClient != null && mCamera == null) {
+					mCamera = (CameraInstructionQueue) mClient.getInitialData().get(cameraId);
+				}
+				return mClient != null && mCamera != null;
 			}
 		};
 	}

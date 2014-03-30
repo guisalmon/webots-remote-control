@@ -3,7 +3,7 @@ package org.black_mesa.webots_remote_control.communication_structures;
 import java.io.Serializable;
 
 /**
- * Specific Instruction class for a Webots camera.
+ * Instruction class for a Webots camera.
  * 
  * @author Ilja Kroonen
  * 
