@@ -1,13 +1,19 @@
 package org.black_mesa.webots_remote_control.activities;
 
+import org.black_mesa.webots_remote_control.listeners.CameraJoystickCoordinateListener;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
-
-public class CameraViewJoysticks extends View{
+/**
+ * 
+ * @author Cassim Ketfi
+ *
+ */
+public class CameraViewJoysticks extends View implements CameraJoystickCoordinateListener {
 	//Left Joystick
 	private int centerXMainCircleLeft = 0; // Center view x position
 	private int centerYMainCircleLeft = 0; // Center view y position
@@ -18,6 +24,7 @@ public class CameraViewJoysticks extends View{
 	private int centerYMainCircleRight = 0; // Center view y position
 	private int centerXSecondaryCircleRight = 0; // Center view x position
 	private int centerYSecondaryCircleRight = 0; // Center view y position
+	
 	private Paint mainCircle;
 	private Paint secondaryCircle;
 	private Paint horizontalLine;
@@ -30,6 +37,7 @@ public class CameraViewJoysticks extends View{
 	public CameraViewJoysticks(Context context) {
 		super(context);
 		initPaints();
+		
 	}
 	
 
@@ -90,45 +98,25 @@ public class CameraViewJoysticks extends View{
 				(float) centerXMainCircle, (float) centerYMainCircle, horizontalLine);
 	}
 	
-/**
- * Do this operation for two joysticks : 
- * Create an area of given radius and initialize a joystick in the center with radius half of the given radius.
- * @param centerXJoystickLeft coordinate on axis X for the center of the left joystick 
- * @param centerYJoystickLeft coordinate on axis Y for the center of the left joystick 
- * @param joystickRadiusJoystickLeft radius of the area of the left joystick
- * @param centerXJoystickRight coordinate on axis X for the center of the right joystick 
- * @param centerYJoystickRight coordinate on axis Y for the center of the right joystick 
- * @param joystickRadiusJoystickRight radius of the area of the right joystick
- */
-	public void initJoystick(int centerXJoystickLeft, int centerYJoystickLeft, int joystickRadiusJoystickLeft,int centerXJoystickRight, int centerYJoystickRight, int joystickRadiusJoystickRight)
+	@Override
+	public void onJoystickLeftCoordinateChanged(int centerXJoystickLeft, int centerYJoystickLeft, int joystickRadiusJoystickLeft)
 	{
 		this.centerXMainCircleLeft=centerXJoystickLeft;
 		this.centerYMainCircleLeft=centerYJoystickLeft;
 		this.centerXSecondaryCircleLeft=centerXJoystickLeft;
 		this.centerYSecondaryCircleLeft=centerYJoystickLeft;
 		this.joystickRadiusLeft=joystickRadiusJoystickLeft;
-		
+		this.invalidate();
+	}
+	
+	@Override
+	public void onJoystickRightCoordinateChanged(int centerXJoystickRight, int centerYJoystickRight, int joystickRadiusJoystickRight)
+	{
 		this.centerXMainCircleRight=centerXJoystickRight;
 		this.centerYMainCircleRight=centerYJoystickRight;
 		this.centerXSecondaryCircleRight=centerXJoystickRight;
 		this.centerYSecondaryCircleRight=centerYJoystickRight;
 		this.joystickRadiusRight=joystickRadiusJoystickRight;
-		this.invalidate();
-	}
-	
-	/**
-	 * draw two joystick at the given position 
-	 * @param centerXJoystickLeft  coordinate on axis X for the center of the left joystick 
-	 * @param centerYJoystickLeft coordinate on axis Y for the center of the left joystick 
-	 * @param centerXJoystickRight coordinate on axis X for the center of the right joystick 
-	 * @param centerYJoystickRight coordinate on axis Y for the center of the right joystick 
-	 */
-	public void drawJoystick(int centerXJoystickLeft, int centerYJoystickLeft,int centerXJoystickRight, int centerYJoystickRight)
-	{
-		this.centerXSecondaryCircleLeft=centerXJoystickLeft;
-		this.centerYSecondaryCircleLeft=centerYJoystickLeft;
-		this.centerXSecondaryCircleRight=centerXJoystickRight;
-		this.centerYSecondaryCircleRight=centerYJoystickRight;
 		this.invalidate();
 	}
 
