@@ -1,4 +1,4 @@
-package org.black_mesa.webots_remote_control.activities;
+package org.webots_remote_control.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
