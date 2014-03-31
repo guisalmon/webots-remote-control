@@ -4,7 +4,6 @@ import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.client.CamerasManager;
 import org.black_mesa.webots_remote_control.utils.CameraTouchHandler;
-import org.black_mesa.webots_remote_control.utils.CameraTouchHandlerJoysticks;
 
 import android.app.Fragment;
 import android.content.res.Configuration;
@@ -20,7 +19,7 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 
 public class CameraFragment extends Fragment implements OnTouchListener {
-	private CameraTouchHandlerJoysticks touchHandler;
+	private CameraTouchHandler touchHandler;
 	private CamerasManager camerasManager = new CamerasManager(MainActivity.CONNECTION_MANAGER);
 	private Server server;
 	private float xMin;
@@ -90,7 +89,7 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 	@Override
 	public void onResume() {
 		super.onResume();
-		touchHandler = new CameraTouchHandlerJoysticks(xMin, yMin, xMax, yMax, camerasManager.makeListener(server, 0));
+		touchHandler = new CameraTouchHandler(xMin, yMin, xMax, yMax, camerasManager.makeListener(server, 0));
 	}
 
 	@Override
