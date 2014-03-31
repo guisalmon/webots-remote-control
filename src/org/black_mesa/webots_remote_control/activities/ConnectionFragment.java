@@ -133,6 +133,7 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 			mRows.get(position).findViewById(R.id.server_connecting).setVisibility(View.VISIBLE);
 			((MainActivity)getActivity()).connect(mServers.get(position));
 		}
+		updateMenu(true);
 	}
 	
 	
@@ -159,7 +160,7 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 		default:
 			break;
 		}
-		
+		updateMenu(false);
 		
 	}
 	
@@ -215,25 +216,31 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	}
 	
 	private void updateMenu(boolean isSelection){
-		if(isSelection){
-			switch (countChecks()){
-			case 0:
-				updateMenu(false);
-				break;
-			case 1:
-				mMenu.getItem(0).setVisible(true);
-				mMenu.getItem(1).setVisible(true);
-				mMenu.getItem(2).setVisible(false);
-				break;
-			default:
+		if(MainActivity.CONNECTION_MANAGER.getServerList().isEmpty()){
+			if(isSelection){
+				switch (countChecks()){
+				case 0:
+					updateMenu(false);
+					break;
+				case 1:
+					mMenu.getItem(0).setVisible(true);
+					mMenu.getItem(1).setVisible(true);
+					mMenu.getItem(2).setVisible(false);
+					break;
+				default:
+					mMenu.getItem(0).setVisible(false);
+					mMenu.getItem(1).setVisible(true);
+					mMenu.getItem(2).setVisible(false);
+				}
+			}else{
 				mMenu.getItem(0).setVisible(false);
-				mMenu.getItem(1).setVisible(true);
-				mMenu.getItem(2).setVisible(false);
+				mMenu.getItem(1).setVisible(false);
+				mMenu.getItem(2).setVisible(true);
 			}
 		}else{
 			mMenu.getItem(0).setVisible(false);
 			mMenu.getItem(1).setVisible(false);
-			mMenu.getItem(2).setVisible(true);
+			mMenu.getItem(2).setVisible(false);
 		}
 	}
 }
