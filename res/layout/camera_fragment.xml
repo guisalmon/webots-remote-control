@@ -4,7 +4,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
 >
-<org.webots_remote_control.views.CameraView
+<org.black_mesa.webots_remote_control.views.CameraView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/camera_fragment"

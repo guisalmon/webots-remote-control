@@ -1,4 +1,4 @@
-package org.webots_remote_control.views;
+package org.black_mesa.webots_remote_control.views;
 
 import org.black_mesa.webots_remote_control.R;
 
