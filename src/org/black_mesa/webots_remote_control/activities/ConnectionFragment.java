@@ -124,14 +124,14 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	
 	@Override
 	public void onItemLaunchListener(int position) {
-		
-		if(MainActivity.CONNECTION_MANAGER.getServerList().contains(mServers.get(position))){
+		Server s = (Server)getListView().getItemAtPosition(position);
+		if(MainActivity.CONNECTED_SERVERS.contains(s)){
 			((Button)mRows.get(position).findViewById(R.id.server_state_button)).setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_send, 0);
-			((MainActivity)getActivity()).disconnect(mServers.get(position));
+			((MainActivity)getActivity()).disconnect(s);
 		}else{
 			mRows.get(position).findViewById(R.id.server_state_button).setVisibility(View.GONE);
 			mRows.get(position).findViewById(R.id.server_connecting).setVisibility(View.VISIBLE);
-			((MainActivity)getActivity()).connect(mServers.get(position));
+			((MainActivity)getActivity()).connect(s);
 		}
 		updateMenu(true);
 	}
@@ -144,7 +144,7 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	@Override
 	public void onStateChange(Server server, ConnectionState state) {
 		int i = mServers.indexOf(server);
-		Log.i(getClass().getName(), "State Change");
+		Log.i(getClass().getName(), "State Change : "+i);
 		switch (state) {
 		case CONNECTED:
 			Log.i(getClass().getName(), "Connected");
@@ -179,7 +179,7 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	private void updateView(){
 		Log.i(getClass().getName(), "Update View");
 		mServers = mDatasource.getAllServers();
-		mAdapter = new ServerListAdapter(getActivity(), mServers, MainActivity.CONNECTION_MANAGER.getServerList(), this);
+		mAdapter = new ServerListAdapter(getActivity(), mServers, MainActivity.CONNECTED_SERVERS, this);
 		setListAdapter(mAdapter);
 		mRows = ((ServerListAdapter)mAdapter).getRows();
 	}
@@ -187,7 +187,7 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	private void deleteSelection() {
 		for(int i = 0; i < getListView().getChildCount(); i++){
 			boolean check = ((CheckBox)mRows.get(i).findViewById(R.id.server_select)).isChecked();
-			if(check) mDatasource.deleteServer(mServers.get(i));
+			if(check) mDatasource.deleteServer((Server)getListView().getItemAtPosition(i));
 		}
 		updateView();
 		updateMenu(false);
@@ -199,7 +199,7 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 		Long id = (long) 0;
 		for (int i = 0; i < mRows.size(); i++){
 			if(((CheckBox)mRows.get(i).findViewById(R.id.server_select)).isChecked()){
-				id = mServers.get(i).getId();
+				id = ((Server)getListView().getItemAtPosition(i)).getId();
 			}
 		}
 		b.putLong("id", id);
@@ -216,7 +216,7 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	}
 	
 	private void updateMenu(boolean isSelection){
-		if(MainActivity.CONNECTION_MANAGER.getServerList().isEmpty()){
+		if(MainActivity.CONNECTED_SERVERS.isEmpty()){
 			if(isSelection){
 				switch (countChecks()){
 				case 0:

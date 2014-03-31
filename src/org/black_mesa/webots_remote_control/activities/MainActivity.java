@@ -28,6 +28,7 @@ import android.widget.Toast;
 public class MainActivity extends Activity implements ConnectionManagerListener{
 	
 	public static final ConnectionManager CONNECTION_MANAGER = new ConnectionManager();
+	public static final List<Server> CONNECTED_SERVERS = new ArrayList<Server>();
 	
 	private List<String> mDrawerListItems;
     private ListView mDrawerList;
@@ -99,14 +100,16 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	
 	@Override
 	protected void onPause() {
-		CONNECTION_MANAGER.save();
-		CONNECTION_MANAGER.stop();
+		//TODO
+		//CONNECTION_MANAGER.save();
+		//CONNECTION_MANAGER.stop();
 		super.onPause();
 	}
 
 	@Override
 	protected void onResume() {
-		CONNECTION_MANAGER.restore();
+		//TODO
+		//CONNECTION_MANAGER.restore();
 		super.onResume();
 	}
 	
@@ -178,6 +181,7 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	 */
 	public void disconnect(Server s){
 		CONNECTION_MANAGER.removeServer(s);
+		CONNECTED_SERVERS.remove(s);
 		updateDrawer();
 		mDrawerAdapter.notifyDataSetChanged();
 	}
@@ -189,6 +193,7 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	public void connect(Server s){
 		if(CONNECTION_MANAGER.getClient(s) == null){
 			CONNECTION_MANAGER.addServer(s);
+			CONNECTED_SERVERS.add(s);
 		}
 	}
 	
@@ -199,13 +204,12 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	
 	private void updateDrawer() {
 		mDrawerListItems.clear();
-		List<Server> connectedServers = CONNECTION_MANAGER.getServerList();
 		String resTitles[] = getResources().getStringArray(R.array.drawer_list_array);
 		for(int i = 0; i<resTitles.length; i++){
         	mDrawerListItems.add(resTitles[i]);
         }
-		for(int i=0; i<connectedServers.size(); i++){
-			mDrawerListItems.add(i+1, connectedServers.get(i).getName());
+		for(int i=0; i<CONNECTED_SERVERS.size(); i++){
+			mDrawerListItems.add(i+1, CONNECTED_SERVERS.get(i).getName());
 		}
 	}
 
@@ -230,13 +234,13 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 			                   .replace(R.id.content_frame, aboutFragment)
 			                   .commit();
 			}else{
-				if(CONNECTION_MANAGER.getServerList().isEmpty()){
+				if(CONNECTED_SERVERS.isEmpty()){
 					Toast.makeText(this, "No server connected", Toast.LENGTH_SHORT).show();
 				}else{
 					mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 					Fragment cameraFragment = new CameraFragment();
 					Bundle b = new Bundle();
-					b.putLong("ServerId", CONNECTION_MANAGER.getServerList().get(position-1).getId());
+					b.putLong("ServerId", CONNECTED_SERVERS.get(position-1).getId());
 					cameraFragment.setArguments(b);
 					fragmentManager = getFragmentManager();
 				    fragmentManager.beginTransaction()
