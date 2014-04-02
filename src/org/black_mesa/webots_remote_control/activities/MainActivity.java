@@ -100,16 +100,14 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	
 	@Override
 	protected void onPause() {
-		//TODO
-		//CONNECTION_MANAGER.save();
-		//CONNECTION_MANAGER.stop();
+		//TODO Save all servers
+		CONNECTION_MANAGER.dispose();
 		super.onPause();
 	}
 
 	@Override
 	protected void onResume() {
-		//TODO
-		//CONNECTION_MANAGER.restore();
+		//TODO Restore all servers
 		super.onResume();
 	}
 	
