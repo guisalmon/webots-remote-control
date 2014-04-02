@@ -60,7 +60,7 @@ public class ServerListAdapter extends ArrayAdapter<Server>{
 			
 			@Override
 			public void onClick(View v) {
-				eventsListener.onItemLaunchListener(rows.indexOf(v.getParent()));
+				eventsListener.onItemLaunchListener(rows.indexOf(v.getParent()), servers.get(rows.indexOf(v.getParent())));
 			}
 		});
 		CheckBox checkBox = (CheckBox)rowView.findViewById(R.id.server_select);

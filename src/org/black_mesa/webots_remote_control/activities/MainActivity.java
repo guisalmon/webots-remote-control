@@ -16,6 +16,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,6 +39,7 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
     private boolean mClosed;
     private Menu mMenu;
     private String mCurTitle;
+    private List<Server> mServersToReconnect;
     
     
     
@@ -52,6 +54,9 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 		
 		//Set this as the connection manager listener 
 		CONNECTION_MANAGER.addListener(this);
+		
+		mServersToReconnect = new ArrayList<Server>();
+		
 		
 		//Create and populate the left drawer
 		setContentView(R.layout.activity_main);
@@ -100,17 +105,20 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	
 	@Override
 	protected void onPause() {
-		//TODO Save all servers
+		mServersToReconnect = new ArrayList<Server>(CONNECTED_SERVERS);
 		CONNECTION_MANAGER.dispose();
 		super.onPause();
 	}
 
 	@Override
 	protected void onResume() {
-		//TODO Restore all servers
+		for(Server s : mServersToReconnect){
+			Log.i(getClass().getName(), "Server "+s.getName()+" connecting");
+			connect(s);
+		}
 		super.onResume();
 	}
-	
+
 	@Override
 	public void setTitle(CharSequence title) {
 	    getActionBar().setTitle(title);
@@ -156,6 +164,9 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	public void onStateChange(Server server, ConnectionState state) {
 		switch (state) {
 		case CONNECTED:
+			if(!CONNECTED_SERVERS.contains(server)){
+				CONNECTED_SERVERS.add(server);
+			}
 			Toast.makeText(this, "Connected ! ", Toast.LENGTH_SHORT).show();
 			break;
 		case COMMUNICATION_ERROR:
@@ -191,7 +202,6 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	public void connect(Server s){
 		if(CONNECTION_MANAGER.getClient(s) == null){
 			CONNECTION_MANAGER.addServer(s);
-			CONNECTED_SERVERS.add(s);
 		}
 	}
 	

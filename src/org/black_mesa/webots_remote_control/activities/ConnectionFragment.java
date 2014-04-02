@@ -66,10 +66,10 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 
 	@Override
 	public void onResume() {
+		super.onResume();
 		mDatasource.open();
 		getActivity().invalidateOptionsMenu();
 		updateView();
-		super.onResume();
 	}
 
 	@Override
@@ -123,8 +123,7 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	}
 	
 	@Override
-	public void onItemLaunchListener(int position) {
-		Server s = (Server)getListView().getItemAtPosition(position);
+	public void onItemLaunchListener(int position, Server s) {
 		if(MainActivity.CONNECTED_SERVERS.contains(s)){
 			((Button)mRows.get(position).findViewById(R.id.server_state_button)).setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_send, 0);
 			((MainActivity)getActivity()).disconnect(s);
