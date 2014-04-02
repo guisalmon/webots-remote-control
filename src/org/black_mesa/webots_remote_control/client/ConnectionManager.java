@@ -94,7 +94,11 @@ public class ConnectionManager {
 	 *            Server
 	 */
 	public final void removeServer(final Server server) {
-		mConnections.get(server).dispose();
+		Client client = mConnections.get(server);
+		if (client == null) {
+			return;
+		}
+		client.dispose();
 		mConnections.remove(server);
 	}
 
