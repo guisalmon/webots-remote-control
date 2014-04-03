@@ -3,7 +3,7 @@ package org.black_mesa.webots_remote_control.utils;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.black_mesa.webots_remote_control.listeners.CameraTouchHandlerListener;
+import org.black_mesa.webots_remote_control.listeners.CameraTouchListenerV3;
 
 import android.os.SystemClock;
 import android.view.MotionEvent;
@@ -13,7 +13,7 @@ import android.view.MotionEvent;
  * 
  * @author Ilja Kroonen
  */
-public class CameraTouchHandler {
+public class CameraTouchHandlerV3 {
 	private static final int TIMER_TICK = 32;
 	/*
 	 * Current state of the handler.
@@ -22,29 +22,35 @@ public class CameraTouchHandler {
 
 	/*
 	 * Main pointer id and last coordinates. Valid in states DOUBLE_CENTRAL,
-	 * SINGLE_CENTRAL, SINGLE_SIDE.
+	 * DOUBLE_SIDE, SINGLE_CENTRAL, SINGLE_SIDE.
 	 */
 	private int mP1;
 	private float mX1;
 	private float mY1;
 
 	/*
-	 * Second pointer id and last coordinates. Valid in state DOUBLE_CENTRAL.
+	 * Second pointer id and last coordinates. Valid in state DOUBLE_CENTRAL and
+	 * DOUBLE_SIDE.
 	 */
 	private int mP2;
 	private float mX2;
 	private float mY2;
 
 	/*
-	 * Timer for SINGLE_SIDE.
+	 * Timer for SINGLE_SIDE, DOUBLE_SIDE and DOUBLE_CENTRAL..
 	 */
 	private Timer mTimer;
 
 	/*
 	 * Timestamp of the last event that has been consumed (uptime millis). Valid
-	 * in state SINGLE_SIDE.
+	 * in states SINGLE_SIDE, DOUBLE_SIDE and DOUBLE_CENTRAL.
 	 */
 	private long mTimestamp;
+	
+	/*
+	 * Initial distance. Valid in DOUBLE_SIDE and DOUBLE_CENTRAL.
+	 */
+	private float mDistance;
 
 	/*
 	 * Information about the touching surface.
@@ -57,7 +63,7 @@ public class CameraTouchHandler {
 	/*
 	 * Listener for the generated events
 	 */
-	private CameraTouchHandlerListener mListener;
+	private CameraTouchListenerV3 mListener;
 
 	/**
 	 * Instantiates the CameraTouchHandler.
@@ -74,8 +80,8 @@ public class CameraTouchHandler {
 	 *            Listener that will be notified of the actions that need to be
 	 *            performed on the camera.
 	 */
-	public CameraTouchHandler(final float xMin, final float yMin, final float xMax, final float yMax,
-			final CameraTouchHandlerListener l) {
+	public CameraTouchHandlerV3(final float xMin, final float yMin, final float xMax, final float yMax,
+			final CameraTouchListenerV3 l) {
 		mXMin = xMin;
 		mYMin = yMin;
 		mXMax = xMax;
@@ -116,12 +122,6 @@ public class CameraTouchHandler {
 	private void moveHandler(final MotionEvent event) {
 		switch (mState) {
 		case DOUBLE_CENTRAL:
-			float prevDistance = distance(mX1, mY1, mX2, mY2);
-			float newDistance = distance(event.getX(event.findPointerIndex(mP1)),
-					event.getY(event.findPointerIndex(mP1)), event.getX(event.findPointerIndex(mP2)),
-					event.getY(event.findPointerIndex(mP2)));
-			float res = (newDistance - prevDistance) / distance(mXMin, mYMin, mXMax, mYMax);
-			mListener.moveForward(res);
 			break;
 		case INIT:
 			throw new RuntimeException();
@@ -133,11 +133,6 @@ public class CameraTouchHandler {
 		case SINGLE_SIDE:
 			break;
 		case DOUBLE_SIDE:
-			prevDistance = distance(mX1, mY1, mX2, mY2);
-			newDistance = distance(event.getX(event.findPointerIndex(mP1)), event.getY(event.findPointerIndex(mP1)),
-					event.getX(event.findPointerIndex(mP2)), event.getY(event.findPointerIndex(mP2)));
-			res = (newDistance - prevDistance) / distance(mXMin, mYMin, mXMax, mYMax);
-			mListener.moveForward(res);
 			break;
 		}
 	}
@@ -151,6 +146,7 @@ public class CameraTouchHandler {
 				if (id == mP1) {
 					mP1 = mP2;
 				}
+				mTimer.cancel();
 				mState = State.SINGLE_CENTRAL;
 			} else if (count > 2) {
 				if (id == mP1) {
@@ -170,6 +166,14 @@ public class CameraTouchHandler {
 						}
 					}
 				}
+				float x1 = event.getX(event.findPointerIndex(mP1));
+				float y1 = event.getY(event.findPointerIndex(mP1));
+				float x2 = event.getX(event.findPointerIndex(mP2));
+				float y2 = event.getY(event.findPointerIndex(mP2));
+				mDistance = distance(x1, y1, x2, y2);
+				mTimer = new Timer();
+				mTimer.schedule(makeTask(), 0, TIMER_TICK);
+				mTimestamp = event.getEventTime();
 				mState = State.DOUBLE_CENTRAL;
 			} else {
 				throw new RuntimeException();
@@ -188,15 +192,9 @@ public class CameraTouchHandler {
 				if (id == mP1) {
 					mP1 = mP2;
 				}
+				mTimer.cancel();
 				mTimer = new Timer();
-				TimerTask task = new TimerTask() {
-
-					@Override
-					public void run() {
-						timerHandler();
-					}
-				};
-				mTimer.schedule(task, 0, TIMER_TICK);
+				mTimer.schedule(makeTask(), 0, TIMER_TICK);
 				mState = State.SINGLE_SIDE;
 			} else if (count > 2) {
 				if (id == mP1) {
@@ -216,6 +214,14 @@ public class CameraTouchHandler {
 						}
 					}
 				}
+				float x1 = event.getX(event.findPointerIndex(mP1));
+				float y1 = event.getY(event.findPointerIndex(mP1));
+				float x2 = event.getX(event.findPointerIndex(mP2));
+				float y2 = event.getY(event.findPointerIndex(mP2));
+				mDistance = distance(x1, y1, x2, y2);
+				mTimer = new Timer();
+				mTimer.schedule(makeTask(), 0, TIMER_TICK);
+				mTimestamp = event.getEventTime();
 				mState = State.DOUBLE_SIDE;
 			} else {
 				throw new RuntimeException();
@@ -233,11 +239,27 @@ public class CameraTouchHandler {
 			throw new RuntimeException();
 		case SINGLE_CENTRAL:
 			mP2 = event.getPointerId(event.getActionIndex());
+			float x1 = event.getX(event.findPointerIndex(mP1));
+			float y1 = event.getY(event.findPointerIndex(mP1));
+			float x2 = event.getX(event.findPointerIndex(mP2));
+			float y2 = event.getY(event.findPointerIndex(mP2));
+			mDistance = distance(x1, y1, x2, y2);
+			mTimer = new Timer();
+			mTimer.schedule(makeTask(), 0, TIMER_TICK);
+			mTimestamp = event.getEventTime();
 			mState = State.DOUBLE_CENTRAL;
 			break;
 		case SINGLE_SIDE:
 			mTimer.cancel();
 			mP2 = event.getPointerId(event.getActionIndex());
+			x1 = event.getX(event.findPointerIndex(mP1));
+			y1 = event.getY(event.findPointerIndex(mP1));
+			x2 = event.getX(event.findPointerIndex(mP2));
+			y2 = event.getY(event.findPointerIndex(mP2));
+			mDistance = distance(x1, y1, x2, y2);
+			mTimer = new Timer();
+			mTimer.schedule(makeTask(), 0, TIMER_TICK);
+			mTimestamp = event.getEventTime();
 			mState = State.DOUBLE_SIDE;
 			break;
 		case DOUBLE_SIDE:
@@ -267,6 +289,7 @@ public class CameraTouchHandler {
 	private void cancelHandler(final MotionEvent event) {
 		switch (mState) {
 		case DOUBLE_CENTRAL:
+			mTimer.cancel();
 			mState = State.INIT;
 			break;
 		case INIT:
@@ -279,6 +302,7 @@ public class CameraTouchHandler {
 			mState = State.INIT;
 			break;
 		case DOUBLE_SIDE:
+			mTimer.cancel();
 			mState = State.INIT;
 			break;
 		}
@@ -294,14 +318,7 @@ public class CameraTouchHandler {
 				mState = State.SINGLE_CENTRAL;
 			} else {
 				mTimer = new Timer();
-				TimerTask task = new TimerTask() {
-
-					@Override
-					public void run() {
-						timerHandler();
-					}
-				};
-				mTimer.schedule(task, 0, TIMER_TICK);
+				mTimer.schedule(makeTask(), 0, TIMER_TICK);
 				mState = State.SINGLE_SIDE;
 			}
 			break;
@@ -315,9 +332,17 @@ public class CameraTouchHandler {
 	}
 
 	private void timerHandler() {
+		float newDistance;
+		float dDistance;
 		switch (mState) {
 		case DOUBLE_CENTRAL:
-			throw new RuntimeException();
+			newDistance = distance(mX1, mY1, mX2, mY2);
+			dDistance = newDistance - mDistance;
+			long now = SystemClock.uptimeMillis();
+			long dTime = now - mTimestamp;
+			mTimestamp = now;
+			mListener.moveForward(dDistance, dTime);
+			break;
 		case INIT:
 			throw new RuntimeException();
 		case SINGLE_CENTRAL:
@@ -325,13 +350,19 @@ public class CameraTouchHandler {
 		case SINGLE_SIDE:
 			float resX = (mX1 - (mXMax - mXMin) / 2) / (mXMax - mXMin);
 			float resY = (mY1 - (mYMax - mYMin) / 2) / (mYMax - mYMin);
-			long now = SystemClock.uptimeMillis();
+			now = SystemClock.uptimeMillis();
 			long time = now - mTimestamp;
 			mListener.moveSide(resX, resY, time);
 			mTimestamp = now;
 			break;
 		case DOUBLE_SIDE:
-			throw new RuntimeException();
+			newDistance = distance(mX1, mY1, mX2, mY2);
+			dDistance = newDistance - mDistance;
+			now = SystemClock.uptimeMillis();
+			dTime = now - mTimestamp;
+			mTimestamp = now;
+			mListener.moveForward(dDistance, dTime);
+			break;
 		}
 	}
 
@@ -376,6 +407,15 @@ public class CameraTouchHandler {
 
 	private float distance(final float x1, final float y1, final float x2, final float y2) {
 		return (float) Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+	}
+	
+	private TimerTask makeTask() {
+		return new TimerTask() {
+			@Override
+			public void run() {
+				timerHandler();
+			}
+		};
 	}
 
 	private enum State {

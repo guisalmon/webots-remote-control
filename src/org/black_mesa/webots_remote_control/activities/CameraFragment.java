@@ -3,7 +3,7 @@ package org.black_mesa.webots_remote_control.activities;
 import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.client.CamerasManager;
-import org.black_mesa.webots_remote_control.utils.CameraTouchHandler;
+import org.black_mesa.webots_remote_control.utils.CameraTouchHandlerV1;
 
 import android.app.Fragment;
 import android.content.res.Configuration;
@@ -19,7 +19,9 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 
 public class CameraFragment extends Fragment implements OnTouchListener {
-	private CameraTouchHandler touchHandler;
+	private static final int INTERACTION_MODE = 1;
+
+	private CameraTouchHandlerV1 touchHandler;
 	private CamerasManager camerasManager = new CamerasManager(MainActivity.CONNECTION_MANAGER);
 	private Server server;
 	private float xMin;
@@ -89,7 +91,7 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 	@Override
 	public void onResume() {
 		super.onResume();
-		touchHandler = new CameraTouchHandler(xMin, yMin, xMax, yMax, camerasManager.makeListener(server, 0));
+		touchHandler = new CameraTouchHandlerV1(xMin, yMin, xMax, yMax, camerasManager.makeListenerType1(server, 0));
 	}
 
 	@Override
@@ -104,6 +106,5 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 	public void onPrepareOptionsMenu(Menu menu) {
 		super.onPrepareOptionsMenu(menu);
 	}
-	
-	
+
 }
