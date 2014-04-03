@@ -9,7 +9,7 @@ import android.os.SystemClock;
 import android.view.MotionEvent;
 
 /**
- * Handles the touch events on a CameraView.
+ * Handles the touch events on a CameraView. Interaction mode: oval, pinch sets forward speed.
  * 
  * @author Ilja Kroonen
  */
@@ -21,16 +21,14 @@ public class CameraTouchHandlerV3 {
 	private State mState = State.INIT;
 
 	/*
-	 * Main pointer id and last coordinates. Valid in states DOUBLE_CENTRAL,
-	 * DOUBLE_SIDE, SINGLE_CENTRAL, SINGLE_SIDE.
+	 * Main pointer id and last coordinates. Valid in states DOUBLE_CENTRAL, DOUBLE_SIDE, SINGLE_CENTRAL, SINGLE_SIDE.
 	 */
 	private int mP1;
 	private float mX1;
 	private float mY1;
 
 	/*
-	 * Second pointer id and last coordinates. Valid in state DOUBLE_CENTRAL and
-	 * DOUBLE_SIDE.
+	 * Second pointer id and last coordinates. Valid in state DOUBLE_CENTRAL and DOUBLE_SIDE.
 	 */
 	private int mP2;
 	private float mX2;
@@ -42,11 +40,11 @@ public class CameraTouchHandlerV3 {
 	private Timer mTimer;
 
 	/*
-	 * Timestamp of the last event that has been consumed (uptime millis). Valid
-	 * in states SINGLE_SIDE, DOUBLE_SIDE and DOUBLE_CENTRAL.
+	 * Timestamp of the last event that has been consumed (uptime millis). Valid in states SINGLE_SIDE, DOUBLE_SIDE and
+	 * DOUBLE_CENTRAL.
 	 */
 	private long mTimestamp;
-	
+
 	/*
 	 * Initial distance. Valid in DOUBLE_SIDE and DOUBLE_CENTRAL.
 	 */
@@ -77,8 +75,7 @@ public class CameraTouchHandlerV3 {
 	 * @param yMax
 	 *            End of the y axis of the window.
 	 * @param l
-	 *            Listener that will be notified of the actions that need to be
-	 *            performed on the camera.
+	 *            Listener that will be notified of the actions that need to be performed on the camera.
 	 */
 	public CameraTouchHandlerV3(final float xMin, final float yMin, final float xMax, final float yMax,
 			final CameraTouchListenerV3 l) {
@@ -408,7 +405,7 @@ public class CameraTouchHandlerV3 {
 	private float distance(final float x1, final float y1, final float x2, final float y2) {
 		return (float) Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 	}
-	
+
 	private TimerTask makeTask() {
 		return new TimerTask() {
 			@Override

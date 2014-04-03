@@ -9,7 +9,7 @@ import android.os.SystemClock;
 import android.view.MotionEvent;
 
 /**
- * Handles the touch events on a CameraView.
+ * Handles the touch events on a CameraView. Interaction mode: 2 virtual joysticks.
  * 
  * @author Ilja Kroonen
  */
@@ -23,8 +23,7 @@ public class CameraTouchHandlerV2 {
 	private static final float RIGHT_JOYSTICK_RADIUS = .2f;
 
 	/*
-	 * Right joystick pointer id, coordinates and last timestamp. Valid if
-	 * mRightValid is true.
+	 * Right joystick pointer id, coordinates and last timestamp. Valid if mRightValid is true.
 	 */
 	private boolean mRightValid = false;
 	private int mRightPointerId;
@@ -76,8 +75,7 @@ public class CameraTouchHandlerV2 {
 	 * @param yMax
 	 *            End of the y axis of the window.
 	 * @param l
-	 *            Listener that will be notified of the actions that need to be
-	 *            performed on the camera.
+	 *            Listener that will be notified of the actions that need to be performed on the camera.
 	 */
 	public CameraTouchHandlerV2(final float xMin, final float yMin, final float xMax, final float yMax,
 			final CameraTouchListenerV2 l) {
@@ -174,11 +172,13 @@ public class CameraTouchHandlerV2 {
 			mRightPointerX = event.getX(i);
 			mRightPointerY = event.getY(i);
 			mRightTimeStamp = event.getEventTime();
+			mListener.onJoystickRightCoordinateChanged(mRightPointerX, mRightPointerY, 50);
 		}
 		if (mLeftValid) {
 			int i = event.findPointerIndex(mLeftPointerId);
 			mLeftPointerX = event.getX(i);
 			mLeftPointerY = event.getY(i);
+			mListener.onJoystickLeftCoordinateChanged(mLeftPointerX, mLeftPointerY, 50);
 		}
 	}
 

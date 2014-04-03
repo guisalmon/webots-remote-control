@@ -28,6 +28,7 @@ import android.widget.Toast;
 public class MainActivity extends Activity implements ConnectionManagerListener{
 	
 	public static final ConnectionManager CONNECTION_MANAGER = new ConnectionManager();
+	public static final int CAMERA_INTERACTION_MODE = 1;
 	
 	private List<String> mDrawerListItems;
     private ListView mDrawerList;

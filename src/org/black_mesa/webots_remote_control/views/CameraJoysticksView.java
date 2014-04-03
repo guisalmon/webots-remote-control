@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 /**
@@ -48,7 +49,7 @@ public class CameraJoysticksView extends View implements CameraJoysticksViewList
 		super(context, attrs, defStyleAttr);
 		initPaints();
 	}
-
+	
 	protected void initPaints() {
 		mainCircle = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mainCircle.setColor(Color.WHITE);
@@ -65,6 +66,7 @@ public class CameraJoysticksView extends View implements CameraJoysticksViewList
 		horizontalLine = new Paint();
 		horizontalLine.setStrokeWidth(2);
 		horizontalLine.setColor(Color.BLACK);
+		Log.d("DERP", "DURRR");
 	}
 
 	@Override
