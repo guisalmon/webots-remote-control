@@ -99,7 +99,7 @@ public class CameraViewJoysticks extends View implements CameraJoystickCoordinat
 	}
 	
 	@Override
-	public void onJoystickLeftCoordinateChanged(int centerXJoystickLeft, int centerYJoystickLeft, int joystickRadiusJoystickLeft)
+	public void onJoystickLeftCoordinateChanged(float centerXJoystickLeft, float centerYJoystickLeft, float joystickRadiusJoystickLeft)
 	{
 		this.centerXMainCircleLeft=centerXJoystickLeft;
 		this.centerYMainCircleLeft=centerYJoystickLeft;
@@ -110,7 +110,7 @@ public class CameraViewJoysticks extends View implements CameraJoystickCoordinat
 	}
 	
 	@Override
-	public void onJoystickRightCoordinateChanged(int centerXJoystickRight, int centerYJoystickRight, int joystickRadiusJoystickRight)
+	public void onJoystickRightCoordinateChanged(float centerXJoystickRight, float centerYJoystickRight, float joystickRadiusJoystickRight)
 	{
 		this.centerXMainCircleRight=centerXJoystickRight;
 		this.centerYMainCircleRight=centerYJoystickRight;

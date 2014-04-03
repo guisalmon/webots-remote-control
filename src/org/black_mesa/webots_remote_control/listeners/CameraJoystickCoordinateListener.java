@@ -12,7 +12,7 @@ public interface CameraJoystickCoordinateListener {
 	 * @param centerYJoystickLeft coordinate on axis Y for the center of the left joystick 
 	 * @param joystickRadiusJoystickLeft radius of the area of the left joystick
 	 */	
-	public void onJoystickLeftCoordinateChanged(int centerXJoystickLeft, int centerYJoystickLeft, int joystickRadiusJoystickLeft);
+	public void onJoystickLeftCoordinateChanged(float centerXJoystickLeft, float centerYJoystickLeft, float joystickRadiusJoystickLeft);
 	
 	/**
 	 * Create an area of given radius and initialize a joystick in the center with radius half of the given radius.
@@ -20,6 +20,6 @@ public interface CameraJoystickCoordinateListener {
 	 * @param centerYJoystickRight
 	 * @param joystickRadiusJoystickRight
 	 */
-	public void onJoystickRightCoordinateChanged(int centerXJoystickRight, int centerYJoystickRight, int joystickRadiusJoystickRight);
+	public void onJoystickRightCoordinateChanged(float centerXJoystickRight, float centerYJoystickRight, float joystickRadiusJoystickRight);
 }
 
