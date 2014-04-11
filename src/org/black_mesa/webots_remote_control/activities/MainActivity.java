@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.classes.Server;
+import org.black_mesa.webots_remote_control.client.CamerasManager;
 import org.black_mesa.webots_remote_control.client.ConnectionManager;
 import org.black_mesa.webots_remote_control.client.ConnectionState;
 import org.black_mesa.webots_remote_control.listeners.ConnectionManagerListener;
@@ -30,6 +31,8 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	
 	public static final ConnectionManager CONNECTION_MANAGER = new ConnectionManager();
 	public static final List<Server> CONNECTED_SERVERS = new ArrayList<Server>();
+	public static CamerasManager CAMERAS_MANAGER = new CamerasManager(CONNECTION_MANAGER);
+	public static final int CAMERA_INTERACTION_MODE = 1;
 	
 	private List<String> mDrawerListItems;
     private ListView mDrawerList;

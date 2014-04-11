@@ -2,8 +2,9 @@ package org.black_mesa.webots_remote_control.activities;
 
 import org.black_mesa.webots_remote_control.R;
 import org.black_mesa.webots_remote_control.classes.Server;
-import org.black_mesa.webots_remote_control.client.CamerasManager;
-import org.black_mesa.webots_remote_control.utils.CameraTouchHandler;
+import org.black_mesa.webots_remote_control.utils.CameraTouchHandlerV1;
+import org.black_mesa.webots_remote_control.utils.CameraTouchHandlerV2;
+import org.black_mesa.webots_remote_control.utils.CameraTouchHandlerV3;
 
 import android.app.Fragment;
 import android.content.res.Configuration;
@@ -19,8 +20,9 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 
 public class CameraFragment extends Fragment implements OnTouchListener {
-	private CameraTouchHandler touchHandler;
-	private CamerasManager camerasManager = new CamerasManager(MainActivity.CONNECTION_MANAGER);
+	private CameraTouchHandlerV1 mTouchHandlerV1;
+	private CameraTouchHandlerV2 mTouchHandlerV2;
+	private CameraTouchHandlerV3 mTouchHandlerV3;
 	private Server server;
 	private float xMin;
 	private float xMax;
@@ -42,7 +44,16 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.camera_fragment, container, false);
+		switch (MainActivity.CAMERA_INTERACTION_MODE) {
+		case 1:
+			return inflater.inflate(R.layout.camera_fragment, container, false);
+		case 2:
+			return inflater.inflate(R.layout.camera_fragment_joysticks, container, false);
+		case 3:
+			return inflater.inflate(R.layout.camera_fragment, container, false);
+		default:
+			throw new RuntimeException("Unknown interaction mode");
+		}
 	}
 
 	@Override
@@ -89,13 +100,42 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 	@Override
 	public void onResume() {
 		super.onResume();
-		touchHandler = new CameraTouchHandler(xMin, yMin, xMax, yMax, camerasManager.makeListener(server, 0));
+		switch (MainActivity.CAMERA_INTERACTION_MODE) {
+		case 1:
+			mTouchHandlerV1 =
+					new CameraTouchHandlerV1(xMin, yMin, xMax, yMax, MainActivity.CAMERAS_MANAGER.makeListenerType1(server, 0));
+			break;
+		case 2:
+			mTouchHandlerV2 =
+					new CameraTouchHandlerV2(xMin, yMin, xMax, yMax, MainActivity.CAMERAS_MANAGER.makeListenerType2(server, 0));
+			break;
+		case 3:
+			mTouchHandlerV3 =
+					new CameraTouchHandlerV3(xMin, yMin, xMax, yMax, MainActivity.CAMERAS_MANAGER.makeListenerType3(server, 0));
+			break;
+		default:
+			throw new RuntimeException("Unknown interaction mode");
+		}
 	}
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
-		if (touchHandler != null) {
-			touchHandler.onTouch(event);
+		switch (MainActivity.CAMERA_INTERACTION_MODE) {
+		case 1:
+			if (mTouchHandlerV1 != null) {
+				mTouchHandlerV1.onTouch(event);
+			}
+			break;
+		case 2:
+			if (mTouchHandlerV2 != null) {
+				mTouchHandlerV2.onTouch(event);
+			}
+			break;
+		case 3:
+			if (mTouchHandlerV3 != null) {
+				mTouchHandlerV3.onTouch(event);
+			}
+			break;
 		}
 		return true;
 	}
@@ -104,6 +144,5 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 	public void onPrepareOptionsMenu(Menu menu) {
 		super.onPrepareOptionsMenu(menu);
 	}
-	
-	
+
 }

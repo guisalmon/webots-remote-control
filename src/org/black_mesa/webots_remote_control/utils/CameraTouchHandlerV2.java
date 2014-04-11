@@ -3,67 +3,65 @@ package org.black_mesa.webots_remote_control.utils;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.black_mesa.webots_remote_control.listeners.CameraTouchHandlerListener;
+import org.black_mesa.webots_remote_control.listeners.CameraTouchListenerV2;
 
 import android.os.SystemClock;
 import android.view.MotionEvent;
 
 /**
- * Handles the touch events on a CameraView.
+ * Handles the touch events on a CameraView. Interaction mode: 2 virtual joysticks.
  * 
  * @author Ilja Kroonen
  */
 public class CameraTouchHandlerV2 {
 	private static final int TIMER_TICK = 32;
-	/*
-	 * Current state of the handler.
-	 */
-	private State mState = State.INIT;
+	private static final float LEFT_JOYSTICK_CENTER_X = .25f;
+	private static final float LEFT_JOYSTICK_CENTER_Y = .5f;
+	private static final float LEFT_JOYSTICK_RADIUS = .2f;
+	private static final float RIGHT_JOYSTICK_CENTER_X = .75f;
+	private static final float RIGHT_JOYSTICK_CENTER_Y = .5f;
+	private static final float RIGHT_JOYSTICK_RADIUS = .2f;
 
 	/*
-	 * Main pointer id and last coordinates. Valid in states DOUBLE_CENTRAL,
-	 * DOUBLE_SIDE, SINGLE_CENTRAL, SINGLE_SIDE.
+	 * Right joystick pointer id, coordinates and last timestamp. Valid if mRightValid is true.
 	 */
-	private int mP1;
-	private float mX1;
-	private float mY1;
+	private boolean mRightValid = false;
+	private int mRightPointerId;
+	private float mRightPointerX;
+	private float mRightPointerY;
+	private long mRightTimeStamp;
 
 	/*
-	 * Second pointer id and last coordinates. Valid in state DOUBLE_CENTRAL and
-	 * DOUBLE_SIDE.
+	 * Left joystick pointer id, coordinates. Valid if mLeftValid is true.
 	 */
-	private int mP2;
-	private float mX2;
-	private float mY2;
+	private boolean mLeftValid = false;
+	private int mLeftPointerId;
+	private float mLeftPointerX;
+	private float mLeftPointerY;
 
 	/*
-	 * Timer for SINGLE_SIDE, DOUBLE_SIDE and DOUBLE_CENTRAL..
+	 * Timer used in state DOUBLE and ONLY_RIGHT.
 	 */
-	private Timer mTimer;
-
-	/*
-	 * Timestamp of the last event that has been consumed (uptime millis). Valid
-	 * in states SINGLE_SIDE, DOUBLE_SIDE and DOUBLE_CENTRAL.
-	 */
-	private long mTimestamp;
-	
-	/*
-	 * Initial distance. Valid in DOUBLE_SIDE and DOUBLE_CENTRAL.
-	 */
-	private float mDistance;
+	private Timer mTimer = new Timer();
 
 	/*
 	 * Information about the touching surface.
 	 */
-	private float mXMin;
-	private float mYMin;
-	private float mXMax;
-	private float mYMax;
+	private final float mXMin;
+	private final float mYMin;
+	private final float mXMax;
+	private final float mYMax;
+	private final float mLeftCenterX;
+	private final float mLeftCenterY;
+	private final float mLeftRadius;
+	private final float mRightCenterX;
+	private final float mRightCenterY;
+	private final float mRightRadius;
 
 	/*
 	 * Listener for the generated events
 	 */
-	private CameraTouchHandlerListener mListener;
+	private CameraTouchListenerV2 mListener;
 
 	/**
 	 * Instantiates the CameraTouchHandler.
@@ -77,15 +75,21 @@ public class CameraTouchHandlerV2 {
 	 * @param yMax
 	 *            End of the y axis of the window.
 	 * @param l
-	 *            Listener that will be notified of the actions that need to be
-	 *            performed on the camera.
+	 *            Listener that will be notified of the actions that need to be performed on the camera.
 	 */
 	public CameraTouchHandlerV2(final float xMin, final float yMin, final float xMax, final float yMax,
-			final CameraTouchHandlerListener l) {
-		mXMin = xMin;
-		mYMin = yMin;
+			final CameraTouchListenerV2 l) {
+		// TODO
+		mXMin = 0;
+		mYMin = 0;
 		mXMax = xMax;
 		mYMax = yMax;
+		mLeftCenterX = LEFT_JOYSTICK_CENTER_X * (mXMax - mXMin) + mXMin;
+		mLeftCenterY = LEFT_JOYSTICK_CENTER_Y * (mYMax - mYMin) + mYMin;
+		mLeftRadius = LEFT_JOYSTICK_RADIUS * (mXMax - mXMin) + mXMin;
+		mRightCenterX = RIGHT_JOYSTICK_CENTER_X * (mXMax - mXMin) + mXMin;
+		mRightCenterY = RIGHT_JOYSTICK_CENTER_Y * (mYMax - mYMin) + mYMin;
+		mRightRadius = RIGHT_JOYSTICK_RADIUS * (mXMax - mXMin) + mXMin;
 		mListener = l;
 	}
 
@@ -116,299 +120,156 @@ public class CameraTouchHandlerV2 {
 			moveHandler(event);
 			break;
 		}
-		update(event);
 	}
 
 	private void moveHandler(final MotionEvent event) {
-		switch (mState) {
-		case DOUBLE_CENTRAL:
-			break;
-		case INIT:
-			throw new RuntimeException();
-		case SINGLE_CENTRAL:
-			float dX = (event.getX() - mX1) / (mXMax - mXMin);
-			float dY = (event.getY() - mY1) / (mYMax - mYMin);
-			mListener.turnPitch(dX, dY);
-			break;
-		case SINGLE_SIDE:
-			break;
-		case DOUBLE_SIDE:
-			break;
+		updateState(event);
+		if (mLeftValid) {
+			onOrientationChange(event);
 		}
+		updateAttributes(event);
 	}
 
 	private void pointerUpHandler(final MotionEvent event) {
-		switch (mState) {
-		case DOUBLE_CENTRAL:
-			int id = event.getPointerId(event.getActionIndex());
-			int count = event.getPointerCount();
-			if (count == 2) {
-				if (id == mP1) {
-					mP1 = mP2;
-				}
-				mTimer.cancel();
-				mState = State.SINGLE_CENTRAL;
-			} else if (count > 2) {
-				if (id == mP1) {
-					for (int i = 0; i < count; i++) {
-						int candidate = event.getPointerId(i);
-						if (candidate != id && candidate != mP2) {
-							mP1 = candidate;
-							break;
-						}
-					}
-				} else if (id == mP2) {
-					for (int i = 0; i < count; i++) {
-						int candidate = event.getPointerId(i);
-						if (candidate != id && candidate != mP1) {
-							mP2 = candidate;
-							break;
-						}
-					}
-				}
-				float x1 = event.getX(event.findPointerIndex(mP1));
-				float y1 = event.getY(event.findPointerIndex(mP1));
-				float x2 = event.getX(event.findPointerIndex(mP2));
-				float y2 = event.getY(event.findPointerIndex(mP2));
-				mDistance = distance(x1, y1, x2, y2);
-				mTimer = new Timer();
-				mTimer.schedule(makeTask(), 0, TIMER_TICK);
-				mTimestamp = event.getEventTime();
-				mState = State.DOUBLE_CENTRAL;
-			} else {
-				throw new RuntimeException();
-			}
-			break;
-		case INIT:
-			throw new RuntimeException();
-		case SINGLE_CENTRAL:
-			throw new RuntimeException();
-		case SINGLE_SIDE:
-			throw new RuntimeException();
-		case DOUBLE_SIDE:
-			id = event.getPointerId(event.getActionIndex());
-			count = event.getPointerCount();
-			if (count == 2) {
-				if (id == mP1) {
-					mP1 = mP2;
-				}
-				mTimer.cancel();
-				mTimer = new Timer();
-				mTimer.schedule(makeTask(), 0, TIMER_TICK);
-				mState = State.SINGLE_SIDE;
-			} else if (count > 2) {
-				if (id == mP1) {
-					for (int i = 0; i < count; i++) {
-						int candidate = event.getPointerId(i);
-						if (candidate != id && candidate != mP2) {
-							mP1 = candidate;
-							break;
-						}
-					}
-				} else if (id == mP2) {
-					for (int i = 0; i < count; i++) {
-						int candidate = event.getPointerId(i);
-						if (candidate != id && candidate != mP1) {
-							mP2 = candidate;
-							break;
-						}
-					}
-				}
-				float x1 = event.getX(event.findPointerIndex(mP1));
-				float y1 = event.getY(event.findPointerIndex(mP1));
-				float x2 = event.getX(event.findPointerIndex(mP2));
-				float y2 = event.getY(event.findPointerIndex(mP2));
-				mDistance = distance(x1, y1, x2, y2);
-				mTimer = new Timer();
-				mTimer.schedule(makeTask(), 0, TIMER_TICK);
-				mTimestamp = event.getEventTime();
-				mState = State.DOUBLE_SIDE;
-			} else {
-				throw new RuntimeException();
-			}
-			break;
+		int id = event.getPointerId(event.getActionIndex());
+		if (id == mRightPointerId) {
+			changeRightState(false);
+		}
+		if (id == mLeftPointerId) {
+			changeLeftState(false);
 		}
 	}
 
 	private void pointerDownHandler(final MotionEvent event) {
-		switch (mState) {
-		case DOUBLE_CENTRAL:
-			mState = State.DOUBLE_CENTRAL;
-			break;
-		case INIT:
-			throw new RuntimeException();
-		case SINGLE_CENTRAL:
-			mP2 = event.getPointerId(event.getActionIndex());
-			float x1 = event.getX(event.findPointerIndex(mP1));
-			float y1 = event.getY(event.findPointerIndex(mP1));
-			float x2 = event.getX(event.findPointerIndex(mP2));
-			float y2 = event.getY(event.findPointerIndex(mP2));
-			mDistance = distance(x1, y1, x2, y2);
-			mTimer = new Timer();
-			mTimer.schedule(makeTask(), 0, TIMER_TICK);
-			mTimestamp = event.getEventTime();
-			mState = State.DOUBLE_CENTRAL;
-			break;
-		case SINGLE_SIDE:
-			mTimer.cancel();
-			mP2 = event.getPointerId(event.getActionIndex());
-			x1 = event.getX(event.findPointerIndex(mP1));
-			y1 = event.getY(event.findPointerIndex(mP1));
-			x2 = event.getX(event.findPointerIndex(mP2));
-			y2 = event.getY(event.findPointerIndex(mP2));
-			mDistance = distance(x1, y1, x2, y2);
-			mTimer = new Timer();
-			mTimer.schedule(makeTask(), 0, TIMER_TICK);
-			mTimestamp = event.getEventTime();
-			mState = State.DOUBLE_SIDE;
-			break;
-		case DOUBLE_SIDE:
-			mState = State.DOUBLE_SIDE;
-			break;
-		}
+		updateState(event);
+		updateAttributes(event);
 	}
 
 	private void upHandler(final MotionEvent event) {
-		switch (mState) {
-		case DOUBLE_CENTRAL:
-			throw new RuntimeException();
-		case INIT:
-			throw new RuntimeException();
-		case SINGLE_CENTRAL:
-			mState = State.INIT;
-			break;
-		case SINGLE_SIDE:
-			mTimer.cancel();
-			mState = State.INIT;
-			break;
-		case DOUBLE_SIDE:
-			throw new RuntimeException();
-		}
+		changeLeftState(false);
+		changeRightState(false);
 	}
 
 	private void cancelHandler(final MotionEvent event) {
-		switch (mState) {
-		case DOUBLE_CENTRAL:
-			mTimer.cancel();
-			mState = State.INIT;
-			break;
-		case INIT:
-			throw new RuntimeException();
-		case SINGLE_CENTRAL:
-			mState = State.INIT;
-			break;
-		case SINGLE_SIDE:
-			mTimer.cancel();
-			mState = State.INIT;
-			break;
-		case DOUBLE_SIDE:
-			mTimer.cancel();
-			mState = State.INIT;
-			break;
-		}
+		changeLeftState(false);
+		changeRightState(false);
 	}
 
 	private void downHandler(final MotionEvent event) {
-		switch (mState) {
-		case DOUBLE_CENTRAL:
-			throw new RuntimeException();
-		case INIT:
-			mP1 = event.getPointerId(event.getActionIndex());
-			if (isCenter(event.getX(), event.getY())) {
-				mState = State.SINGLE_CENTRAL;
-			} else {
-				mTimer = new Timer();
-				mTimer.schedule(makeTask(), 0, TIMER_TICK);
-				mState = State.SINGLE_SIDE;
-			}
-			break;
-		case SINGLE_CENTRAL:
-			throw new RuntimeException();
-		case SINGLE_SIDE:
-			throw new RuntimeException();
-		case DOUBLE_SIDE:
-			throw new RuntimeException();
-		}
+		updateState(event);
+		updateAttributes(event);
 	}
 
 	private void timerHandler() {
-		float newDistance;
-		float dDistance;
-		switch (mState) {
-		case DOUBLE_CENTRAL:
-			newDistance = distance(mX1, mY1, mX2, mY2);
-			dDistance = newDistance - mDistance;
-			long now = SystemClock.uptimeMillis();
-			long dTime = now - mTimestamp;
-			mTimestamp = now;
-			mListener.moveForward(dDistance, dTime);
-			break;
-		case INIT:
-			throw new RuntimeException();
-		case SINGLE_CENTRAL:
-			throw new RuntimeException();
-		case SINGLE_SIDE:
-			float resX = (mX1 - (mXMax - mXMin) / 2) / (mXMax - mXMin);
-			float resY = (mY1 - (mYMax - mYMin) / 2) / (mYMax - mYMin);
-			now = SystemClock.uptimeMillis();
-			long time = now - mTimestamp;
-			mListener.moveSide(resX, resY, time);
-			mTimestamp = now;
-			break;
-		case DOUBLE_SIDE:
-			newDistance = distance(mX1, mY1, mX2, mY2);
-			dDistance = newDistance - mDistance;
-			now = SystemClock.uptimeMillis();
-			dTime = now - mTimestamp;
-			mTimestamp = now;
-			mListener.moveForward(dDistance, dTime);
-			break;
+		if (mRightValid) {
+			onPositionChange();
 		}
 	}
 
-	private void update(final MotionEvent event) {
-		switch (mState) {
-		case DOUBLE_CENTRAL:
-			mX1 = event.getX(event.findPointerIndex(mP1));
-			mY1 = event.getY(event.findPointerIndex(mP1));
-			mX2 = event.getX(event.findPointerIndex(mP2));
-			mY2 = event.getY(event.findPointerIndex(mP2));
-			break;
-		case INIT:
-			break;
-		case SINGLE_CENTRAL:
-			mX1 = event.getX(event.findPointerIndex(mP1));
-			mY1 = event.getY(event.findPointerIndex(mP1));
-			break;
-		case SINGLE_SIDE:
-			mX1 = event.getX(event.findPointerIndex(mP1));
-			mY1 = event.getY(event.findPointerIndex(mP1));
-			mTimestamp = event.getEventTime();
-			break;
-		case DOUBLE_SIDE:
-			mX1 = event.getX(event.findPointerIndex(mP1));
-			mY1 = event.getY(event.findPointerIndex(mP1));
-			mX2 = event.getX(event.findPointerIndex(mP2));
-			mY2 = event.getY(event.findPointerIndex(mP2));
-			break;
+	private void updateAttributes(final MotionEvent event) {
+		if (mRightValid) {
+			int i = event.findPointerIndex(mRightPointerId);
+			mRightPointerX = event.getX(i);
+			mRightPointerY = event.getY(i);
+			mRightTimeStamp = event.getEventTime();
+			mListener.onJoystickRightCoordinateChanged(mRightPointerX, mRightPointerY, 50);
+		}
+		if (mLeftValid) {
+			int i = event.findPointerIndex(mLeftPointerId);
+			mLeftPointerX = event.getX(i);
+			mLeftPointerY = event.getY(i);
+			mListener.onJoystickLeftCoordinateChanged(mLeftPointerX, mLeftPointerY, 50);
 		}
 	}
 
-	private boolean isCenter(final float x, final float y) {
-		// We have to detect if the zone that has been touched is the "center".
-		// Here, we defined the center as an oval covering 2/3 of the view.
-		float u = (mXMax - mXMin) / 2;
-		float v = (mYMax - mYMin) / 2;
-		float a = (mXMax - mXMin) / 3;
-		float b = (mYMax - mYMin) / 3;
-		float t = (x - u) * (x - u) / (a * a) + (y - v) * (y - v) / (b * b);
-		return t <= 1;
+	private void updateState(final MotionEvent event) {
+		boolean leftValid = mLeftValid;
+		if (leftValid) {
+			int index = event.findPointerIndex(mLeftPointerId);
+			if (!isOnLeftJoystick(event, index)) {
+				leftValid = false;
+			}
+		}
+		if (!leftValid) {
+			int index = findLeftJoystickPointerIndex(event);
+			if (index != -1) {
+				mLeftPointerId = event.getPointerId(index);
+				leftValid = true;
+			}
+		}
+		changeLeftState(leftValid);
+
+		boolean rightValid = mRightValid;
+		if (rightValid) {
+			int index = event.findPointerIndex(mRightPointerId);
+			if (!isOnRightJoystick(event, index)) {
+				rightValid = false;
+			}
+		}
+		if (!rightValid) {
+			int index = findRightJoystickPointerIndex(event);
+			if (index != -1) {
+				mRightPointerId = event.getPointerId(index);
+				rightValid = true;
+			}
+		}
+		changeRightState(rightValid);
+	}
+
+	private void changeLeftState(final boolean newState) {
+		mLeftValid = newState;
+	}
+
+	private void changeRightState(final boolean newState) {
+		if (newState == mRightValid) {
+			return;
+		}
+		if (!newState) {
+			mTimer.cancel();
+		}
+		if (newState) {
+			mTimer = new Timer();
+			mTimer.schedule(makeTask(), 0, TIMER_TICK);
+		}
+		mRightValid = newState;
+	}
+
+	private boolean isOnLeftJoystick(final MotionEvent event, final int pointerIndex) {
+		float x = event.getX(pointerIndex);
+		float y = event.getY(pointerIndex);
+		float d = distance(x, y, mLeftCenterX, mLeftCenterY);
+		return d < mLeftRadius;
+	}
+
+	private boolean isOnRightJoystick(final MotionEvent event, final int pointerIndex) {
+		float x = event.getX(pointerIndex);
+		float y = event.getY(pointerIndex);
+		float d = distance(x, y, mRightCenterX, mRightCenterY);
+		return d < mRightRadius;
 	}
 
 	private float distance(final float x1, final float y1, final float x2, final float y2) {
 		return (float) Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 	}
-	
+
+	private int findLeftJoystickPointerIndex(final MotionEvent event) {
+		for (int i = 0; i < event.getPointerCount(); i++) {
+			if (isOnLeftJoystick(event, i)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	private int findRightJoystickPointerIndex(final MotionEvent event) {
+		for (int i = 0; i < event.getPointerCount(); i++) {
+			if (isOnRightJoystick(event, i)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
 	private TimerTask makeTask() {
 		return new TimerTask() {
 			@Override
@@ -418,7 +279,19 @@ public class CameraTouchHandlerV2 {
 		};
 	}
 
-	private enum State {
-		DOUBLE_CENTRAL, DOUBLE_SIDE, INIT, SINGLE_CENTRAL, SINGLE_SIDE
+	private void onOrientationChange(final MotionEvent event) {
+		int index = event.findPointerIndex(mLeftPointerId);
+		float dx = (event.getX(index) - mLeftPointerX) / (mXMax - mXMin);
+		float dy = (event.getY(index) - mLeftPointerY) / (mYMax - mYMin);
+		mListener.turnPitch(dx, dy);
+	}
+
+	private void onPositionChange() {
+		float x = (mRightPointerX - mRightCenterX) / (mXMax - mXMin);
+		float y = (mRightPointerY - mRightCenterY) / (mYMax - mYMin);
+		long now = SystemClock.uptimeMillis();
+		long time = now - mRightTimeStamp;
+		mRightTimeStamp = now;
+		mListener.moveRightForward(x, y, time);
 	}
 }

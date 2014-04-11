@@ -3,17 +3,17 @@ package org.black_mesa.webots_remote_control.utils;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.black_mesa.webots_remote_control.listeners.CameraTouchHandlerListener;
+import org.black_mesa.webots_remote_control.listeners.CameraTouchListenerV1;
 
 import android.os.SystemClock;
 import android.view.MotionEvent;
 
 /**
- * Handles the touch events on a CameraView.
+ * Handles the touch events on a CameraView. Interaction mode: oval, pinch sets forward position.
  * 
  * @author Ilja Kroonen
  */
-public class CameraTouchHandler {
+public class CameraTouchHandlerV1 {
 	private static final int TIMER_TICK = 32;
 	/*
 	 * Current state of the handler.
@@ -21,8 +21,7 @@ public class CameraTouchHandler {
 	private State mState = State.INIT;
 
 	/*
-	 * Main pointer id and last coordinates. Valid in states DOUBLE_CENTRAL,
-	 * SINGLE_CENTRAL, SINGLE_SIDE.
+	 * Main pointer id and last coordinates. Valid in states DOUBLE_CENTRAL, SINGLE_CENTRAL, SINGLE_SIDE.
 	 */
 	private int mP1;
 	private float mX1;
@@ -41,8 +40,7 @@ public class CameraTouchHandler {
 	private Timer mTimer;
 
 	/*
-	 * Timestamp of the last event that has been consumed (uptime millis). Valid
-	 * in state SINGLE_SIDE.
+	 * Timestamp of the last event that has been consumed (uptime millis). Valid in state SINGLE_SIDE.
 	 */
 	private long mTimestamp;
 
@@ -57,7 +55,7 @@ public class CameraTouchHandler {
 	/*
 	 * Listener for the generated events
 	 */
-	private CameraTouchHandlerListener mListener;
+	private CameraTouchListenerV1 mListener;
 
 	/**
 	 * Instantiates the CameraTouchHandler.
@@ -71,11 +69,10 @@ public class CameraTouchHandler {
 	 * @param yMax
 	 *            End of the y axis of the window.
 	 * @param l
-	 *            Listener that will be notified of the actions that need to be
-	 *            performed on the camera.
+	 *            Listener that will be notified of the actions that need to be performed on the camera.
 	 */
-	public CameraTouchHandler(final float xMin, final float yMin, final float xMax, final float yMax,
-			final CameraTouchHandlerListener l) {
+	public CameraTouchHandlerV1(final float xMin, final float yMin, final float xMax, final float yMax,
+			final CameraTouchListenerV1 l) {
 		mXMin = xMin;
 		mYMin = yMin;
 		mXMax = xMax;
@@ -117,9 +114,9 @@ public class CameraTouchHandler {
 		switch (mState) {
 		case DOUBLE_CENTRAL:
 			float prevDistance = distance(mX1, mY1, mX2, mY2);
-			float newDistance = distance(event.getX(event.findPointerIndex(mP1)),
-					event.getY(event.findPointerIndex(mP1)), event.getX(event.findPointerIndex(mP2)),
-					event.getY(event.findPointerIndex(mP2)));
+			float newDistance =
+					distance(event.getX(event.findPointerIndex(mP1)), event.getY(event.findPointerIndex(mP1)),
+							event.getX(event.findPointerIndex(mP2)), event.getY(event.findPointerIndex(mP2)));
 			float res = (newDistance - prevDistance) / distance(mXMin, mYMin, mXMax, mYMax);
 			mListener.moveForward(res);
 			break;
@@ -134,8 +131,9 @@ public class CameraTouchHandler {
 			break;
 		case DOUBLE_SIDE:
 			prevDistance = distance(mX1, mY1, mX2, mY2);
-			newDistance = distance(event.getX(event.findPointerIndex(mP1)), event.getY(event.findPointerIndex(mP1)),
-					event.getX(event.findPointerIndex(mP2)), event.getY(event.findPointerIndex(mP2)));
+			newDistance =
+					distance(event.getX(event.findPointerIndex(mP1)), event.getY(event.findPointerIndex(mP1)),
+							event.getX(event.findPointerIndex(mP2)), event.getY(event.findPointerIndex(mP2)));
 			res = (newDistance - prevDistance) / distance(mXMin, mYMin, mXMax, mYMax);
 			mListener.moveForward(res);
 			break;
