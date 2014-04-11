@@ -19,15 +19,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 
 public class ConnectionFragment extends ListFragment implements OnListEventsListener, ConnectionManagerListener{
 	private DataSource mDatasource;
-	private ArrayAdapter<Server> mAdapter;
+	private ServerListAdapter mAdapter;
 	private List<Server> mServers;
-	private List<View> mRows;
 	private Menu mMenu;
 	
 	
@@ -53,7 +50,6 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 		mDatasource.open();
 				
 		mServers = mDatasource.getAllServers();
-		updateView();
 		
 		MainActivity.CONNECTION_MANAGER.addListener(this);
 	}
@@ -106,30 +102,29 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	
 
 	@Override
-	public void onCheckChanged(boolean isChecked, int position) {
+	public void onCheckChanged() {
 		updateMenu(true);
 	}
 
 	@Override
-	public void onItemClicked(int position) {
+	public void onItemClicked() {
 		clearChecks();
 		updateMenu(true);
-		Log.i(getClass().getName(), position+" Click !");
 	}
 
 	@Override
-	public void onItemLongClicked(int position) {
-		updateMenu(true);
+	public void onItemLongClicked() {
+		//TODO Nothing to do here
+		//updateMenu(true);
 	}
 	
 	@Override
-	public void onItemLaunchListener(int position, Server s) {
+	public void onItemLaunchListener(Server s) {
 		if(MainActivity.CONNECTED_SERVERS.contains(s)){
-			((Button)mRows.get(position).findViewById(R.id.server_state_button)).setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_send, 0);
+			mAdapter.setServerDisconnected(s.getId());
 			((MainActivity)getActivity()).disconnect(s);
 		}else{
-			mRows.get(position).findViewById(R.id.server_state_button).setVisibility(View.GONE);
-			mRows.get(position).findViewById(R.id.server_connecting).setVisibility(View.VISIBLE);
+			mAdapter.setServerConnected(s.getId());
 			((MainActivity)getActivity()).connect(s);
 		}
 		updateMenu(true);
@@ -147,15 +142,11 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 		switch (state) {
 		case CONNECTED:
 			Log.i(getClass().getName(), "Connected");
-			((Button)mRows.get(i).findViewById(R.id.server_state_button)).setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_close_clear_cancel, 0);
-			mRows.get(i).findViewById(R.id.server_state_button).setVisibility(View.VISIBLE);
-			mRows.get(i).findViewById(R.id.server_connecting).setVisibility(View.GONE);
+			mAdapter.setServerConnected(server.getId());
 			break;
 		case COMMUNICATION_ERROR:
 		case CONNECTION_ERROR:
-			((Button)mRows.get(i).findViewById(R.id.server_state_button)).setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_send, 0);
-			mRows.get(i).findViewById(R.id.server_state_button).setVisibility(View.VISIBLE);
-			mRows.get(i).findViewById(R.id.server_connecting).setVisibility(View.GONE);
+			mAdapter.setServerDisconnected(server.getId());
 		default:
 			break;
 		}
@@ -180,13 +171,11 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 		mServers = mDatasource.getAllServers();
 		mAdapter = new ServerListAdapter(getActivity(), mServers, MainActivity.CONNECTED_SERVERS, this);
 		setListAdapter(mAdapter);
-		mRows = ((ServerListAdapter)mAdapter).getRows();
 	}
 	
 	private void deleteSelection() {
-		for(int i = 0; i < getListView().getChildCount(); i++){
-			boolean check = ((CheckBox)mRows.get(i).findViewById(R.id.server_select)).isChecked();
-			if(check) mDatasource.deleteServer((Server)getListView().getItemAtPosition(i));
+		for(Server s : mAdapter.getCheckedServers()){
+			mDatasource.deleteServer(s);
 		}
 		updateView();
 		updateMenu(false);
@@ -195,15 +184,12 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	private void editServer() {
 		Bundle b = new Bundle();
 		Intent intent = new Intent(getActivity(), AddServerActivity.class);
-		Long id = (long) 0;
-		for (int i = 0; i < mRows.size(); i++){
-			if(((CheckBox)mRows.get(i).findViewById(R.id.server_select)).isChecked()){
-				id = ((Server)getListView().getItemAtPosition(i)).getId();
-			}
+		List<Server> checkedServers = mAdapter.getCheckedServers();
+		if(!checkedServers.isEmpty()){
+			b.putLong("id", checkedServers.get(0).getId());
+			intent.putExtras(b);
+			startActivity(intent);
 		}
-		b.putLong("id", id);
-		intent.putExtras(b);
-		startActivity(intent);
 	}
 	
 	private int countChecks(){
