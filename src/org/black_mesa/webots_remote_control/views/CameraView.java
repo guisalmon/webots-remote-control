@@ -10,7 +10,9 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 public class CameraView extends View {
 
@@ -20,7 +22,11 @@ public class CameraView extends View {
 	private Bitmap bitmapLeft;
 	private Bitmap bitmapRight;
 	private Bitmap bitmapDown;
-
+	private float l;
+	private float u;
+	private float r;
+	private float d;
+	
 	public CameraView(Context context) {
 		super(context);
 		commonConstructor();
@@ -44,15 +50,14 @@ public class CameraView extends View {
 		bitmapLeft = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_left);
 		bitmapRight = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_right);
 		bitmapDown = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_down);
-
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		float l = getWidth() / 6;
-		float u = getHeight() / 6;
-		float r = l * 5;
-		float d = u * 5;
+		l = getWidth() / 6;
+		u = getHeight() / 6;
+		r = l * 5;
+		d = u * 5;
 		rectangle.set(l, u, r, d);
 		paint.setAntiAlias(true);
 		paint.setColor(Color.RED);
@@ -67,5 +72,4 @@ public class CameraView extends View {
 		canvas.drawBitmap(bitmapDown, (getWidth() - bitmapDown.getWidth()) / 2, getHeight() - bitmapDown.getHeight(),
 				paint);
 	}
-
 }

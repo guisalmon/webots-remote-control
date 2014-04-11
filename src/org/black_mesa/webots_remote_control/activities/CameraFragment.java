@@ -24,7 +24,7 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 	private CameraTouchHandlerV1 mTouchHandlerV1;
 	private CameraTouchHandlerV2 mTouchHandlerV2;
 	private CameraTouchHandlerV3 mTouchHandlerV3;
-	private CamerasManager camerasManager = new CamerasManager(MainActivity.CONNECTION_MANAGER);
+	//private CamerasManager camerasManager = new CamerasManager(MainActivity.CONNECTION_MANAGER);
 	private Server server;
 	private float xMin;
 	private float xMax;
@@ -46,7 +46,16 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.camera_fragment, container, false);
+		switch (MainActivity.CAMERA_INTERACTION_MODE) {
+		case 1:
+			return inflater.inflate(R.layout.camera_fragment, container, false);
+		case 2:
+			return inflater.inflate(R.layout.camera_fragment_joysticks, container, false);
+		case 3:
+			return inflater.inflate(R.layout.camera_fragment, container, false);
+		default:
+			throw new RuntimeException("Unknown interaction mode");
+		}
 	}
 
 	@Override
@@ -96,15 +105,15 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 		switch (MainActivity.CAMERA_INTERACTION_MODE) {
 		case 1:
 			mTouchHandlerV1 =
-					new CameraTouchHandlerV1(xMin, yMin, xMax, yMax, camerasManager.makeListenerType1(server, 0));
+					new CameraTouchHandlerV1(xMin, yMin, xMax, yMax, MainActivity.CAMERAS_MANAGER.makeListenerType1(server, 0));
 			break;
 		case 2:
 			mTouchHandlerV2 =
-					new CameraTouchHandlerV2(xMin, yMin, xMax, yMax, camerasManager.makeListenerType2(server, 0));
+					new CameraTouchHandlerV2(xMin, yMin, xMax, yMax, MainActivity.CAMERAS_MANAGER.makeListenerType2(server, 0));
 			break;
 		case 3:
 			mTouchHandlerV3 =
-					new CameraTouchHandlerV3(xMin, yMin, xMax, yMax, camerasManager.makeListenerType3(server, 0));
+					new CameraTouchHandlerV3(xMin, yMin, xMax, yMax, MainActivity.CAMERAS_MANAGER.makeListenerType3(server, 0));
 			break;
 		default:
 			throw new RuntimeException("Unknown interaction mode");

@@ -1,5 +1,7 @@
 package org.black_mesa.webots_remote_control.views;
 
+import org.black_mesa.webots_remote_control.activities.MainActivity;
+import org.black_mesa.webots_remote_control.client.CamerasManager;
 import org.black_mesa.webots_remote_control.listeners.CameraJoysticksViewListener;
 
 import android.content.Context;
@@ -67,6 +69,7 @@ public class CameraJoysticksView extends View implements CameraJoysticksViewList
 		horizontalLine.setStrokeWidth(2);
 		horizontalLine.setColor(Color.BLACK);
 		Log.d("DERP", "DURRR");
+		MainActivity.CAMERAS_MANAGER.registerV2(this);
 	}
 
 	@Override
