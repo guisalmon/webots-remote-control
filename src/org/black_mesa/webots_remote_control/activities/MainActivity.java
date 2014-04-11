@@ -32,15 +32,15 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 	public static final ConnectionManager CONNECTION_MANAGER = new ConnectionManager();
 	public static final List<Server> CONNECTED_SERVERS = new ArrayList<Server>();
 	public static CamerasManager CAMERAS_MANAGER = new CamerasManager(CONNECTION_MANAGER);
-	public static final int CAMERA_INTERACTION_MODE = 1;
+	public static int CAMERA_INTERACTION_MODE = 1;
 	
 	private List<String> mDrawerListItems;
     private ListView mDrawerList;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private ArrayAdapter<String> mDrawerAdapter;
-    private boolean mClosed;
     private Menu mMenu;
+    private MenuItem mSwitch;
     private String mCurTitle;
     private List<Server> mServersToReconnect;
     
@@ -78,8 +78,8 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
-                mClosed = true;
                 getActionBar().setTitle(mCurTitle);
+                mMenu.clear();
                 invalidateOptionsMenu();
             }
 
@@ -87,15 +87,15 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
                 getActionBar().setTitle(R.string.app_name);
-                mClosed = false;
                 mMenu.clear();
+                mSwitch = mMenu.add(Menu.NONE, R.id.action_switch_mode, Menu.NONE, CAMERA_INTERACTION_MODE+"");
+                mSwitch.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
         selectItem(0);
-        mClosed = true;
 
 	}
 	
@@ -129,9 +129,6 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
 
 	@Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-		if (!mClosed){
-			menu.clear();
-		}
 		mMenu = menu;
         return super.onPrepareOptionsMenu(menu);
     }
@@ -155,6 +152,18 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
         if (mDrawerToggle.onOptionsItemSelected(item)) {
           return true;
         }
+        switch (item.getItemId()) {
+		case R.id.action_switch_mode:
+			if(CAMERA_INTERACTION_MODE < 3){
+				CAMERA_INTERACTION_MODE++;
+			}else{
+				CAMERA_INTERACTION_MODE = 1;
+			}
+			mSwitch.setTitle(""+CAMERA_INTERACTION_MODE);
+			break;
+		default:
+			break;
+		}
         return super.onOptionsItemSelected(item);
     }
 	

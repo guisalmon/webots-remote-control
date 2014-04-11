@@ -64,17 +64,16 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	public void onResume() {
 		super.onResume();
 		mDatasource.open();
-		getActivity().invalidateOptionsMenu();
 		updateView();
 	}
 
 	@Override
 	public void onPrepareOptionsMenu(Menu menu) {
+		super.onPrepareOptionsMenu(menu);
 		menu.clear();
 		getActivity().getMenuInflater().inflate(R.menu.connexion, menu);
 		mMenu = menu;
 		updateMenu(false);
-		super.onPrepareOptionsMenu(menu);
 	}
 
 	@Override
