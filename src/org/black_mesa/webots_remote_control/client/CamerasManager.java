@@ -4,9 +4,10 @@ import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.communication_structures.CameraInstruction;
 import org.black_mesa.webots_remote_control.communication_structures.CameraInstructionQueue;
 import org.black_mesa.webots_remote_control.listeners.CameraJoysticksViewListener;
-import org.black_mesa.webots_remote_control.listeners.CameraTouchListenerV2;
 import org.black_mesa.webots_remote_control.listeners.CameraTouchListenerV1;
+import org.black_mesa.webots_remote_control.listeners.CameraTouchListenerV2;
 import org.black_mesa.webots_remote_control.listeners.CameraTouchListenerV3;
+import org.black_mesa.webots_remote_control.listeners.CameraTouchListenerV4;
 
 /**
  * Factory for CameraTouchHandlerListener instances. When instanciating a touch handler, such an instance will be passed
@@ -159,6 +160,65 @@ public class CamerasManager {
 
 	public void clearV2() {
 		mJoystickListener = null;
+	}
+	
+	/**
+	 * Instantiates a CameraTouchHandlerListener linked to a specific remote camera.
+	 * 
+	 * @param server
+	 *            Server of the remote camera.
+	 * @param cameraId
+	 *            Id of the remote camera on the server.
+	 * @return The listener.
+	 */
+	public final CameraTouchListenerV4 makeListenerType4(final Server server, final int cameraId) {
+		return new CameraTouchListenerV4() {
+			private Client mClient;
+			private CameraInstructionQueue mCamera;
+
+			@Override
+			public void moveVertical(final float vertical) {
+				if (!init()) {
+					return;
+				}
+				CameraInstruction instruction = CameraInstruction.move(0, vertical * SCALE_MOVE_SIDE, 0);
+				mCamera.add(instruction);
+				mClient.board(mCamera);
+			}
+
+			@Override
+			public void moveSide(final float right, final float forward, final long time) {
+				if (!init()) {
+					return;
+				}
+				CameraInstruction instruction =
+						CameraInstruction.move((right * time) * SCALE_MOVE_SIDE, 0, (forward * time) * SCALE_MOVE_FORWARD);
+				mCamera.add(instruction);
+				mClient.board(mCamera);
+			}
+
+			@Override
+			public void turnPitch(final float turn, final float pitch) {
+				if (!init()) {
+					return;
+				}
+				CameraInstruction instruction = CameraInstruction.turn(turn * SCALE_TURN_PITCH);
+				mCamera.add(instruction);
+				instruction = CameraInstruction.pitch(pitch * SCALE_TURN_PITCH);
+				mCamera.add(instruction);
+				mClient.board(mCamera);
+			}
+
+			private boolean init() {
+				if (mClient == null) {
+					mClient = mConnectionManager.getClient(server);
+				}
+				if (mClient != null && mCamera == null) {
+					mCamera = (CameraInstructionQueue) mClient.getInitialData().get(cameraId);
+				}
+				return mClient != null && mCamera != null;
+			}
+		};
 	}
 
 	/**

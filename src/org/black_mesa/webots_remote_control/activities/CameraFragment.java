@@ -5,6 +5,7 @@ import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.utils.CameraTouchHandlerV1;
 import org.black_mesa.webots_remote_control.utils.CameraTouchHandlerV2;
 import org.black_mesa.webots_remote_control.utils.CameraTouchHandlerV3;
+import org.black_mesa.webots_remote_control.utils.CameraTouchHandlerV4;
 
 import android.app.Fragment;
 import android.content.res.Configuration;
@@ -23,6 +24,7 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 	private CameraTouchHandlerV1 mTouchHandlerV1;
 	private CameraTouchHandlerV2 mTouchHandlerV2;
 	private CameraTouchHandlerV3 mTouchHandlerV3;
+	private CameraTouchHandlerV4 mTouchHandlerV4;
 	private Server server;
 	private float xMin;
 	private float xMax;
@@ -50,6 +52,10 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 		case 2:
 			return inflater.inflate(R.layout.camera_fragment_joysticks, container, false);
 		case 3:
+			return inflater.inflate(R.layout.camera_fragment, container, false);
+		case 4:
+			return inflater.inflate(R.layout.camera_fragment, container, false);
+		case 5:
 			return inflater.inflate(R.layout.camera_fragment, container, false);
 		default:
 			throw new RuntimeException("Unknown interaction mode");
@@ -113,6 +119,10 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 			mTouchHandlerV3 =
 					new CameraTouchHandlerV3(xMin, yMin, xMax, yMax, MainActivity.CAMERAS_MANAGER.makeListenerType3(server, 0));
 			break;
+		case 4:
+			mTouchHandlerV4 =
+					new CameraTouchHandlerV4(xMin, yMin, xMax, yMax, MainActivity.CAMERAS_MANAGER.makeListenerType4(server, 0));
+		break;
 		default:
 			throw new RuntimeException("Unknown interaction mode");
 		}
@@ -134,6 +144,11 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 		case 3:
 			if (mTouchHandlerV3 != null) {
 				mTouchHandlerV3.onTouch(event);
+			}
+			break;
+		case 4:
+			if (mTouchHandlerV4 != null) {
+				mTouchHandlerV4.onTouch(event);
 			}
 			break;
 		}

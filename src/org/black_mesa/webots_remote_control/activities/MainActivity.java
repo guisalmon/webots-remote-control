@@ -154,7 +154,7 @@ public class MainActivity extends Activity implements ConnectionManagerListener{
         }
         switch (item.getItemId()) {
 		case R.id.action_switch_mode:
-			if(CAMERA_INTERACTION_MODE < 3){
+			if(CAMERA_INTERACTION_MODE < 5){
 				CAMERA_INTERACTION_MODE++;
 			}else{
 				CAMERA_INTERACTION_MODE = 1;
