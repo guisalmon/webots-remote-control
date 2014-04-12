@@ -181,7 +181,7 @@ public class CamerasManager {
 				if (!init()) {
 					return;
 				}
-				CameraInstruction instruction = CameraInstruction.move(0, vertical * SCALE_MOVE_SIDE, 0);
+				CameraInstruction instruction = CameraInstruction.move(0, vertical * SCALE_MOVE_FORWARD, 0);
 				mCamera.add(instruction);
 				mClient.board(mCamera);
 			}
@@ -192,7 +192,7 @@ public class CamerasManager {
 					return;
 				}
 				CameraInstruction instruction =
-						CameraInstruction.move((right * time) * SCALE_MOVE_SIDE, 0, (forward * time) * SCALE_MOVE_FORWARD);
+						CameraInstruction.move((right * time) * SCALE_MOVE_SIDE, 0, (forward * time) * -SCALE_MOVE_SIDE);
 				mCamera.add(instruction);
 				mClient.board(mCamera);
 			}
