@@ -6,6 +6,7 @@ import org.black_mesa.webots_remote_control.utils.CameraTouchHandlerV1;
 import org.black_mesa.webots_remote_control.utils.CameraTouchHandlerV2;
 import org.black_mesa.webots_remote_control.utils.CameraTouchHandlerV3;
 import org.black_mesa.webots_remote_control.utils.CameraTouchHandlerV4;
+import org.black_mesa.webots_remote_control.utils.CameraTouchHandlerV5;
 
 import android.app.Fragment;
 import android.content.res.Configuration;
@@ -25,6 +26,7 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 	private CameraTouchHandlerV2 mTouchHandlerV2;
 	private CameraTouchHandlerV3 mTouchHandlerV3;
 	private CameraTouchHandlerV4 mTouchHandlerV4;
+	private CameraTouchHandlerV5 mTouchHandlerV5;
 	private Server server;
 	private float xMin;
 	private float xMax;
@@ -122,6 +124,10 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 		case 4:
 			mTouchHandlerV4 =
 					new CameraTouchHandlerV4(xMin, yMin, xMax, yMax, MainActivity.CAMERAS_MANAGER.makeListenerType4(server, 0));
+			break;
+		case 5:
+			mTouchHandlerV5 =
+					new CameraTouchHandlerV5(xMin, yMin, xMax, yMax, MainActivity.CAMERAS_MANAGER.makeListenerType5(server, 0));
 		break;
 		default:
 			throw new RuntimeException("Unknown interaction mode");
@@ -149,6 +155,11 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 		case 4:
 			if (mTouchHandlerV4 != null) {
 				mTouchHandlerV4.onTouch(event);
+			}
+			break;
+		case 5:
+			if (mTouchHandlerV5 != null) {
+				mTouchHandlerV5.onTouch(event);
 			}
 			break;
 		}
