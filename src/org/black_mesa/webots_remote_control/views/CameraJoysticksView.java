@@ -1,7 +1,6 @@
 package org.black_mesa.webots_remote_control.views;
 
 import org.black_mesa.webots_remote_control.activities.MainActivity;
-import org.black_mesa.webots_remote_control.client.CamerasManager;
 import org.black_mesa.webots_remote_control.listeners.CameraJoysticksViewListener;
 
 import android.content.Context;
