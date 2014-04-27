@@ -20,7 +20,6 @@ public class ConnectionManager {
 	private final List<ConnectionManagerListener> mListeners = new ArrayList<ConnectionManagerListener>();
 	private final Map<Server, Client> mConnections = new Hashtable<Server, Client>();
 	private final ClientListener mClientListener;
-	private List<Server> mSavedServers = new ArrayList<Server>();
 
 	/**
 	 * Instantiates the ConnectionManager.
@@ -121,59 +120,5 @@ public class ConnectionManager {
 			c.dispose();
 		}
 		mConnections.clear();
-	}
-
-	/**
-	 * Getter for the server list.
-	 * 
-	 * @return List of connected servers.
-	 * @deprecated Server list should be held somewhere else.
-	 */
-	@Deprecated
-	public final List<Server> getServerList() {
-		return new ArrayList<Server>(mConnections.keySet());
-	}
-
-	/**
-	 * Saves the current servers to be restored later with the restore() method.
-	 * 
-	 * @deprecated Server list should be held somewhere else.
-	 */
-	@Deprecated
-	public final void save() {
-		mSavedServers = new ArrayList<Server>(mConnections.keySet());
-	}
-
-	/**
-	 * Restores the connections previously saved with the save() method.
-	 * 
-	 * @deprecated Server list should be held somewhere else.
-	 */
-	@Deprecated
-	public final void restore() {
-		stop();
-		start();
-		for (Server s : mSavedServers) {
-			addServer(s);
-		}
-	}
-
-	/**
-	 * Stops the ConnectionManager. This call closes all connections.
-	 * 
-	 * @deprecated Use dispose() instead.
-	 */
-	@Deprecated
-	public final void stop() {
-		dispose();
-	}
-
-	/**
-	 * Starts the ConnectionManager.
-	 * 
-	 * @deprecated Calling this method is useless.
-	 */
-	@Deprecated
-	public final void start() {
 	}
 }
