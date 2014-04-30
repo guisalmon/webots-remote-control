@@ -142,14 +142,16 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 		case CONNECTED:
 			Log.i(getClass().getName(), "Connected");
 			mAdapter.setServerConnected(server.getId());
+			updateMenu(false);
 			break;
 		case COMMUNICATION_ERROR:
 		case CONNECTION_ERROR:
 			mAdapter.setServerDisconnected(server.getId());
 		default:
+			updateMenu(true);
 			break;
 		}
-		updateMenu(false);
+		
 		
 	}
 	
@@ -202,7 +204,8 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	private void updateMenu(boolean isSelection){
 		if(MainActivity.CONNECTED_SERVERS.isEmpty()){
 			if(isSelection){
-				switch (countChecks()){
+				int i = countChecks();
+				switch (i){
 				case 0:
 					updateMenu(false);
 					break;
