@@ -1,7 +1,7 @@
 package org.black_mesa.webots_remote_control.activities;
 
 import org.black_mesa.webots_remote_control.R;
-import org.black_mesa.webots_remote_control.classes.Server;
+import org.black_mesa.webots_remote_control.database.Server;
 import org.black_mesa.webots_remote_control.utils.CameraTouchHandlerV1;
 import org.black_mesa.webots_remote_control.utils.CameraTouchHandlerV2;
 import org.black_mesa.webots_remote_control.utils.CameraTouchHandlerV3;
@@ -27,11 +27,11 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 	private CameraTouchHandlerV3 mTouchHandlerV3;
 	private CameraTouchHandlerV4 mTouchHandlerV4;
 	private CameraTouchHandlerV5 mTouchHandlerV5;
-	private Server server;
-	private float xMin;
-	private float xMax;
-	private float yMin;
-	private float yMax;
+	private Server mServer;
+	private float mXMin;
+	private float mXMax;
+	private float mYMin;
+	private float mYMax;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -39,7 +39,7 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 		long id = extras.getLong("ServerId");
 		for (Server s : MainActivity.CONNECTED_SERVERS) {
 			if (s.getId() == id) {
-				server = s;
+				mServer = s;
 				break;
 			}
 		}
@@ -48,7 +48,7 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		switch (MainActivity.CAMERA_INTERACTION_MODE) {
+		switch (MainActivity.getInteractionMode()) {
 		case 1:
 			return inflater.inflate(R.layout.camera_fragment, container, false);
 		case 2:
@@ -84,15 +84,15 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 
 		// compute the size of the usable part of the screen
 		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			xMin = 0;
-			xMax = size.x;
-			yMin = (float) actionBarSize;
-			yMax = size.y;
+			mXMin = 0;
+			mXMax = size.x;
+			mYMin = (float) actionBarSize;
+			mYMax = size.y;
 		} else {
-			xMin = 0;
-			xMax = size.x;
-			yMin = (float) actionBarSize;
-			yMax = size.y;
+			mXMin = 0;
+			mXMax = size.x;
+			mYMin = (float) actionBarSize;
+			mYMax = size.y;
 		}
 
 		// Initialize Client
@@ -108,27 +108,32 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 	@Override
 	public void onResume() {
 		super.onResume();
-		switch (MainActivity.CAMERA_INTERACTION_MODE) {
+		switch (MainActivity.getInteractionMode()) {
 		case 1:
 			mTouchHandlerV1 =
-					new CameraTouchHandlerV1(xMin, yMin, xMax, yMax, MainActivity.CAMERAS_MANAGER.makeListenerType1(server, 0));
+					new CameraTouchHandlerV1(mXMin, mYMin, mXMax, mYMax,
+							MainActivity.CAMERAS_MANAGER.makeListenerType1(mServer, 0));
 			break;
 		case 2:
 			mTouchHandlerV2 =
-					new CameraTouchHandlerV2(xMin, yMin, xMax, yMax, MainActivity.CAMERAS_MANAGER.makeListenerType2(server, 0));
+					new CameraTouchHandlerV2(mXMin, mYMin, mXMax, mYMax,
+							MainActivity.CAMERAS_MANAGER.makeListenerType2(mServer, 0));
 			break;
 		case 3:
 			mTouchHandlerV3 =
-					new CameraTouchHandlerV3(xMin, yMin, xMax, yMax, MainActivity.CAMERAS_MANAGER.makeListenerType3(server, 0));
+					new CameraTouchHandlerV3(mXMin, mYMin, mXMax, mYMax,
+							MainActivity.CAMERAS_MANAGER.makeListenerType3(mServer, 0));
 			break;
 		case 4:
 			mTouchHandlerV4 =
-					new CameraTouchHandlerV4(xMin, yMin, xMax, yMax, MainActivity.CAMERAS_MANAGER.makeListenerType4(server, 0));
+					new CameraTouchHandlerV4(mXMin, mYMin, mXMax, mYMax,
+							MainActivity.CAMERAS_MANAGER.makeListenerType4(mServer, 0));
 			break;
 		case 5:
 			mTouchHandlerV5 =
-					new CameraTouchHandlerV5(xMin, yMin, xMax, yMax, MainActivity.CAMERAS_MANAGER.makeListenerType5(server, 0));
-		break;
+					new CameraTouchHandlerV5(mXMin, mYMin, mXMax, mYMax,
+							MainActivity.CAMERAS_MANAGER.makeListenerType5(mServer, 0));
+			break;
 		default:
 			throw new RuntimeException("Unknown interaction mode");
 		}
@@ -136,7 +141,7 @@ public class CameraFragment extends Fragment implements OnTouchListener {
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
-		switch (MainActivity.CAMERA_INTERACTION_MODE) {
+		switch (MainActivity.getInteractionMode()) {
 		case 1:
 			if (mTouchHandlerV1 != null) {
 				mTouchHandlerV1.onTouch(event);

@@ -17,7 +17,7 @@ public interface CameraJoysticksViewListener {
 	 * @param joystickRadiusJoystickLeft
 	 *            radius of the area of the left joystick
 	 */
-	public void onJoystickLeftCoordinateChanged(float centerXJoystickLeft, float centerYJoystickLeft,
+	void onJoystickLeftCoordinateChanged(float centerXJoystickLeft, float centerYJoystickLeft,
 			float joystickRadiusJoystickLeft);
 
 	/**
@@ -27,6 +27,6 @@ public interface CameraJoysticksViewListener {
 	 * @param centerYJoystickRight
 	 * @param joystickRadiusJoystickRight
 	 */
-	public void onJoystickRightCoordinateChanged(float centerXJoystickRight, float centerYJoystickRight,
+	void onJoystickRightCoordinateChanged(float centerXJoystickRight, float centerYJoystickRight,
 			float joystickRadiusJoystickRight);
 }

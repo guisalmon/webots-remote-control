@@ -5,8 +5,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.communication_structures.CommunicationStructure;
+import org.black_mesa.webots_remote_control.database.Server;
 import org.black_mesa.webots_remote_control.listeners.ClientListener;
 import org.black_mesa.webots_remote_control.listeners.ConnectionManagerListener;
 

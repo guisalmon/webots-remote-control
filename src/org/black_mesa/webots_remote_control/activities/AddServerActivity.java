@@ -3,8 +3,8 @@ package org.black_mesa.webots_remote_control.activities;
 import java.util.List;
 
 import org.black_mesa.webots_remote_control.R;
-import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.database.DataSource;
+import org.black_mesa.webots_remote_control.database.Server;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -51,7 +51,9 @@ public class AddServerActivity extends Activity {
 
 		switch (item.getItemId()) {
 		case R.id.new_server_validate:
-			if (isInputValid()) saveServer();
+			if (isInputValid()) {
+				saveServer();
+			}
 			finish();
 			break;
 		case R.id.new_server_cancel:
@@ -74,8 +76,8 @@ public class AddServerActivity extends Activity {
 	}
 
 	// Private methods
-	
-	private boolean isInputValid(){
+
+	private boolean isInputValid() {
 		String name = ((EditText) findViewById(R.id.serverName)).getText().toString();
 		String address = ((EditText) findViewById(R.id.serverAdress)).getText().toString();
 		String portText = ((EditText) findViewById(R.id.serverPort)).getText().toString();

@@ -13,18 +13,22 @@ import android.util.AttributeSet;
 import android.view.View;
 
 public class CameraView extends View {
+	private static final int DIV_HOR = 6;
+	private static final int DIV_VER = 6;
+	private static final int ALPHA = 0x80;
+	private static final float STROKE_WIDTH = 4.5F;
 
-	private Paint paint;
-	private RectF rectangle;
-	private Bitmap bitmapUp;
-	private Bitmap bitmapLeft;
-	private Bitmap bitmapRight;
-	private Bitmap bitmapDown;
-	private float l;
-	private float u;
-	private float r;
-	private float d;
-	
+	private Paint mPaint;
+	private RectF mRectangle;
+	private Bitmap mBitmapUp;
+	private Bitmap mBitmapLeft;
+	private Bitmap mBitmapRight;
+	private Bitmap mBitmapDown;
+	private float mL;
+	private float mU;
+	private float mR;
+	private float mD;
+
 	public CameraView(Context context) {
 		super(context);
 		commonConstructor();
@@ -42,32 +46,32 @@ public class CameraView extends View {
 
 	private void commonConstructor() {
 		setFocusable(true);
-		paint = new Paint();
-		rectangle = new RectF();
-		bitmapUp = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_up);
-		bitmapLeft = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_left);
-		bitmapRight = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_right);
-		bitmapDown = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_down);
+		mPaint = new Paint();
+		mRectangle = new RectF();
+		mBitmapUp = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_up);
+		mBitmapLeft = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_left);
+		mBitmapRight = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_right);
+		mBitmapDown = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_down);
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		l = getWidth() / 6;
-		u = getHeight() / 6;
-		r = l * 5;
-		d = u * 5;
-		rectangle.set(l, u, r, d);
-		paint.setAntiAlias(true);
-		paint.setColor(Color.RED);
-		paint.setAlpha(0x80);
-		paint.setStyle(Paint.Style.STROKE);
-		paint.setStrokeWidth(4.5f);
-		canvas.drawOval(rectangle, paint);
-		canvas.drawBitmap(bitmapUp, (getWidth() - bitmapUp.getWidth()) / 2, 0, paint);
-		canvas.drawBitmap(bitmapLeft, 0, (getHeight() - bitmapLeft.getHeight()) / 2, paint);
-		canvas.drawBitmap(bitmapRight, getWidth() - bitmapRight.getWidth(), (getHeight() - bitmapLeft.getHeight()) / 2,
-				paint);
-		canvas.drawBitmap(bitmapDown, (getWidth() - bitmapDown.getWidth()) / 2, getHeight() - bitmapDown.getHeight(),
-				paint);
+		mL = getWidth() / DIV_HOR;
+		mU = getHeight() / DIV_VER;
+		mR = mL * 5;
+		mD = mU * 5;
+		mRectangle.set(mL, mU, mR, mD);
+		mPaint.setAntiAlias(true);
+		mPaint.setColor(Color.RED);
+		mPaint.setAlpha(ALPHA);
+		mPaint.setStyle(Paint.Style.STROKE);
+		mPaint.setStrokeWidth(STROKE_WIDTH);
+		canvas.drawOval(mRectangle, mPaint);
+		canvas.drawBitmap(mBitmapUp, (getWidth() - mBitmapUp.getWidth()) / 2, 0, mPaint);
+		canvas.drawBitmap(mBitmapLeft, 0, (getHeight() - mBitmapLeft.getHeight()) / 2, mPaint);
+		canvas.drawBitmap(mBitmapRight, getWidth() - mBitmapRight.getWidth(),
+				(getHeight() - mBitmapLeft.getHeight()) / 2, mPaint);
+		canvas.drawBitmap(mBitmapDown, (getWidth() - mBitmapDown.getWidth()) / 2,
+				getHeight() - mBitmapDown.getHeight(), mPaint);
 	}
 }

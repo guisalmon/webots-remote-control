@@ -1,8 +1,8 @@
 package org.black_mesa.webots_remote_control.client;
 
-import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.communication_structures.CameraInstruction;
 import org.black_mesa.webots_remote_control.communication_structures.CameraInstructionQueue;
+import org.black_mesa.webots_remote_control.database.Server;
 import org.black_mesa.webots_remote_control.listeners.CameraJoysticksViewListener;
 import org.black_mesa.webots_remote_control.listeners.CameraTouchListenerV1;
 import org.black_mesa.webots_remote_control.listeners.CameraTouchListenerV2;
@@ -162,7 +162,7 @@ public class CamerasManager {
 	public void clearV2() {
 		mJoystickListener = null;
 	}
-	
+
 	/**
 	 * Instantiates a CameraTouchHandlerListener linked to a specific remote camera.
 	 * 
@@ -203,7 +203,8 @@ public class CamerasManager {
 				if (!init()) {
 					return;
 				}
-				CameraInstruction instruction = CameraInstruction.turn((turn * time) * 0.5 * SCALE_MOVE_SIDE * SCALE_TURN_PITCH);
+				CameraInstruction instruction =
+						CameraInstruction.turn((turn * time) * 0.5 * SCALE_MOVE_SIDE * SCALE_TURN_PITCH);
 				mCamera.add(instruction);
 				instruction = CameraInstruction.pitch((pitch * time) * 0.5 * SCALE_MOVE_SIDE * SCALE_TURN_PITCH);
 				mCamera.add(instruction);
@@ -221,7 +222,7 @@ public class CamerasManager {
 			}
 		};
 	}
-	
+
 	/**
 	 * Instantiates a CameraTouchHandlerListener linked to a specific remote camera.
 	 * 
@@ -252,7 +253,8 @@ public class CamerasManager {
 					return;
 				}
 				CameraInstruction instruction =
-						CameraInstruction.move((right * time) * SCALE_MOVE_SIDE, 0, (forward * time) * -SCALE_MOVE_SIDE);
+						CameraInstruction
+								.move((right * time) * SCALE_MOVE_SIDE, 0, (forward * time) * -SCALE_MOVE_SIDE);
 				mCamera.add(instruction);
 				mClient.board(mCamera);
 			}

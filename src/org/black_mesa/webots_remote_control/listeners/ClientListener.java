@@ -1,8 +1,8 @@
 package org.black_mesa.webots_remote_control.listeners;
 
-import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.client.ConnectionState;
 import org.black_mesa.webots_remote_control.communication_structures.CommunicationStructure;
+import org.black_mesa.webots_remote_control.database.Server;
 
 /**
  * Interface for the listeners of a Client.

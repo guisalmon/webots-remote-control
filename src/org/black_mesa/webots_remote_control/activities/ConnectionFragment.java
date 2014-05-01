@@ -3,9 +3,9 @@ package org.black_mesa.webots_remote_control.activities;
 import java.util.List;
 
 import org.black_mesa.webots_remote_control.R;
-import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.client.ConnectionState;
 import org.black_mesa.webots_remote_control.database.DataSource;
+import org.black_mesa.webots_remote_control.database.Server;
 import org.black_mesa.webots_remote_control.database.ServerListAdapter;
 import org.black_mesa.webots_remote_control.listeners.ConnectionManagerListener;
 import org.black_mesa.webots_remote_control.listeners.OnListEventsListener;
@@ -21,16 +21,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 
-public class ConnectionFragment extends ListFragment implements OnListEventsListener, ConnectionManagerListener{
+public class ConnectionFragment extends ListFragment implements OnListEventsListener, ConnectionManagerListener {
 	private DataSource mDatasource;
 	private ServerListAdapter mAdapter;
 	private List<Server> mServers;
 	private Menu mMenu;
-	
-	
-	//Activity lifecycle
-	
-	
+
+	// Activity lifecycle
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		setHasOptionsMenu(true);
@@ -45,15 +43,15 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		//Initiate database
+		// Initiate database
 		mDatasource = new DataSource(getActivity());
 		mDatasource.open();
-				
+
 		mServers = mDatasource.getAllServers();
-		
+
 		MainActivity.CONNECTION_MANAGER.addListener(this);
 	}
-	
+
 	@Override
 	public void onPause() {
 		mDatasource.close();
@@ -95,10 +93,7 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 		return super.onOptionsItemSelected(item);
 	}
 
-	
-	
-	//OnListEventsListener
-	
+	// OnListEventsListener
 
 	@Override
 	public void onCheckChanged() {
@@ -113,31 +108,28 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 
 	@Override
 	public void onItemLongClicked() {
-		//TODO Nothing to do here
-		//updateMenu(true);
+		// TODO Nothing to do here
+		// updateMenu(true);
 	}
-	
+
 	@Override
 	public void onItemLaunchListener(Server s) {
-		if(MainActivity.CONNECTED_SERVERS.contains(s)){
+		if (MainActivity.CONNECTED_SERVERS.contains(s)) {
 			mAdapter.setServerDisconnected(s.getId());
-			((MainActivity)getActivity()).disconnect(s);
-		}else{
+			((MainActivity) getActivity()).disconnect(s);
+		} else {
 			mAdapter.setServerConnected(s.getId());
-			((MainActivity)getActivity()).connect(s);
+			((MainActivity) getActivity()).connect(s);
 		}
 		updateMenu(true);
 	}
-	
-	
-	
-	//ConnectionManagerListener
-	
-	
+
+	// ConnectionManagerListener
+
 	@Override
 	public void onStateChange(Server server, ConnectionState state) {
 		int i = mServers.indexOf(server);
-		Log.i(getClass().getName(), "State Change : "+i);
+		Log.i(getClass().getName(), "State Change : " + i);
 		switch (state) {
 		case CONNECTED:
 			Log.i(getClass().getName(), "Connected");
@@ -151,61 +143,59 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 			updateMenu(true);
 			break;
 		}
-		
-		
+
 	}
-	
-	
-	
-	//Private methods
-	
-	
+
+	// Private methods
+
 	private void clearChecks() {
-		for(int i = 0; i < getListView().getChildCount(); i++){
-			((CheckBox)getListView().getChildAt(i).findViewById(R.id.server_select)).setChecked(false);
+		for (int i = 0; i < getListView().getChildCount(); i++) {
+			((CheckBox) getListView().getChildAt(i).findViewById(R.id.server_select)).setChecked(false);
 		}
-		
+
 	}
-	
-	private void updateView(){
+
+	private void updateView() {
 		Log.i(getClass().getName(), "Update View");
 		mServers = mDatasource.getAllServers();
 		mAdapter = new ServerListAdapter(getActivity(), mServers, MainActivity.CONNECTED_SERVERS, this);
 		setListAdapter(mAdapter);
 	}
-	
+
 	private void deleteSelection() {
-		for(Server s : mAdapter.getCheckedServers()){
+		for (Server s : mAdapter.getCheckedServers()) {
 			mDatasource.deleteServer(s);
 		}
 		updateView();
 		updateMenu(false);
 	}
-	
+
 	private void editServer() {
 		Bundle b = new Bundle();
 		Intent intent = new Intent(getActivity(), AddServerActivity.class);
 		List<Server> checkedServers = mAdapter.getCheckedServers();
-		if(!checkedServers.isEmpty()){
+		if (!checkedServers.isEmpty()) {
 			b.putLong("id", checkedServers.get(0).getId());
 			intent.putExtras(b);
 			startActivity(intent);
 		}
 	}
-	
-	private int countChecks(){
+
+	private int countChecks() {
 		int i = 0;
-		for (int j = 0; j < getListView().getChildCount(); j++){
-			if(((CheckBox)getListView().getChildAt(j).findViewById(R.id.server_select)).isChecked()) i++;
+		for (int j = 0; j < getListView().getChildCount(); j++) {
+			if (((CheckBox) getListView().getChildAt(j).findViewById(R.id.server_select)).isChecked()) {
+				i++;
+			}
 		}
 		return i;
 	}
-	
-	private void updateMenu(boolean isSelection){
-		if(MainActivity.CONNECTED_SERVERS.isEmpty()){
-			if(isSelection){
+
+	private void updateMenu(boolean isSelection) {
+		if (MainActivity.CONNECTED_SERVERS.isEmpty()) {
+			if (isSelection) {
 				int i = countChecks();
-				switch (i){
+				switch (i) {
 				case 0:
 					updateMenu(false);
 					break;
@@ -219,12 +209,12 @@ public class ConnectionFragment extends ListFragment implements OnListEventsList
 					mMenu.getItem(1).setVisible(true);
 					mMenu.getItem(2).setVisible(false);
 				}
-			}else{
+			} else {
 				mMenu.getItem(0).setVisible(false);
 				mMenu.getItem(1).setVisible(false);
 				mMenu.getItem(2).setVisible(true);
 			}
-		}else{
+		} else {
 			mMenu.getItem(0).setVisible(false);
 			mMenu.getItem(1).setVisible(false);
 			mMenu.getItem(2).setVisible(false);

@@ -9,8 +9,8 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.black_mesa.webots_remote_control.classes.Server;
 import org.black_mesa.webots_remote_control.communication_structures.CommunicationStructure;
+import org.black_mesa.webots_remote_control.database.Server;
 import org.black_mesa.webots_remote_control.listeners.ClientListener;
 
 import android.os.Handler;
