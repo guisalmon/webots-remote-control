@@ -8,6 +8,11 @@ import org.black_mesa.webots_remote_control.listeners.CameraTouchListenerV5;
 import android.os.SystemClock;
 import android.view.MotionEvent;
 
+/**
+ * Handles the touch events on a CameraView. Interaction mode: oval, move center and orientation on sides.
+ * 
+ * @author Guillaume Salmon
+ */
 public class CameraTouchHandlerV5 {
 
 	private static final int TIMER_TICK = 32;

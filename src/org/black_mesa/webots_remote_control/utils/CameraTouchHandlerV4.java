@@ -8,6 +8,11 @@ import org.black_mesa.webots_remote_control.listeners.CameraTouchListenerV4;
 import android.os.SystemClock;
 import android.view.MotionEvent;
 
+/**
+ * Handles the touch events on a CameraView. Interaction mode: pinch sets altitude
+ * 
+ * @author Guillaume Salmon
+ */
 public class CameraTouchHandlerV4 {
 
 	private static final int TIMER_TICK = 32;
