@@ -4,14 +4,14 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 /**
- * Stores a queue of actions to be sent to a server. The actions are then
- * executed on the server side.
+ * Stores a queue of actions to be sent to a server. The actions are then executed on the server side.
  * 
  * @author Ilja Kroonen
  * 
  */
 public final class CameraInstructionQueue extends CommunicationStructure {
 	private static final long serialVersionUID = 228351533118850327L;
+	private static final int MAX_QUEUE_SIZE = 100;
 	private Queue<CameraInstruction> mQueue;
 
 	private CameraInstructionQueue(final int id, final CameraInstructionQueue queue) {
@@ -30,6 +30,9 @@ public final class CameraInstructionQueue extends CommunicationStructure {
 	 *            Instruction that will be added.
 	 */
 	public void add(final CameraInstruction i) {
+		if (mQueue.size() > MAX_QUEUE_SIZE) {
+			return;
+		}
 		mQueue.add(i);
 	}
 
@@ -55,7 +58,7 @@ public final class CameraInstructionQueue extends CommunicationStructure {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Camera " + getId();
