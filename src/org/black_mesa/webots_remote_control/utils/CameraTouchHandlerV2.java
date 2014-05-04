@@ -80,6 +80,7 @@ public class CameraTouchHandlerV2 {
 	public CameraTouchHandlerV2(final float xMin, final float yMin, final float xMax, final float yMax,
 			final CameraTouchListenerV2 l) {
 		// TODO
+		// Coordinate problem ?
 		mXMin = 0;
 		mYMin = 0;
 		mXMax = xMax;
@@ -91,6 +92,9 @@ public class CameraTouchHandlerV2 {
 		mRightCenterY = RIGHT_JOYSTICK_CENTER_Y * (mYMax - mYMin) + mYMin;
 		mRightRadius = RIGHT_JOYSTICK_RADIUS * (mXMax - mXMin) + mXMin;
 		mListener = l;
+		
+		mListener.onJoystickLeftCoordinateChanged(mLeftCenterX, mLeftCenterY, 50);
+		mListener.onJoystickRightCoordinateChanged(mRightCenterX, mRightCenterY, 50);
 	}
 
 	/**
@@ -218,6 +222,9 @@ public class CameraTouchHandlerV2 {
 
 	private void changeLeftState(final boolean newState) {
 		mLeftValid = newState;
+		if (!mLeftValid) {
+			mListener.onJoystickLeftCoordinateChanged(mLeftCenterX, mLeftCenterY, 50);
+		}
 	}
 
 	private void changeRightState(final boolean newState) {
@@ -232,6 +239,9 @@ public class CameraTouchHandlerV2 {
 			mTimer.schedule(makeTask(), 0, TIMER_TICK);
 		}
 		mRightValid = newState;
+		if (!mRightValid) {
+			mListener.onJoystickRightCoordinateChanged(mRightCenterX, mRightCenterY, 50);
+		}
 	}
 
 	private boolean isOnLeftJoystick(final MotionEvent event, final int pointerIndex) {
